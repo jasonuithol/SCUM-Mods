@@ -1,28 +1,21 @@
-# Build artifacts
-.staging/build/
-.staging/dist/
+# Scratch / working dir: SCUM-AllowMods bundle, build outputs, db_tier.exe,
+# DB backups, the live.lua hot-reload buffer, recon output dumps.
+.staging/
+
+# Build artifacts (anywhere)
+build/
+dist/
 *.spec
 __pycache__/
 *.pyc
 *.exe
 
-# Third-party tools / bundles (re-downloadable, not our source)
-# herbie96x/SCUM-AllowMods bundle:
-.staging/extracted/
-# repak_cli:
-.staging/repak/
-.staging/repak_cli.zip
-.staging/repak_cli.zip.sha256
-.staging/Win64.zip
-# cooked test pak workdir:
-.staging/HelloScum_P/
-
-# Binary game assets
+# Binaries / archives
 *.pak
 *.dll
+*.zip
 
-# SCUM save data + DB backups (personal data, large)
-.staging/db_backup_*/
+# SCUM save data + DB backups
 *.db
 *.db-wal
 *.db-shm

@@ -10,7 +10,7 @@ The headline deliverable is **`db_tier`** — an offline tool that bulk **upgrad
 
 ## `db_tier` — the tier editor
 
-`.staging/db_tier.py` (also buildable to a standalone `db_tier.exe`, see below).
+`tools/db_tier.py` (also buildable to a standalone `db_tier.exe`, see below).
 
 ```
 python db_tier.py (--tier NAME | --levels N) [--playerid ID] [--apply] [--db PATH]
@@ -42,7 +42,7 @@ Run with **no arguments** to print this help.
 
 ```
 pip install pyinstaller
-pyinstaller --onefile --console db_tier.py
+pyinstaller --onefile --console tools/db_tier.py
 # -> dist/db_tier.exe  (no Python needed to run)
 ```
 
@@ -82,17 +82,22 @@ It runs under UE4SS (Experimental v3.0.1, from the `herbie96x/SCUM-AllowMods` bu
 ## Repo layout
 
 ```
-db_tier  ──────────────  .staging/db_tier.py        # the tier tool (main deliverable)
-helper/recon scripts ──  .staging/db_upgrade.py, dbread.py, dbcheck.py,
-                         dbexplore.py, inspect_pak.py
-hot-reload mod ────────  Mods/FlagUpgrade/Scripts/main.lua  (+ .staging/live.lua)
-research notes ────────  .staging/recon_*.txt        # the lab notebook (see below)
+tools/
+  db_tier.py                          # the tier tool (main deliverable)
+Mods/
+  FlagUpgrade/Scripts/main.lua        # UE4SS hot-reload harness (loads .staging/live.lua)
+  HelloScum/Scripts/main.lua          # minimal UE4SS sanity mod
+docs/recon/                           # research archive:
+  recon_*.txt                         #   the lab notebook (findings)
+  *.py                                #   the DB / UE probe scripts used to gather them
+.staging/                             # git-ignored scratch
 ```
 
-Build artifacts, the SCUM-AllowMods bundle, DLLs, the `.exe`, PAKs, zips, and DB
-backups (save data) are **git-ignored** — they're large, binary, third-party, or personal.
+Everything in `.staging/` is **git-ignored**: the SCUM-AllowMods bundle, build
+outputs, `db_tier.exe`, DB backups (save data), the `live.lua` hot-reload buffer,
+and raw recon output dumps — all large, binary, third-party, or personal.
 
-### Research notes (`.staging/recon_*.txt`)
+### Research notes (`docs/recon/`)
 
 Key references produced during the reverse-engineering:
 
