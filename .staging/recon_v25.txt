@@ -1,0 +1,74 @@
+=== recon v25 :: 2026-05-24 17:33:13 ===
+
+Twig HISMs found: 8
+
+LoadAsset available: true
+
+Twig: SM_Foundation_Base_Twig (count=3)
+  twig path: StaticMesh /Game/ConZ_Files/Models/Objects/Outdoor/Base_Building_Elements/Modular/Foundation/Twig/SM_Foundation_Base_Twig.SM_Foundation_Base_Twig
+  cement path: /Game/ConZ_Files/Models/Objects/Outdoor/Base_Building_Elements/Modular/Foundation/Cement/SM_Foundation_Base_Cement.SM_Foundation_Base_Cement
+  StaticFindObject -> already loaded: StaticMesh /Game/ConZ_Files/Models/Objects/Outdoor/Base_Building_Elements/Modular/Foundation/Cement/SM_Foundation_Base_Cement.SM_Foundation_Base_Cement
+
+Twig: SM_Ramp_Base_Twig (count=3)
+  twig path: StaticMesh /Game/ConZ_Files/Models/Objects/Outdoor/Base_Building_Elements/Modular/Ramp/Twig/SM_Ramp_Base_Twig.SM_Ramp_Base_Twig
+  cement path: /Game/ConZ_Files/Models/Objects/Outdoor/Base_Building_Elements/Modular/Ramp/Cement/SM_Ramp_Base_Cement.SM_Ramp_Base_Cement
+  LoadAsset failed/nil  ok=false  ret=GetGameThreadId called too early, not yet initialized by UGameEngine::Tick
+stack traceback:
+	[C]: in function 'LoadAsset'
+	[C]: in function 'pcall'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:101: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:72>
+
+Twig: SM_Wall_Door_Double_Twig (count=1)
+  twig path: StaticMesh /Game/ConZ_Files/Models/Objects/Outdoor/Base_Building_Elements/Modular/Wall/Twig/SM_Wall_Door_Double_Twig.SM_Wall_Door_Double_Twig
+  cement path: /Game/ConZ_Files/Models/Objects/Outdoor/Base_Building_Elements/Modular/Wall/Cement/SM_Wall_Door_Double_Cement.SM_Wall_Door_Double_Cement
+  LoadAsset failed/nil  ok=false  ret=GetGameThreadId called too early, not yet initialized by UGameEngine::Tick
+stack traceback:
+	[C]: in function 'LoadAsset'
+	[C]: in function 'pcall'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:101: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:72>
+
+Twig: SM_Wall_Base_Bars_Twig (count=2)
+  twig path: StaticMesh /Game/ConZ_Files/Models/Objects/Outdoor/Base_Building_Elements/Modular/Wall/Twig/SM_Wall_Base_Bars_Twig.SM_Wall_Base_Bars_Twig
+  cement path: /Game/ConZ_Files/Models/Objects/Outdoor/Base_Building_Elements/Modular/Wall/Cement/SM_Wall_Base_Bars_Cement.SM_Wall_Base_Bars_Cement
+  LoadAsset failed/nil  ok=false  ret=GetGameThreadId called too early, not yet initialized by UGameEngine::Tick
+stack traceback:
+	[C]: in function 'LoadAsset'
+	[C]: in function 'pcall'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:101: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:72>
+
+Twig: SM_Wall_Loophole_Twig (count=2)
+  twig path: StaticMesh /Game/ConZ_Files/Models/Objects/Outdoor/Base_Building_Elements/Modular/Wall/Twig/SM_Wall_Loophole_Twig.SM_Wall_Loophole_Twig
+  cement path: /Game/ConZ_Files/Models/Objects/Outdoor/Base_Building_Elements/Modular/Wall/Cement/SM_Wall_Loophole_Cement.SM_Wall_Loophole_Cement
+  LoadAsset failed/nil  ok=false  ret=GetGameThreadId called too early, not yet initialized by UGameEngine::Tick
+stack traceback:
+	[C]: in function 'LoadAsset'
+	[C]: in function 'pcall'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:101: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:72>
+
+Twig: SM_Wall_Window_Twig (count=2)
+  twig path: StaticMesh /Game/ConZ_Files/Models/Objects/Outdoor/Base_Building_Elements/Modular/Wall/Twig/SM_Wall_Window_Twig.SM_Wall_Window_Twig
+  cement path: /Game/ConZ_Files/Models/Objects/Outdoor/Base_Building_Elements/Modular/Wall/Cement/SM_Wall_Window_Cement.SM_Wall_Window_Cement
+  LoadAsset failed/nil  ok=false  ret=GetGameThreadId called too early, not yet initialized by UGameEngine::Tick
+stack traceback:
+	[C]: in function 'LoadAsset'
+	[C]: in function 'pcall'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:101: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:72>
+
+Twig: SM_Wall_Hole_Base_Third_Twig (count=3)
+  twig path: StaticMesh /Game/ConZ_Files/Models/Objects/Outdoor/Base_Building_Elements/Modular/Wall/Twig/SM_Wall_Hole_Base_Third_Twig.SM_Wall_Hole_Base_Third_Twig
+  cement path: /Game/ConZ_Files/Models/Objects/Outdoor/Base_Building_Elements/Modular/Wall/Cement/SM_Wall_Hole_Base_Third_Cement.SM_Wall_Hole_Base_Third_Cement
+  LoadAsset failed/nil  ok=false  ret=GetGameThreadId called too early, not yet initialized by UGameEngine::Tick
+stack traceback:
+	[C]: in function 'LoadAsset'
+	[C]: in function 'pcall'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:101: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:72>
+
+Twig: SM_Roof_Base_Twig (count=5)
+  twig path: StaticMesh /Game/ConZ_Files/Models/Objects/Outdoor/Base_Building_Elements/Modular/Roof/Twig/SM_Roof_Base_Twig.SM_Roof_Base_Twig
+  cement path: /Game/ConZ_Files/Models/Objects/Outdoor/Base_Building_Elements/Modular/Roof/Cement/SM_Roof_Base_Cement.SM_Roof_Base_Cement
+  LoadAsset failed/nil  ok=false  ret=GetGameThreadId called too early, not yet initialized by UGameEngine::Tick
+stack traceback:
+	[C]: in function 'LoadAsset'
+	[C]: in function 'pcall'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:101: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:72>
+

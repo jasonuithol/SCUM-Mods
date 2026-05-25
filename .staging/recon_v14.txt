@@ -1,0 +1,85 @@
+=== recon v14 :: 2026-05-24 15:45:25 ===
+
+=== A: broader Foundation BP class probe (every plausible synonym) ===
+  Twig         -> FOUND
+  Stick        -> absent
+  Sticks       -> absent
+  Wood         -> absent
+  Wooden       -> absent
+  Plank        -> absent
+  Planks       -> absent
+  Metal        -> absent
+  Iron         -> absent
+  Steel        -> absent
+  Rebar        -> absent
+  Sheet        -> absent
+  Stone        -> absent
+  Rock         -> absent
+  Cobblestone  -> absent
+  Brick        -> absent
+  Bricks       -> absent
+  Mortar       -> absent
+  Concrete     -> absent
+  Reinforced   -> absent
+  Improved     -> absent
+  Tier1        -> absent
+  Tier2        -> absent
+  Tier3        -> absent
+  Tier4        -> absent
+  Tier5        -> absent
+  T1           -> absent
+  T2           -> absent
+  T3           -> absent
+  T4           -> absent
+  T5           -> absent
+  Lv1          -> absent
+  Lv2          -> absent
+  Lv3          -> absent
+  Lv4          -> absent
+  Lv5          -> absent
+  Level1       -> absent
+  Level2       -> absent
+  Level3       -> absent
+  Basic        -> absent
+  Advanced     -> absent
+  Max          -> absent
+  Final        -> absent
+  Upgraded     -> absent
+
+=== B: probe alternative parent path patterns ===
+  /Game/ConZ_Files/BaseBuilding/BaseElements/BP_Base_Modular_Foundation_Wood.BP_Base_Modular_Foundation_Wood_C -> absent
+  /Game/ConZ_Files/BaseBuilding/Elements/Modular/BP_Base_Modular_Foundation_Wood.BP_Base_Modular_Foundation_Wood_C -> absent
+  /Game/ConZ_Files/Buildable/BP_Base_Modular_Foundation_Wood.BP_Base_Modular_Foundation_Wood_C -> absent
+  /Game/ConZ_Files/BaseBuilding/BaseElements/Modular/Wood/BP_Base_Modular_Foundation_Wood.BP_Base_Modular_Foundation_Wood_C -> absent
+  /Game/ConZ_Files/BaseBuilding/BaseElements/Modular/Foundation/BP_Base_Modular_Foundation_Wood.BP_Base_Modular_Foundation_Wood_C -> absent
+  /Script/SCUM.BP_Base_Modular_Foundation_Wood.SCUM.BP_Base_Modular_Foundation_Wood_C -> absent
+
+=== C: force-load attempts (LoadObject/LoadClass/LoadAsset) ===
+  _G[LoadObject] = nil
+  _G[LoadClass] = nil
+  _G[LoadAsset] = function: 0000021AC1B2F750
+  none of LoadObject/LoadClass/LoadAsset found this asset
+
+=== D: BuildingManager._buildingsDataRepHelper -- find its struct type + dump ===
+  struct = ScriptStruct /Script/SCUM.BuildingsReplicationHelper
+    BuildingsData                                : MapProperty
+    [total: 1]
+
+=== E: read live _buildingsDataRepHelper fields (best-effort) ===
+  helper.BuildingsData        = TMap: 0000021B0E808B78
+  helper.BuildingData         = nil
+  helper.Buildings            = nil
+  helper.Elements             = nil
+  helper.Items                = nil
+  helper.BaseElements         = nil
+  helper.Data                 = nil
+  helper.Entries              = nil
+  helper.DataVersion          = nil
+  helper.Version              = nil
+
+=== F: confirm enums needed for radius-destroy ===
+  /Script/SCUM.EBaseElementType                      -> FOUND
+  /Script/SCUM.EBaseDamageActorType                  -> absent
+  /Script/SCUM.EBaseElementDestructionReason         -> absent
+
+=== end of recon ===

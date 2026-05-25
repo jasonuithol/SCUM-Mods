@@ -1,0 +1,57 @@
+=== recon v16 :: 2026-05-24 16:02:47 ===
+
+=== A: full BPC_ catalog probe (every shape x tier) ===
+  -- Foundation --
+    Twig     BP_Base_Modular_Foundation_Twig                    -> FOUND
+    Wood     BPC_Base_Modular_Foundation_Wood                   -> FOUND
+    Metal    BPC_Base_Modular_Foundation_Metal                  -> FOUND
+    Brick    BPC_Base_Modular_Foundation_Brick                  -> FOUND
+    Cement   BPC_Base_Modular_Foundation_Cement                 -> FOUND
+  -- Ramp --
+    Twig     BP_Base_Modular_Ramp_Twig                          -> FOUND
+    Wood     BPC_Base_Modular_Ramp_Wood                         -> absent
+    Metal    BPC_Base_Modular_Ramp_Metal                        -> absent
+    Brick    BPC_Base_Modular_Ramp_Brick                        -> absent
+    Cement   BPC_Base_Modular_Ramp_Cement                       -> absent
+  -- Door_Frame_Double --
+    Twig     BP_Base_Modular_Door_Frame_Double_Twig             -> FOUND
+    Wood     BPC_Base_Modular_Door_Frame_Double_Wood            -> absent
+    Metal    BPC_Base_Modular_Door_Frame_Double_Metal           -> absent
+    Brick    BPC_Base_Modular_Door_Frame_Double_Brick           -> absent
+    Cement   BPC_Base_Modular_Door_Frame_Double_Cement          -> absent
+  -- Wall_Bars --
+    Twig     BP_Base_Modular_Wall_Bars_Twig                     -> FOUND
+    Wood     BPC_Base_Modular_Wall_Bars_Wood                    -> absent
+    Metal    BPC_Base_Modular_Wall_Bars_Metal                   -> absent
+    Brick    BPC_Base_Modular_Wall_Bars_Brick                   -> absent
+    Cement   BPC_Base_Modular_Wall_Bars_Cement                  -> absent
+  -- Wall_Loophole --
+    Twig     BP_Base_Modular_Wall_Loophole_Twig                 -> FOUND
+    Wood     BPC_Base_Modular_Wall_Loophole_Wood                -> absent
+    Metal    BPC_Base_Modular_Wall_Loophole_Metal               -> absent
+    Brick    BPC_Base_Modular_Wall_Loophole_Brick               -> absent
+    Cement   BPC_Base_Modular_Wall_Loophole_Cement              -> absent
+  -- Wall_Window --
+    Twig     BP_Base_Modular_Wall_Window_Twig                   -> FOUND
+    Wood     BPC_Base_Modular_Wall_Window_Wood                  -> absent
+    Metal    BPC_Base_Modular_Wall_Window_Metal                 -> absent
+    Brick    BPC_Base_Modular_Wall_Window_Brick                 -> absent
+    Cement   BPC_Base_Modular_Wall_Window_Cement                -> absent
+  -- Low_Wall_Support_Frame --
+    Twig     BP_Base_Modular_Low_Wall_Support_Frame_Twig        -> FOUND
+    Wood     BPC_Base_Modular_Low_Wall_Support_Frame_Wood       -> absent
+    Metal    BPC_Base_Modular_Low_Wall_Support_Frame_Metal      -> absent
+    Brick    BPC_Base_Modular_Low_Wall_Support_Frame_Brick      -> absent
+    Cement   BPC_Base_Modular_Low_Wall_Support_Frame_Cement     -> absent
+  -- Roof --
+    Twig     BP_Base_Modular_Roof_Twig                          -> FOUND
+    Wood     BPC_Base_Modular_Roof_Wood                         -> absent
+    Metal    BPC_Base_Modular_Roof_Metal                        -> absent
+    Brick    BPC_Base_Modular_Roof_Brick                        -> absent
+    Cement   BPC_Base_Modular_Roof_Cement                       -> absent
+
+=== B: instance counts for Twig + Cement Foundations on the BaseElement ===
+  Twig Foundation HISM: HISM 0  instances=3
+  Cement Foundation HISM: HISM 13  instances=2
+
+=== end of recon ===

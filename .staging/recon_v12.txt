@@ -1,0 +1,67 @@
+=== recon v12 :: 2026-05-24 15:10:43 ===
+
+=== A: per-HISM instance counts from _elementClassMap ===
+  element = BP_ConZBaseElement_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.c58ca26c_ConZBaseElement_1
+  [ 1] hism=HISM 0      count=6     mesh=SM_Foundation_Base_Twig
+       mesh_path = StaticMesh /Game/ConZ_Files/Models/Objects/Outdoor/Base_Building_Elements/Modular/Foundation/Twig/SM_Foundation_Base_Twig.SM_Foundation_Base_Twig
+  [ 2] hism=HISM 1      count=3     mesh=SM_Ramp_Base_Twig
+       mesh_path = StaticMesh /Game/ConZ_Files/Models/Objects/Outdoor/Base_Building_Elements/Modular/Ramp/Twig/SM_Ramp_Base_Twig.SM_Ramp_Base_Twig
+  [ 3] hism=HISM 2      count=1     mesh=SM_Wall_Door_Double_Twig
+       mesh_path = StaticMesh /Game/ConZ_Files/Models/Objects/Outdoor/Base_Building_Elements/Modular/Wall/Twig/SM_Wall_Door_Double_Twig.SM_Wall_Door_Double_Twig
+  [ 4] hism=HISM 3      count=2     mesh=SM_Wall_Base_Bars_Twig
+       mesh_path = StaticMesh /Game/ConZ_Files/Models/Objects/Outdoor/Base_Building_Elements/Modular/Wall/Twig/SM_Wall_Base_Bars_Twig.SM_Wall_Base_Bars_Twig
+  [ 5] hism=HISM 4      count=2     mesh=SM_Wall_Loophole_Twig
+       mesh_path = StaticMesh /Game/ConZ_Files/Models/Objects/Outdoor/Base_Building_Elements/Modular/Wall/Twig/SM_Wall_Loophole_Twig.SM_Wall_Loophole_Twig
+  [ 6] hism=HISM 5      count=2     mesh=SM_Wall_Window_Twig
+       mesh_path = StaticMesh /Game/ConZ_Files/Models/Objects/Outdoor/Base_Building_Elements/Modular/Wall/Twig/SM_Wall_Window_Twig.SM_Wall_Window_Twig
+  [ 7] hism=HISM 6      count=3     mesh=SM_Wall_Hole_Base_Third_Twig
+       mesh_path = StaticMesh /Game/ConZ_Files/Models/Objects/Outdoor/Base_Building_Elements/Modular/Wall/Twig/SM_Wall_Hole_Base_Third_Twig.SM_Wall_Hole_Base_Third_Twig
+  [ 8] hism=HISM 7      count=5     mesh=SM_Roof_Base_Twig
+       mesh_path = StaticMesh /Game/ConZ_Files/Models/Objects/Outdoor/Base_Building_Elements/Modular/Roof/Twig/SM_Roof_Base_Twig.SM_Roof_Base_Twig
+  [ 9] hism=HISM 8      count=5     mesh=SM_CamoNet_Wall
+       mesh_path = StaticMesh /Game/ConZ_Files/Models/Objects/Outdoor/Base_Building_Elements/Camo_Net/SM_CamoNet_Wall.SM_CamoNet_Wall
+  [10] hism=HISM 9      count=1     mesh=SM_Bed_Improvised
+       mesh_path = StaticMesh /Game/ConZ_Files/Models/Objects/Outdoor/Base_Building_Elements/Craftable_Furniture/Bed/Improvised_Bed/SM_Bed_Improvised.SM_Bed_Improvised
+  [11] hism=HISM 10     count=1     mesh=SM_Base_Flag
+       mesh_path = StaticMesh /Game/ConZ_Files/Models/Objects/Outdoor/Base_Building_Elements/Flag/Base_Flag/SM_Base_Flag.SM_Base_Flag
+
+  TOTAL instances across all 11 HISMs: 31
+
+=== B: _referencedBaseElementClasses on ConZBase (TSet) ===
+  base = BP_ConZBase_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.c58ca26c_ConZBase_1
+  set tostring: TSet: 000001E8C663D6B8
+    [1] BP_Base_Modular_Foundation_Twig_C  [BlueprintGeneratedClass /Game/ConZ_Files/BaseBuilding/BaseElements/Modular/BP_Base_Modular_Foundation_Twig.BP_Base_Modular_Foundation_Twig_C]
+    [2] BP_Base_Modular_Ramp_Twig_C  [BlueprintGeneratedClass /Game/ConZ_Files/BaseBuilding/BaseElements/Modular/BP_Base_Modular_Ramp_Twig.BP_Base_Modular_Ramp_Twig_C]
+    [3] BP_Base_Modular_Door_Frame_Double_Twig_C  [BlueprintGeneratedClass /Game/ConZ_Files/BaseBuilding/BaseElements/Modular/BP_Base_Modular_Door_Frame_Double_Twig.BP_Base_Modular_Door_Frame_Double_Twig_C]
+    [4] BP_Base_Modular_Wall_Bars_Twig_C  [BlueprintGeneratedClass /Game/ConZ_Files/BaseBuilding/BaseElements/Modular/BP_Base_Modular_Wall_Bars_Twig.BP_Base_Modular_Wall_Bars_Twig_C]
+    [5] BP_Base_Modular_Wall_Loophole_Twig_C  [BlueprintGeneratedClass /Game/ConZ_Files/BaseBuilding/BaseElements/Modular/BP_Base_Modular_Wall_Loophole_Twig.BP_Base_Modular_Wall_Loophole_Twig_C]
+    [6] BP_Base_Modular_Wall_Window_Twig_C  [BlueprintGeneratedClass /Game/ConZ_Files/BaseBuilding/BaseElements/Modular/BP_Base_Modular_Wall_Window_Twig.BP_Base_Modular_Wall_Window_Twig_C]
+    [7] BP_Base_Modular_Low_Wall_Support_Frame_Twig_C  [BlueprintGeneratedClass /Game/ConZ_Files/BaseBuilding/BaseElements/Modular/BP_Base_Modular_Low_Wall_Support_Frame_Twig.BP_Base_Modular_Low_Wall_Support_Frame_Twig_C]
+    [8] BP_Base_Modular_Roof_Twig_C  [BlueprintGeneratedClass /Game/ConZ_Files/BaseBuilding/BaseElements/Modular/BP_Base_Modular_Roof_Twig.BP_Base_Modular_Roof_Twig_C]
+    [9] BP_Base_Modular_Wall_CamoNet_C  [BlueprintGeneratedClass /Game/ConZ_Files/BaseBuilding/BaseElements/Modular/BP_Base_Modular_Wall_CamoNet.BP_Base_Modular_Wall_CamoNet_C]
+    [10] BP_Bed_Improvised_C  [BlueprintGeneratedClass /Game/ConZ_Files/BaseBuilding/BaseElements/BP_Bed_Improvised.BP_Bed_Improvised_C]
+    [11] BP_Base_Flag_C  [BlueprintGeneratedClass /Game/ConZ_Files/BaseBuilding/BaseElements/BP_Base_Flag.BP_Base_Flag_C]
+
+=== C: any other BaseElement* actor classes loaded ===
+  FindAllOf(BP_ConZBaseElement_Wood_C     ) -> 0
+  FindAllOf(BP_ConZBaseElement_Metal_C    ) -> 0
+  FindAllOf(BP_ConZBaseElement_Stone_C    ) -> 0
+  FindAllOf(BP_ConZBaseElement_Brick_C    ) -> 0
+  FindAllOf(ConZBaseElement_Wood          ) -> 0
+  FindAllOf(ConZBaseElement_Metal         ) -> 0
+  FindAllOf(ConZBaseElement_Stone         ) -> 0
+  FindAllOf(ConZBaseElement_Brick         ) -> 0
+
+  -- world actor scan for 'BaseElement' / 'BaseBuild' --
+        1  BP_ConZBaseElement_C
+
+=== D: probe Wood/Metal tier mesh asset paths ===
+  >> section ERROR: ...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:173: invalid conversion specification: '%-110s'
+
+=== E: probe ConZBaseElement_<Tier> class paths ===
+  /Script/SCUM.ConZBaseElement                       -> FOUND
+  /Script/SCUM.ConZBaseElement_Twig                  -> absent
+  /Script/SCUM.ConZBaseElement_Wood                  -> absent
+  /Script/SCUM.ConZBaseElement_Metal                 -> absent
+
+=== end of recon ===

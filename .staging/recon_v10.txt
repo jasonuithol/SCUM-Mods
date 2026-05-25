@@ -1,0 +1,339 @@
+=== recon v10 :: 2026-05-24 14:16:05 ===
+
+=== A: ConZBaseManager UFunction signatures (NetMulticast_* especially) ===
+  manager = BP_ConZBaseManager_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.BP_ConZBaseManager_C_2147470847
+  -- class[0] BP_ConZBaseManager_C functions --
+  -- class[1] ConZBaseManager functions --
+  fn: NetMulticast_UpdateItemElementsLocationsAndRotations
+       p1   dataVersion                      : IntProperty
+       p2   itemElements                     : ArrayProperty
+  fn: NetMulticast_TransferOwnership
+       p1   dataVersion                      : IntProperty
+       p2   oldId                            : StructProperty  (struct DbIntegerId)
+       p3   newId                            : StructProperty  (struct DbIntegerId)
+  fn: NetMulticast_SpawnBaseElement
+       p1   dataVersion                      : IntProperty
+       p2   Transform                        : StructProperty  (struct Transform)
+       p3   baseData                         : StructProperty  (struct ConZBaseData)
+       p4   ElementClass                     : ClassProperty  -> Class
+       p5   ElementID                        : Int64Property
+       p6   OwnerUserProfileId               : Int64Property
+       p7   CreatorPrisonerId                : Int64Property
+       p8   IsOwnedByPlayer                  : BoolProperty
+       p9   params                           : StructProperty  (struct BaseElementSpawnParams)
+  fn: NetMulticast_SetDebugMode
+       p1   Prisoner                         : ObjectProperty  -> Prisoner
+       p2   mode                             : EnumProperty
+  fn: NetMulticast_SetBaseOwnerPlayerId
+       p1   dataVersion                      : IntProperty
+       p2   baseData                         : StructProperty  (struct ConZBaseInteractionData)
+       p3   PlayerId                         : Int64Property
+  fn: NetMulticast_SetBaseHasActiveEncounter
+       p1   dataVersion                      : IntProperty
+       p2   BaseId                           : Int64Property
+       p3   Value                            : BoolProperty
+  fn: NetMulticast_ProcessDecay
+       p1   dataVersion                      : IntProperty
+       p2   DeltaSeconds                     : FloatProperty
+  fn: NetMulticast_InteractWithElement
+       p1   dataVersion                      : IntProperty
+       p2   interactionType                  : EnumProperty
+       p3   baseData                         : StructProperty  (struct ConZBaseInteractionData)
+       p4   baseElementData                  : StructProperty  (struct ConZBaseElementInteractionData)
+       p5   User                             : ObjectProperty  -> Prisoner
+  fn: NetMulticast_ExecuteFlagOvertake
+       p1   dataVersion                      : IntProperty
+       p2   ElementID                        : Int64Property
+       p3   elementLocation                  : StructProperty  (struct Vector)
+       p4   PlayerId                         : StructProperty  (struct DbIntegerId)
+  fn: NetMulticast_DestroyElement
+       p1   dataVersion                      : IntProperty
+       p2   ElementIdentifier                : StructProperty  (struct ConZBaseElementIdentifier)
+       p3   reason                           : EnumProperty
+       p4   cascade                          : BoolProperty
+  fn: NetMulticast_DestroyAllElementsInRadius
+       p1   dataVersion                      : IntProperty
+       p2   Center                           : StructProperty  (struct Vector)
+       p3   Radius                           : FloatProperty
+       p4   minElementAreaCovered            : FloatProperty
+       p5   minAngleDeg                      : FloatProperty
+       p6   maxAngleDeg                      : FloatProperty
+       p7   forwardVector                    : StructProperty  (struct Vector)
+       p8   typeFilter                       : EnumProperty
+       p9   damageActorType                  : EnumProperty
+  fn: NetMulticast_ClearBaseOwnerPlayerId
+       p1   dataVersion                      : IntProperty
+       p2   baseData                         : StructProperty  (struct ConZBaseInteractionData)
+  fn: NetMulticast_ChangeFlagOwner
+       p1   dataVersion                      : IntProperty
+       p2   oldOwnerProfileId                : StructProperty  (struct DbIntegerId)
+       p3   newOwnerProfileId                : StructProperty  (struct DbIntegerId)
+  fn: NetMulticast_ApplyDamageToBaseElement
+       p1   dataVersion                      : IntProperty
+       p2   BaseId                           : Int64Property
+       p3   ElementID                        : Int64Property
+       p4   elementLocation                  : StructProperty  (struct Vector)
+       p5   damageAmount                     : FloatProperty
+  -- class[2] Actor functions --
+  fn: SetAutoDestroyWhenFinished
+       p1   bVal                             : BoolProperty
+  fn: ReceiveDestroyed
+       (no params)
+  fn: K2_DestroyComponent
+       p1   Component                        : ObjectProperty  -> ActorComponent
+  fn: K2_DestroyActor
+       (no params)
+  fn: IsActorBeingDestroyed
+       p1   ReturnValue                      : BoolProperty
+  -- class[3] Object functions --
+
+=== B: try map iteration for MeshMap / _elementClassMap on live element ===
+  element = BP_ConZBaseElement_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.c58ca26c_ConZBaseElement_1
+  -- MeshMap (BP-level) --
+    type: userdata
+    tostring: TMap: 0000025901D298D8
+    GetMapNum    -> ERR (fail)
+    GetNum       -> ERR (fail)
+    Num          -> ERR (fail)
+    #map         -> 0 (ok)
+  -- _elementClassMap (ConZBaseElement) --
+    type: userdata
+    tostring: TMap: 0000025901D2A2F8
+    GetMapNum    -> ERR (fail)
+    GetNum       -> ERR (fail)
+    Num          -> ERR (fail)
+    #map         -> 11 (ok)
+    ForEach: RemoteUnrealParam: 0000025B48AFA158 -> RemoteUnrealParam: 0000025B48AF6A18
+    ForEach: RemoteUnrealParam: 0000025B48AF6198 -> RemoteUnrealParam: 0000025B48AF9C08
+    ForEach: RemoteUnrealParam: 0000025B48AF8D28 -> RemoteUnrealParam: 0000025B48AFA048
+    ForEach: RemoteUnrealParam: 0000025B48AF7C28 -> RemoteUnrealParam: 0000025B48AF9388
+    ForEach: RemoteUnrealParam: 0000025B48AFA378 -> RemoteUnrealParam: 0000025B48AF7F58
+    ForEach: RemoteUnrealParam: 0000025B48AF7D38 -> RemoteUnrealParam: 0000025B48AF8398
+    ForEach: RemoteUnrealParam: 0000025B48AF9D18 -> RemoteUnrealParam: 0000025B48AF8C18
+    ForEach: RemoteUnrealParam: 0000025B48AF62A8 -> RemoteUnrealParam: 0000025B48AF78F8
+    ForEach: RemoteUnrealParam: 0000025B48AF74B8 -> RemoteUnrealParam: 0000025B48AF8288
+    ForEach: RemoteUnrealParam: 0000025B48AF66E8 -> RemoteUnrealParam: 0000025B48AF9E28
+    ForEach: RemoteUnrealParam: 0000025B48AF6D48 -> RemoteUnrealParam: 0000025B48AF67F8
+
+=== C: HISM component on the live element ===
+  hism = HierarchicalInstancedStaticMeshComponent /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.c58ca26c_ConZBaseElement_1._hismComponent
+  hism class = HierarchicalInstancedStaticMeshComponent
+  GetInstanceCount          -> 0 (ok)
+  InstanceCount             -> UObject: 0000025B5C8B1A78 (ok)
+  GetNumInstances           -> ERR (fail)
+  GetInstanceTransforms     -> ERR (fail)
+
+  HISM class chain property names:
+    -- HierarchicalInstancedStaticMeshComponent --
+      SortedInstances
+      NumBuiltInstances
+      BuiltInstanceBounds
+      UnbuiltInstanceBounds
+      UnbuiltInstanceBoundsList
+      bEnableDensityScaling
+      OcclusionLayerNumNodes
+      CacheMeshExtendedBounds
+      bDisableCollision
+      InstanceCountToRender
+    -- InstancedStaticMeshComponent --
+      PerInstanceSMData
+      NumCustomDataFloats
+      bKeepInstanceBufferCPUAccess
+      PerInstanceSMCustomData
+      InstancingRandomSeed
+      InstanceStartCullDistance
+      InstanceEndCullDistance
+      InstanceReorderTable
+      NumPendingLightmaps
+      CachedMappings
+    -- StaticMeshComponent --
+      ForcedLodModel
+      PreviousLODLevel
+      MinLOD
+      SubDivisionStepSize
+      StaticMesh
+      WireframeColorOverride
+      bEvaluateWorldPositionOffset
+      bOverrideWireframeColor
+      bOverrideMinLOD
+      bOverrideNavigationExport
+      bForceNavigationObstacle
+      bDisallowMeshPaintPerInstance
+      bIgnoreInstanceForTextureStreaming
+      bOverrideLightMapRes
+      bCastDistanceFieldIndirectShadow
+      bOverrideDistanceFieldSelfShadowBias
+      bUseSubDivisions
+      bUseDefaultCollision
+      bReverseCulling
+      OverriddenLightMapRes
+      DistanceFieldIndirectShadowMinVisibility
+      DistanceFieldSelfShadowBias
+      StreamingDistanceMultiplier
+      LODData
+      StreamingTextureData
+      LightmassSettings
+      PersistentCollisionIndex
+    -- MeshComponent --
+      OverrideMaterials
+      bEnableMaterialParameterCaching
+    -- PrimitiveComponent --
+      MinDrawDistance
+      UseHLODMinDrawDistance
+      LDMaxDrawDistance
+      CachedMaxDrawDistance
+      DepthPriorityGroup
+      ViewOwnerDepthPriorityGroup
+      IndirectLightingCacheQuality
+      LightmapType
+      bUseMaxLODAsImposter
+      bBatchImpostersAsInstances
+      bNeverDistanceCull
+      bAlwaysCreatePhysicsState
+      bGenerateOverlapEvents
+      bMultiBodyOverlap
+      bTraceComplexOnMove
+      bReturnMaterialOnMove
+      bUseViewOwnerDepthPriorityGroup
+      bAllowCullDistanceVolume
+      bHasMotionBlurVelocityMeshes
+      bVisibleInReflectionCaptures
+      bVisibleInRealTimeSkyCaptures
+      bVisibleInRayTracing
+      bRenderInMainPass
+      bRenderInDepthPass
+      bReceivesDecals
+      bOwnerNoSee
+      bOnlyOwnerSee
+      bTreatAsBackgroundForOcclusion
+      bUseAsOccluder
+      bSelectable
+      bForceMipStreaming
+      bHasPerInstanceHitProxies
+      CastShadow
+      bAffectDynamicIndirectLighting
+      bAffectDistanceFieldLighting
+      bCastDynamicShadow
+      bCastStaticShadow
+      bCastVolumetricTranslucentShadow
+      bCastContactShadow
+      bSelfShadowOnly
+      bCastFarShadow
+      bCastInsetShadow
+      bCastCinematicShadow
+      bCastHiddenShadow
+      bCastShadowAsTwoSided
+      bLightAsIfStatic
+      bLightAttachmentsAsGroup
+      bExcludeFromLightAttachmentGroup
+      bReceiveMobileCSMShadows
+      bSingleSampleShadowFromStationaryLights
+      bIgnoreRadialImpulse
+      bIgnoreRadialForce
+      bApplyImpulseOnDamage
+      bReplicatePhysicsToAutonomousProxy
+      bFillCollisionUnderneathForNavmesh
+      AlwaysLoadOnClient
+      AlwaysLoadOnServer
+      bUseEditorCompositing
+      bRenderCustomDepth
+      bVisibleInSceneCaptureOnly
+      bHiddenInSceneCapture
+      bHasCustomNavigableGeometry
+      CanCharacterStepUpOn
+      LightingChannels
+      CustomDepthStencilWriteMask
+      CustomDepthStencilValue
+      CustomPrimitiveData
+      CustomPrimitiveDataInternal
+      TranslucencySortPriority
+      TranslucencySortDistanceOffset
+      VisibilityId
+      RuntimeVirtualTextures
+      VirtualTextureLodBias
+      VirtualTextureCullMips
+      VirtualTextureMinCoverage
+      VirtualTextureRenderPassType
+      LpvBiasMultiplier
+      BoundsScale
+      MoveIgnoreActors
+      MoveIgnoreComponents
+      BodyInstance
+      OnComponentHit
+      OnComponentBeginOverlap
+      OnComponentEndOverlap
+      OnComponentWake
+      OnComponentSleep
+      OnBeginCursorOver
+      OnEndCursorOver
+      OnClicked
+      OnReleased
+      OnInputTouchBegin
+      OnInputTouchEnd
+      OnInputTouchEnter
+      OnInputTouchLeave
+      LODParentPrimitive
+    -- SceneComponent --
+      PhysicsVolume
+      AttachParent
+      AttachSocketName
+      AttachChildren
+      ClientAttachedChildren
+      RelativeLocation
+      RelativeRotation
+      RelativeScale3D
+      ComponentVelocity
+      bHideWithOwner
+      bComponentToWorldUpdated
+      bAbsoluteLocation
+      bAbsoluteRotation
+      bAbsoluteScale
+      bVisible
+      bShouldBeAttached
+      bShouldSnapLocationWhenAttached
+      bShouldSnapRotationWhenAttached
+      bShouldUpdatePhysicsVolume
+      bHiddenInGame
+      bBoundsChangeTriggersStreamingDataRebuild
+      bUseAttachParentBound
+      Mobility
+      DetailMode
+      PhysicsVolumeChangedDelegate
+    -- ActorComponent --
+      PrimaryComponentTick
+      ComponentTags
+      AssetUserData
+      UCSSerializationIndex
+      bNetAddressable
+      bReplicates
+      bAutoActivate
+      bIsActive
+      bEditableWhenInherited
+      bCanEverAffectNavigation
+      bIsEditorOnly
+      CreationMethod
+      OnComponentActivated
+      OnComponentDeactivated
+      UCSModifiedProperties
+    -- Object --
+
+=== D: ConZBase live values + _bases map on manager ===
+  base = BP_ConZBase_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.c58ca26c_ConZBase_1
+    base._baseElementActor                        = FWeakObjectPtr: 0000025B4871C548
+    base._referencedBaseElementClasses            = TSet: 0000025B48AF8E38
+    base._overrideBlockStackingRules              = false
+    base._debugRenderingDistance                  = 1000.0
+
+  manager = BP_ConZBaseManager_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.BP_ConZBaseManager_C_2147470847
+    mgr._flagInfluenceRadius                     = 5000.0
+    mgr._maxElementsPerFlag                      = 100
+    mgr._baseClass                               = UClass: 0000025B4871AC48
+    mgr._baseElementClass                        = UClass: 0000025B4871C848
+    mgr._initialBaseSize                         = UScriptStruct: 0000025B48AF86C8
+    mgr._maxBaseBuildingHeight                   = 1000.0
+    mgr._bases tostring: TMap: 0000025901D29F98
+      _bases.GetMapNum    -> ERR
+      _bases.GetNum       -> ERR
+      _bases.Num          -> ERR
+
+=== end of recon ===

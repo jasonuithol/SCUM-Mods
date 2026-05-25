@@ -1,0 +1,36 @@
+# Build artifacts
+.staging/build/
+.staging/dist/
+*.spec
+__pycache__/
+*.pyc
+*.exe
+
+# Third-party tools / bundles (re-downloadable, not our source)
+# herbie96x/SCUM-AllowMods bundle:
+.staging/extracted/
+# repak_cli:
+.staging/repak/
+.staging/repak_cli.zip
+.staging/repak_cli.zip.sha256
+.staging/Win64.zip
+# cooked test pak workdir:
+.staging/HelloScum_P/
+
+# Binary game assets
+*.pak
+*.dll
+
+# SCUM save data + DB backups (personal data, large)
+.staging/db_backup_*/
+*.db
+*.db-wal
+*.db-shm
+*.db-backup
+*.bak
+*.bak-*
+
+# OS / editor cruft
+Thumbs.db
+desktop.ini
+.DS_Store

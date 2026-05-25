@@ -1,0 +1,25 @@
+=== FlagUpgrade v28 safe recon :: 2026-05-25 11:43:33 ===
+
+#### CLASS FULL NAMES (module discovery) ####
+   PlayerController : BlueprintGeneratedClass /Game/ConZ_Files/Blueprints/PlayerControllers/BP_ConZPlayerController.BP_ConZPlayerController_C
+   PlayerState      : Class /Script/SCUM.ConZPlayerState
+   Pawn             : BlueprintGeneratedClass /Game/ConZ_Files/Characters/Prisoner/Blueprints/BP_Prisoner.BP_Prisoner_C
+   _playerRpcChannel: Class /Script/SCUM.PlayerRpcChannel
+   CheatManager     : Class /Script/Engine.CheatManager
+   ConZBaseManager  : BlueprintGeneratedClass /Game/ConZ_Files/BaseBuilding/Core/BP_ConZBaseManager.BP_ConZBaseManager_C
+   ConZBaseElement  : BlueprintGeneratedClass /Game/ConZ_Files/BaseBuilding/Core/BP_ConZBaseElement.BP_ConZBaseElement_C
+
+   derived module: /Script/SCUM
+
+#### DEVELOPER / ADMIN / OWNER FLAG HUNT ####
+---- flag probe: PlayerController ----
+   (none of the candidate names resolved as scalars)
+
+---- flag probe: PlayerState ----
+   (none of the candidate names resolved as scalars)
+
+---- flag probe: Pawn ----
+   (none of the candidate names resolved as scalars)
+
+#### interactionType ENUM candidates ####
+   FOUND enum: /Script/SCUM.EInteractionType

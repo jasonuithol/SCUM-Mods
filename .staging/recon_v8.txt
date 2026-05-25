@@ -1,0 +1,237 @@
+=== recon v8 :: 2026-05-24 13:54:13 ===
+
+=== A: PC + PS basics ===
+  PC       = BP_ConZPlayerController_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.BP_ConZPlayerController_C_2147470374
+  PC class = BP_ConZPlayerController_C
+  PS       = ConZPlayerState /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.ConZPlayerState_2147470373
+
+=== B: PC -- ALL properties (defensive) ===
+  -- PC[0] BP_ConZPlayerController_C  (0 props) --
+    ComponentsToHide                             : ArrayProperty
+  -- PC[1] ConZPlayerController  (1 props) --
+  -- PC[2] ConZPlayerControllerBase  (0 props) --
+    Player                                       : ObjectProperty
+  -- PC[3] PlayerController  (1 props) --
+    PlayerState                                  : ObjectProperty
+  -- PC[4] Controller  (1 props) --
+    PrimaryActorTick                             : StructProperty
+  -- PC[5] Actor  (1 props) --
+  -- PC[6] Object  (0 props) --
+
+=== C: PlayerState -- ALL properties (defensive) ===
+  -- PS[0] ConZPlayerState  (0 props) --
+    Score                                        : FloatProperty
+  -- PS[1] PlayerState  (1 props) --
+  -- PS[2] Info  (0 props) --
+    PrimaryActorTick                             : StructProperty
+  -- PS[3] Actor  (1 props) --
+  -- PS[4] Object  (0 props) --
+
+=== D: world actor class census (via GetAllActorsOfClass + :get()) ===
+  total actors: 2542
+  valid: 2542, invalid/null: 0
+
+  ALL class counts (desc):
+     1015  TextRenderActor
+      735  StaticMeshActor
+      324  BP_CookingUtilitySlotContainer_C
+       51  BP_SoundSpline_C
+       37  ConZWaterSplineLake
+       24  BP_TrainyardPowerPillar_01_C
+       22  ConZWaterSplineRiver
+       20  Actor
+       19  BP_PowerPole_04_C
+       16  BoxReflectionCapture
+       16  ConZWaterSplineIsland
+       14  LevelBounds
+       13  BP_DeathmatchLocationMarker_C
+       12  InstancedFoliageActor
+       11  BP_TeamDeathmatchLocationMarker_C
+       10  LandscapeGizmoActiveActor
+       10  BP_DeathmatchGameEvent_C
+        9  LandscapeStreamingProxy
+        9  SphereReflectionCapture
+        9  BP_Radio_Station_2_C
+        8  BP_TeamDeathmatchGameEvent_C
+        7  BP_Ambient_Emitter_C
+        7  SoundSpline
+        7  BP_TransmissionTower_Line_01_C
+        5  BP_DropZoneLocationMarker_C
+        4  BP_TransmissionTower_Line_01_HiddenInGame_C
+        4  BP_DropZoneGameEvent_C
+        3  BP_TrainyardPowerPillar_03_C
+        3  BP_Bridge_WM_C
+        3  BP_CTFLocationMarker_C
+        3  BP_CTFGameEvent_C
+        2  BP_ElectroHouse_01_C
+        2  BP_Street_Lamp_04_On_C
+        2  BP_SmallLightHouse_Rotating_Light_C
+        2  RuntimeVirtualTextureVolume
+        2  BP_City_sign_A_C
+        2  BP_PowerPole_01_C
+        2  BP_Small_Lighthouse_C
+        2  BP_TrainyardPowerPillar_02_C
+        2  BP_HuntingStand_A_C
+        1  BP_WetnessManager_C
+        1  BP_ConZPlayerController_C
+        1  HighTop_Shoes_C
+        1  NavMeshBoundsVolume
+        1  AmbientSounds
+        1  BP_ConZGameMode_C
+        1  BP_GardenManager_C
+        1  BuildingManager
+        1  BP_NotificationsManager_C
+        1  BP_WeatherController1_0_C
+        1  BP_MechanoidsManager_C
+        1  AchievementsManagerClient
+        1  BP_PowerPole_04_HiddenInGame_C
+        1  ItemContainerManager
+        1  TempPlayerStart
+        1  BP_Ambient_Emitter_RTPC_C
+        1  AchievementsManagerServer
+        1  Tunnel_WM_Z1_02_C
+        1  ConZWaterSplineOcean
+        1  RecastNavMesh_LargeAnimals
+        1  BP_Radio_Station_1_C
+        1  BP_ConZBase_C
+        1  1H_ImprovisedKnife_C
+        1  ReportingManager
+        1  Inmate_shirt_01_C
+        1  PostProcessVolume
+        1  CameraActor
+        1  RecastNavMesh_Sentries
+        1  RecastNavMesh_Humanoids
+        1  ConZReverbVolume
+        1  BP_EconomyManager_C
+        1  BP_HuntingManager_C
+        1  AbstractNavData
+        1  Landscape_A_C
+        1  BP_GlobalEncounterManager_C
+        1  WeatherAmbientSounds
+        1  AIDetectionTimerHandler
+        1  BP_River_C_4_3_WM_C
+        1  BP_PrisonerHUD_C
+        1  HeatSourceManager
+        1  Landscape
+        1  LadderMarkersRegistry
+        1  BP_SurvivalStatsHandler_C
+        1  BP_TimedGiftSpawner_Christmas_C
+        1  ItemVirtualizationManager
+        1  BCULockRegistry
+        1  ParticleEventManager
+        1  ConZWorldBoundsVolume
+        1  GameNetworkManager
+        1  ConZWaterSplineRegistry
+        1  BP_ConZGameState_C
+        1  Sock_01_C
+        1  BP_Prisoner_C
+        1  BP_River_C_3_4_WM_C
+        1  ConZWorldSettings
+        1  BP_WorldEventManager_C
+        1  RecastNavMesh_Brenner
+        1  Tunnel_WM_Z1_01_C
+        1  BP_CookingManager_C
+        1  CullDistanceVolume
+        1  BP_QuestManager_C
+        1  BP_ConZBaseManager_C
+        1  Inmate_pants_C
+        1  DistantLevelManager
+        1  BP_ItemSpawningManager_C
+        1  BP_GameEventManager_C
+        1  BP_Ambient_Emitter_Samobor_C
+        1  RecastNavMesh_SmallAnimals
+        1  Tunnel_WM_Z2_01_C
+        1  Cave_Z_2_3c_WM_C
+        1  BP_PowerMount_05_C
+        1  BP_Radiation_Manager_C
+        1  The_Island_C
+        1  BP_HuntingStand_B_C
+        1  Underwater_Cave_A_1_2_WM_C
+        1  ConZPlayerState
+        1  BP_PrecipitationMaskCapture_C
+        1  BP_PersistentCollisionManager_C
+        1  Landscape_Z_2_C
+        1  ConZGameSession
+        1  Boxer_Briefs_01_C
+        1  BP_ConZCameraManager_C
+        1  StartLocationManager
+        1  Undershirt_01_C
+        1  Underwater_Cave_A_2_1_WM_C
+        1  BP_VoteSystemManager_C
+        1  UnderwaterPostProcessVolume
+        1  BP_GlobalGuardedZoneManager_C
+        1  BP_VehicleManager_C
+        1  BP_ConZBaseElement_C
+        1  BP_GlobalAquaticLifeManager_C
+        1  DefaultPhysicsVolume
+        1  BP_River_C_4_2_WM_C
+        1  BP_EffectOverTimeDealer_C
+
+  >>> filtered: class name contains build/wall/flag/foundation/door/floor/element/base/territory/squad <<<
+        1  BuildingManager    sample=BuildingManager /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.BuildingManager_1
+        1  BP_ConZBase_C    sample=BP_ConZBase_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.c58ca26c_ConZBase_1
+        1  BP_ConZBaseManager_C    sample=BP_ConZBaseManager_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.BP_ConZBaseManager_C_2147470388
+        1  BP_ConZBaseElement_C    sample=BP_ConZBaseElement_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.c58ca26c_ConZBaseElement_1
+
+  >>> sampled properties of building-related classes <<<
+
+  ---- BuildingManager sample dump ----
+    BuildingMana[0] BuildingManager (1 props)
+    BuildingMana[1] Actor (1 props)
+    BuildingMana[2] Object (0 props)
+
+  ---- BP_ConZBaseElement_C sample dump ----
+    BP_ConZBaseE[0] BP_ConZBaseElement_C (1 props)
+    BP_ConZBaseE[1] ConZBaseElement (1 props)
+    BP_ConZBaseE[2] Actor (1 props)
+    BP_ConZBaseE[3] Object (0 props)
+
+=== E: actor class names containing 'ConZ' or 'Cheat' or 'Admin' or 'Manager' ===
+    BP_VehicleManager_C                                 sample=BP_VehicleManager_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.BP_VehicleManager_C_2147470396
+    BP_GlobalAquaticLifeManager_C                       sample=BP_GlobalAquaticLifeManager_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.BP_GlobalAquaticLifeManager_C_2147470393
+    ItemContainerManager                                sample=ItemContainerManager /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.ItemContainerManager0
+    BP_ConZBase_C                                       sample=BP_ConZBase_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.c58ca26c_ConZBase_1
+    DistantLevelManager                                 sample=DistantLevelManager /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.DistantLevelManager_1
+    BP_ConZBaseElement_C                                sample=BP_ConZBaseElement_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.c58ca26c_ConZBaseElement_1
+    BP_GlobalEncounterManager_C                         sample=BP_GlobalEncounterManager_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.BP_GlobalEncounterManager_2
+    ConZWorldBoundsVolume                               sample=ConZWorldBoundsVolume /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.ConZWorldBoundsVolume_1
+    GameNetworkManager                                  sample=GameNetworkManager /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.GameNetworkManager_2147470378
+    StartLocationManager                                sample=StartLocationManager /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.StartLocationManager_0
+    BP_NotificationsManager_C                           sample=BP_NotificationsManager_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.BP_NotificationsManager_C_2147470385
+    BP_MechanoidsManager_C                              sample=BP_MechanoidsManager_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.BP_MechanoidsManager_304
+    ReportingManager                                    sample=ReportingManager /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.ReportingManager_2147470394
+    BP_ConZCameraManager_C                              sample=BP_ConZCameraManager_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.BP_ConZCameraManager_C_2147470372
+    ConZWaterSplineRegistry                             sample=ConZWaterSplineRegistry /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.ConZWaterSplineRegistry_2147469934
+    BP_GardenManager_C                                  sample=BP_GardenManager_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.BP_GardenManager_2
+    ConZReverbVolume                                    sample=ConZReverbVolume /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.ConZReverbVolume_1
+    BP_ConZBaseManager_C                                sample=BP_ConZBaseManager_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.BP_ConZBaseManager_C_2147470388
+    BP_ConZPlayerController_C                           sample=BP_ConZPlayerController_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.BP_ConZPlayerController_C_2147470374
+    BP_ConZGameState_C                                  sample=BP_ConZGameState_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.BP_ConZGameState_C_2147470379
+    BP_ConZGameMode_C                                   sample=BP_ConZGameMode_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.BP_ConZGameMode_C_2147470402
+    BP_PersistentCollisionManager_C                     sample=BP_PersistentCollisionManager_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.BP_PersistentCollisionManager_2
+    ConZWorldSettings                                   sample=ConZWorldSettings /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.ConZWorldSettings
+    ConZPlayerState                                     sample=ConZPlayerState /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.ConZPlayerState_2147470373
+    BP_WetnessManager_C                                 sample=BP_WetnessManager_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.BP_WetnessManager_114
+    BP_Radiation_Manager_C                              sample=BP_Radiation_Manager_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.BP_Radiation_Manager_2
+    BuildingManager                                     sample=BuildingManager /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.BuildingManager_1
+    BP_WorldEventManager_C                              sample=BP_WorldEventManager_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.BP_WorldEventManager_2
+    ConZGameSession                                     sample=ConZGameSession /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.ConZGameSession_2147470398
+    BP_VoteSystemManager_C                              sample=BP_VoteSystemManager_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.BP_VoteSystemManager_C_2147470384
+    ParticleEventManager                                sample=ParticleEventManager /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.ParticleEventManager_2147470381
+    ConZWaterSplineIsland                               sample=ConZWaterSplineIsland /Game/ConZ_Files/Maps/The_Island/WaterSplines.WaterSplines:PersistentLevel.ConZWaterSplineIsland_1
+    AchievementsManagerServer                           sample=AchievementsManagerServer /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.AchievementsManagerServer_2147470390
+    HeatSourceManager                                   sample=HeatSourceManager /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.HeatSourceManager_2147470391
+    ConZWaterSplineRiver                                sample=ConZWaterSplineRiver /Game/ConZ_Files/Maps/The_Island/WaterSplines.WaterSplines:PersistentLevel.ConZWaterSplineRiver1
+    ItemVirtualizationManager                           sample=ItemVirtualizationManager /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.ItemVirtualizationManager_2147470395
+    BP_QuestManager_C                                   sample=BP_QuestManager_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.BP_QuestManager_2
+    BP_HuntingManager_C                                 sample=BP_HuntingManager_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.BP_HuntingManager_2
+    BP_ItemSpawningManager_C                            sample=BP_ItemSpawningManager_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.BP_ItemSpawningManager_C_2147470397
+    AchievementsManagerClient                           sample=AchievementsManagerClient /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.AchievementsManagerClient_2147469986
+    ConZWaterSplineLake                                 sample=ConZWaterSplineLake /Game/ConZ_Files/Maps/The_Island/WaterSplines.WaterSplines:PersistentLevel.ConZWaterSplineLake1
+    BP_GameEventManager_C                               sample=BP_GameEventManager_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.BP_GameEventManager_92
+    BP_EconomyManager_C                                 sample=BP_EconomyManager_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.BP_EconomyManager_2
+    BP_GlobalGuardedZoneManager_C                       sample=BP_GlobalGuardedZoneManager_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.BP_GlobalGuardedZoneManager_C_2147470392
+    BP_CookingManager_C                                 sample=BP_CookingManager_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.BP_CookingManager_2
+    ConZWaterSplineOcean                                sample=ConZWaterSplineOcean /Game/ConZ_Files/Maps/The_Island/WaterSplines.WaterSplines:PersistentLevel.ConZWaterSplineOcean_1
+
+=== end of recon ===

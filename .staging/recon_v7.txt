@@ -1,0 +1,188 @@
+=== recon v7 :: 2026-05-24 13:49:00 ===
+
+=== A: PC + PS basics ===
+  PC = BP_ConZPlayerController_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.BP_ConZPlayerController_C_2147470833
+  PC class = BP_ConZPlayerController_C
+  PS = ConZPlayerState /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.ConZPlayerState_2147470832
+  Pawn = BP_Prisoner_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.BP_Prisoner_C_2147468089
+  GameMode = BP_ConZGameMode_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.BP_ConZGameMode_C_2147470861
+  GameState = BP_ConZGameState_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.BP_ConZGameState_C_2147470838
+
+=== B: PC -- ALL properties (no filter, with counts to detect silent ForEachProperty failures) ===
+  -- PC[0] BP_ConZPlayerController_C  (0 props) --
+    ComponentsToHide                             : ArrayProperty
+  -- PC[1] ConZPlayerController  (1 props  ITER_ERR: ...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:43: [Lua::call_function] lua_pcall returned LUA_ERRRUN => attempt to call a nil value
+stack traceback:
+	[C]: in method 'ForEachProperty'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:43: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:42>
+	[C]: in function 'pcall'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:42: in upvalue 'dump_all_props'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:87: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:84>
+	[C]: in function 'pcall'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:32: in upvalue 'section'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:84: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:59>
+stack traceback:
+	[C]: in method 'ForEachProperty'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:43: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:42>
+	[C]: in function 'pcall'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:42: in upvalue 'dump_all_props'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:87: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:84>
+	[C]: in function 'pcall'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:32: in upvalue 'section'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:84: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:59>) --
+  -- PC[2] ConZPlayerControllerBase  (0 props) --
+    Player                                       : ObjectProperty
+  -- PC[3] PlayerController  (1 props  ITER_ERR: ...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:43: [Lua::call_function] lua_pcall returned LUA_ERRRUN => attempt to call a nil value
+stack traceback:
+	[C]: in method 'ForEachProperty'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:43: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:42>
+	[C]: in function 'pcall'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:42: in upvalue 'dump_all_props'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:87: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:84>
+	[C]: in function 'pcall'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:32: in upvalue 'section'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:84: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:59>
+stack traceback:
+	[C]: in method 'ForEachProperty'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:43: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:42>
+	[C]: in function 'pcall'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:42: in upvalue 'dump_all_props'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:87: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:84>
+	[C]: in function 'pcall'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:32: in upvalue 'section'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:84: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:59>) --
+    PlayerState                                  : ObjectProperty
+  -- PC[4] Controller  (1 props  ITER_ERR: ...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:43: [Lua::call_function] lua_pcall returned LUA_ERRRUN => attempt to call a nil value
+stack traceback:
+	[C]: in method 'ForEachProperty'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:43: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:42>
+	[C]: in function 'pcall'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:42: in upvalue 'dump_all_props'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:87: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:84>
+	[C]: in function 'pcall'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:32: in upvalue 'section'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:84: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:59>
+stack traceback:
+	[C]: in method 'ForEachProperty'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:43: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:42>
+	[C]: in function 'pcall'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:42: in upvalue 'dump_all_props'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:87: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:84>
+	[C]: in function 'pcall'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:32: in upvalue 'section'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:84: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:59>) --
+    PrimaryActorTick                             : StructProperty
+  -- PC[5] Actor  (1 props  ITER_ERR: ...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:43: [Lua::call_function] lua_pcall returned LUA_ERRRUN => attempt to call a nil value
+stack traceback:
+	[C]: in method 'ForEachProperty'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:43: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:42>
+	[C]: in function 'pcall'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:42: in upvalue 'dump_all_props'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:87: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:84>
+	[C]: in function 'pcall'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:32: in upvalue 'section'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:84: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:59>
+stack traceback:
+	[C]: in method 'ForEachProperty'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:43: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:42>
+	[C]: in function 'pcall'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:42: in upvalue 'dump_all_props'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:87: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:84>
+	[C]: in function 'pcall'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:32: in upvalue 'section'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:84: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:59>) --
+  -- PC[6] Object  (0 props) --
+
+=== C: PlayerState -- ALL properties ===
+  -- PS[0] ConZPlayerState  (0 props) --
+    Score                                        : FloatProperty
+  -- PS[1] PlayerState  (1 props  ITER_ERR: ...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:43: [Lua::call_function] lua_pcall returned LUA_ERRRUN => attempt to call a nil value
+stack traceback:
+	[C]: in method 'ForEachProperty'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:43: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:42>
+	[C]: in function 'pcall'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:42: in upvalue 'dump_all_props'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:95: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:91>
+	[C]: in function 'pcall'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:32: in upvalue 'section'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:91: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:59>
+stack traceback:
+	[C]: in method 'ForEachProperty'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:43: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:42>
+	[C]: in function 'pcall'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:42: in upvalue 'dump_all_props'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:95: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:91>
+	[C]: in function 'pcall'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:32: in upvalue 'section'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:91: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:59>) --
+  -- PS[2] Info  (0 props) --
+    PrimaryActorTick                             : StructProperty
+  -- PS[3] Actor  (1 props  ITER_ERR: ...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:43: [Lua::call_function] lua_pcall returned LUA_ERRRUN => attempt to call a nil value
+stack traceback:
+	[C]: in method 'ForEachProperty'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:43: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:42>
+	[C]: in function 'pcall'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:42: in upvalue 'dump_all_props'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:95: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:91>
+	[C]: in function 'pcall'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:32: in upvalue 'section'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:91: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:59>
+stack traceback:
+	[C]: in method 'ForEachProperty'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:43: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:42>
+	[C]: in function 'pcall'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:42: in upvalue 'dump_all_props'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:95: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:91>
+	[C]: in function 'pcall'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:32: in upvalue 'section'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:91: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:59>) --
+  -- PS[4] Object  (0 props) --
+
+=== D: world actors via UGameplayStatics::GetAllActorsOfClass(AActor) ===
+  actorClass = UClass: 0000020B7B9D18A8
+  got 2542 actors
+  >> section ERROR: ...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:121: attempt to call a RemoteUnrealParam value (method 'IsValid')
+
+=== E: try calling UpgradeBaseBuildingElementsWithinRadius on multiple targets via pcall ===
+  PC         :UpgradeBaseBuildingElementsWithinRadius(60) -> ERR: ...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:162: Tried calling a member function but the UObject instance is nullptr
+
+stack traceback:
+	[C]: in method 'UpgradeBaseBuildingElementsWithinRadius'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:162: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:162>
+	[C]: in function 'pcall'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:162: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:149>
+	[C]: in function 'pcall'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:32: in upvalue 'section'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:149: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:59>
+  CheatMgr   :UpgradeBaseBuildingElementsWithinRadius(60) -> ERR: ...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:162: Tried calling a member function but the UObject instance is nullptr
+
+stack traceback:
+	[C]: in method 'UpgradeBaseBuildingElementsWithinRadius'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:162: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:162>
+	[C]: in function 'pcall'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:162: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:149>
+	[C]: in function 'pcall'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:32: in upvalue 'section'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:149: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:59>
+  GameMode   :UpgradeBaseBuildingElementsWithinRadius(60) -> ERR: ...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:162: Tried calling a member function but the UObject instance is nullptr
+
+stack traceback:
+	[C]: in method 'UpgradeBaseBuildingElementsWithinRadius'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:162: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:162>
+	[C]: in function 'pcall'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:162: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:149>
+	[C]: in function 'pcall'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:32: in upvalue 'section'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:149: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:59>
+  Pawn       :UpgradeBaseBuildingElementsWithinRadius(60) -> ERR: ...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:162: Tried calling a member function but the UObject instance is nullptr
+
+stack traceback:
+	[C]: in method 'UpgradeBaseBuildingElementsWithinRadius'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:162: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:162>
+	[C]: in function 'pcall'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:162: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:149>
+	[C]: in function 'pcall'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:32: in upvalue 'section'
+	...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:149: in function <...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:59>
+
+=== end of recon ===

@@ -1,0 +1,43 @@
+=== interaction fn param types :: 2026-05-25 12:03:16 ===
+
+############################################################
+#### /Script/SCUM.PlayerRpcChannel :: InteractWithObjectOnServer
+   interactable                 : ObjectProperty     
+   userController               : ObjectProperty     
+   interactionType              : EnumProperty       <GetEnum->EInteractionType>
+   InteractionData              : StructProperty     <GetStruct->InteractionData>
+
+############################################################
+#### /Script/SCUM.ConZBaseManager :: NetMulticast_InteractWithElement
+   dataVersion                  : IntProperty        
+   interactionType              : EnumProperty       <GetEnum->EInteractionType>
+   baseData                     : StructProperty     <GetStruct->ConZBaseInteractionData>
+   baseElementData              : StructProperty     <GetStruct->ConZBaseElementInteractionData>
+   User                         : ObjectProperty     
+
+############################################################
+#### /Script/SCUM.ConZBase :: OnElementInteracted
+   User                         : ObjectProperty     
+   interactionType              : EnumProperty       <GetEnum->EInteractionType>
+   InteractionData              : StructProperty     <GetStruct->InteractionData>
+   BaseInteractionParams        : StructProperty     <GetStruct->BaseInteractionParams>
+
+############################################################
+#### /Script/SCUM.ConZBaseManager :: NetMulticast_SpawnBaseElement
+   dataVersion                  : IntProperty        
+   Transform                    : StructProperty     <GetStruct->Transform>
+   baseData                     : StructProperty     <GetStruct->ConZBaseData>
+   ElementClass                 : ClassProperty      
+   ElementID                    : Int64Property      
+   OwnerUserProfileId           : Int64Property      
+   CreatorPrisonerId            : Int64Property      
+   IsOwnedByPlayer              : BoolProperty       
+   params                       : StructProperty     <GetStruct->BaseElementSpawnParams>
+
+############################################################
+#### /Script/SCUM.ConZBaseManager :: NetMulticast_DestroyElement
+   dataVersion                  : IntProperty        
+   ElementIdentifier            : StructProperty     <GetStruct->ConZBaseElementIdentifier>
+   reason                       : EnumProperty       <GetEnum->EDestroyElementReason>
+   cascade                      : BoolProperty       
+

@@ -1,0 +1,32 @@
+=== recon v17 :: 2026-05-24 16:18:04 ===
+
+=== A: HISM UFunction signatures ===
+  fn AddInstance:
+    p1  InstanceTransform              : StructProperty  (struct Transform)
+    p2  ReturnValue                    : IntProperty
+  fn AddInstanceWorldSpace:
+    p1  WorldTransform                 : StructProperty  (struct Transform)
+    p2  ReturnValue                    : IntProperty
+  fn RemoveInstance:
+    p1  InstanceIndex                  : IntProperty
+    p2  ReturnValue                    : BoolProperty
+  fn GetInstanceTransform:
+    p1  InstanceIndex                  : IntProperty
+    p2  OutInstanceTransform           : StructProperty  (struct Transform)
+    p3  bWorldSpace                    : BoolProperty
+    p4  ReturnValue                    : BoolProperty
+  fn UpdateInstanceTransform:
+    p1  InstanceIndex                  : IntProperty
+    p2  NewInstanceTransform           : StructProperty  (struct Transform)
+    p3  bWorldSpace                    : BoolProperty
+    p4  bMarkRenderStateDirty          : BoolProperty
+    p5  bTeleport                      : BoolProperty
+    p6  ReturnValue                    : BoolProperty
+  fn ClearInstances:
+
+=== B: player Pawn location + Pawn class methods ===
+  pawn = BP_Prisoner_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.BP_Prisoner_C_2147468121
+  K2_GetActorLocation -> table: 0000013F9D321C60
+    X=249 Y=89 Z=-109.473
+
+=== end of recon ===

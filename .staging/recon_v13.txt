@@ -1,0 +1,109 @@
+=== recon v13 :: 2026-05-24 15:40:42 ===
+
+=== A: probe BP class paths for Wood/Metal/Stone/Brick/Concrete tiers ===
+  -- Foundation --
+    Twig            BP_Base_Modular_Foundation_Twig -> FOUND
+    Wood            BP_Base_Modular_Foundation_Wood -> absent
+    Metal           BP_Base_Modular_Foundation_Metal -> absent
+    Stone           BP_Base_Modular_Foundation_Stone -> absent
+    Brick           BP_Base_Modular_Foundation_Brick -> absent
+    Concrete        BP_Base_Modular_Foundation_Concrete -> absent
+  -- Ramp --
+    Twig            BP_Base_Modular_Ramp_Twig -> FOUND
+    Wood            BP_Base_Modular_Ramp_Wood -> absent
+    Metal           BP_Base_Modular_Ramp_Metal -> absent
+    Stone           BP_Base_Modular_Ramp_Stone -> absent
+    Brick           BP_Base_Modular_Ramp_Brick -> absent
+    Concrete        BP_Base_Modular_Ramp_Concrete -> absent
+  -- Door_Frame_Double --
+    Twig            BP_Base_Modular_Door_Frame_Double_Twig -> FOUND
+    Wood            BP_Base_Modular_Door_Frame_Double_Wood -> absent
+    Metal           BP_Base_Modular_Door_Frame_Double_Metal -> absent
+    Stone           BP_Base_Modular_Door_Frame_Double_Stone -> absent
+    Brick           BP_Base_Modular_Door_Frame_Double_Brick -> absent
+    Concrete        BP_Base_Modular_Door_Frame_Double_Concrete -> absent
+  -- Wall_Bars --
+    Twig            BP_Base_Modular_Wall_Bars_Twig -> FOUND
+    Wood            BP_Base_Modular_Wall_Bars_Wood -> absent
+    Metal           BP_Base_Modular_Wall_Bars_Metal -> absent
+    Stone           BP_Base_Modular_Wall_Bars_Stone -> absent
+    Brick           BP_Base_Modular_Wall_Bars_Brick -> absent
+    Concrete        BP_Base_Modular_Wall_Bars_Concrete -> absent
+  -- Wall_Loophole --
+    Twig            BP_Base_Modular_Wall_Loophole_Twig -> FOUND
+    Wood            BP_Base_Modular_Wall_Loophole_Wood -> absent
+    Metal           BP_Base_Modular_Wall_Loophole_Metal -> absent
+    Stone           BP_Base_Modular_Wall_Loophole_Stone -> absent
+    Brick           BP_Base_Modular_Wall_Loophole_Brick -> absent
+    Concrete        BP_Base_Modular_Wall_Loophole_Concrete -> absent
+  -- Wall_Window --
+    Twig            BP_Base_Modular_Wall_Window_Twig -> FOUND
+    Wood            BP_Base_Modular_Wall_Window_Wood -> absent
+    Metal           BP_Base_Modular_Wall_Window_Metal -> absent
+    Stone           BP_Base_Modular_Wall_Window_Stone -> absent
+    Brick           BP_Base_Modular_Wall_Window_Brick -> absent
+    Concrete        BP_Base_Modular_Wall_Window_Concrete -> absent
+  -- Low_Wall_Support_Frame --
+    Twig            BP_Base_Modular_Low_Wall_Support_Frame_Twig -> FOUND
+    Wood            BP_Base_Modular_Low_Wall_Support_Frame_Wood -> absent
+    Metal           BP_Base_Modular_Low_Wall_Support_Frame_Metal -> absent
+    Stone           BP_Base_Modular_Low_Wall_Support_Frame_Stone -> absent
+    Brick           BP_Base_Modular_Low_Wall_Support_Frame_Brick -> absent
+    Concrete        BP_Base_Modular_Low_Wall_Support_Frame_Concrete -> absent
+  -- Roof --
+    Twig            BP_Base_Modular_Roof_Twig -> FOUND
+    Wood            BP_Base_Modular_Roof_Wood -> absent
+    Metal           BP_Base_Modular_Roof_Metal -> absent
+    Stone           BP_Base_Modular_Roof_Stone -> absent
+    Brick           BP_Base_Modular_Roof_Brick -> absent
+    Concrete        BP_Base_Modular_Roof_Concrete -> absent
+
+=== B: probe parallel mesh assets in /Wood/ /Metal/ /Stone/ ===
+  -- Foundation --
+    Twig         -> FOUND
+    Wood         -> absent
+    Metal        -> absent
+    Stone        -> absent
+    Brick        -> absent
+    Concrete     -> absent
+  -- Ramp --
+    Twig         -> FOUND
+    Wood         -> absent
+    Metal        -> absent
+    Stone        -> absent
+    Brick        -> absent
+    Concrete     -> absent
+  -- Wall_Bars --
+    Twig         -> FOUND
+    Wood         -> absent
+    Metal        -> absent
+    Stone        -> absent
+    Brick        -> absent
+    Concrete     -> absent
+  -- Wall_Window --
+    Twig         -> FOUND
+    Wood         -> absent
+    Metal        -> absent
+    Stone        -> absent
+    Brick        -> absent
+    Concrete     -> absent
+  -- Roof --
+    Twig         -> FOUND
+    Wood         -> absent
+    Metal        -> absent
+    Stone        -> absent
+    Brick        -> absent
+    Concrete     -> absent
+
+=== C: hunt for ElementID-like properties (any class chain) ===
+  -- element (BP_ConZBaseElement_C) --
+  -- base (BP_ConZBase_C) --
+  -- baseMgr (BP_ConZBaseManager_C) --
+  -- buildMgr (BuildingManager) --
+    [BuildingManager               ] _buildingsDataRepHelper : StructProperty
+
+=== D: BuildingManager._buildingsDataRepHelper struct layout ===
+  helper tostring: UScriptStruct: 0000019D4AA9B638
+  helper type: userdata
+
+=== end of recon ===

@@ -1,0 +1,60 @@
+=== interaction struct field layouts :: 2026-05-25 12:09:16 ===
+
+############################################################
+#### struct ConZBaseElementInteractionData
+   BaseElementId                  : Int64Property    
+   GardenId                       : UInt16Property   
+   BaseElementLocation            : StructProperty   <GetStruct->Vector>
+   RepairValue                    : FloatProperty    
+   InteractionTimestamp           : Int64Property    
+   IntegerData                    : Int64Property    
+   PointerData                    : ObjectProperty   
+
+############################################################
+#### struct ConZBaseInteractionData
+   BaseId                         : Int64Property    
+   BaseLocation                   : StructProperty   <GetStruct->Vector>
+
+############################################################
+#### struct InteractionData
+   ModifierPressed                : BoolProperty     
+   IntegerData                    : Int64Property    
+   PointerData                    : ObjectProperty   
+   BoolData                       : BoolProperty     
+   TextData                       : TextProperty     
+   InteractionLocation            : StructProperty   <GetStruct->Vector>
+   InteractionNormal              : StructProperty   <GetStruct->Vector>
+   VectorData                     : StructProperty   <GetStruct->Vector>
+   BaseElementId                  : Int64Property    
+
+############################################################
+#### struct ConZBaseElementIdentifier
+   BaseId                         : Int64Property    
+   ElementID                      : Int64Property    
+   Location                       : StructProperty   <GetStruct->Vector>
+
+############################################################
+#### struct BaseInteractionParams
+   ElementID                      : StructProperty   <GetStruct->DbIntegerId>
+
+############################################################
+#### struct ConZBaseData
+   BaseId                         : Int64Property    
+   BaseName                       : StrProperty      
+   BaseSize                       : StructProperty   <GetStruct->Vector2D>
+   BaseLocation                   : StructProperty   <GetStruct->Vector>
+   BaseOwnerPlayerId              : Int64Property    
+   IsOwnedByPlayer                : BoolProperty     
+   BaseBoundsMin                  : StructProperty   <GetStruct->Vector2D>
+   BaseBoundsMax                  : StructProperty   <GetStruct->Vector2D>
+
+############################################################
+#### struct BaseElementSpawnParams
+   Quality                        : FloatProperty    
+   OverrideColor0                 : UInt32Property   
+   OverrideColor1                 : UInt32Property   
+   ShelterId                      : StructProperty   <GetStruct->DbIntegerId>
+   EntityId                       : StructProperty   <GetStruct->EntityId>
+   OverridePattern0               : ByteProperty     
+   OverridePattern1               : ByteProperty     
+

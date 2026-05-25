@@ -1,0 +1,75 @@
+=== recon v6 :: 2026-05-24 13:35:05 ===
+
+=== A: PC + CheatManager + UFunction reachability ===
+  PC = BP_ConZPlayerController_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.BP_ConZPlayerController_C_2147470833
+  PC class = BP_ConZPlayerController_C
+  pc[UpgradeBaseBuildingElementsWithinRadius           ] -> UObject: 00000290E6674648
+  pc[ConsoleCommand                                    ] -> UObject: 00000290E6675448
+  pc[ProcessEvent                                      ] -> UObject: 00000290E6674048
+  pc[ClientMessage                                     ] -> UFunction: 00000290E6674B48
+  pc[SetGodMode                                        ] -> UObject: 00000290E6676048
+  pc[ShowFlagInfo                                      ] -> UObject: 00000290E6674148
+  CM = CheatManager /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.BP_ConZPlayerController_C_2147470833.CheatManager_2147470819
+  cm[UpgradeBaseBuildingElementsWithinRadius           ] -> UObject: 00000290E6676648
+  cm[ConsoleCommand                                    ] -> UObject: 00000290E6674248
+  cm[ProcessEvent                                      ] -> UObject: 00000290E6674748
+  cm[ClientMessage                                     ] -> UObject: 00000290E6676B48
+  cm[SetGodMode                                        ] -> UObject: 00000290E6674948
+  cm[ShowFlagInfo                                      ] -> UObject: 00000290E6676848
+
+=== B: PC properties matching Admin|Dev|Cheat|Elevated|Flag|Owned|Privilege ===
+  -- PC[0]: BP_ConZPlayerController_C --
+  -- PC[1]: ConZPlayerController --
+  -- PC[2]: ConZPlayerControllerBase --
+  -- PC[3]: PlayerController --
+  -- PC[4]: Controller --
+  -- PC[5]: Actor --
+  -- PC[6]: Object --
+
+=== C: PlayerState properties matching Admin|Dev|Cheat|Privilege|Role|Steam ===
+  PS = ConZPlayerState /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.ConZPlayerState_2147470832
+  -- PS[0]: ConZPlayerState --
+  -- PS[1]: PlayerState --
+  -- PS[2]: Info --
+  -- PS[3]: Actor --
+  -- PS[4]: Object --
+
+=== D: FindAllOf probes for building / flag class names ===
+  (count = 0 means not found, ERR means FindAllOf raised)
+  FindAllOf('BaseBuildingElement'         ) -> 0 (none)
+  FindAllOf('ConZBaseBuildingElement'     ) -> 0 (none)
+  FindAllOf('BP_BaseBuildingElement_C'    ) -> 0 (none)
+  FindAllOf('BuildingElement'             ) -> 0 (none)
+  FindAllOf('BaseBuilding'                ) -> 0 (none)
+  FindAllOf('ConZBaseBuilding'            ) -> 0 (none)
+  FindAllOf('BaseBuildingWall'            ) -> 0 (none)
+  FindAllOf('BaseBuildingFloor'           ) -> 0 (none)
+  FindAllOf('BaseBuildingFoundation'      ) -> 0 (none)
+  FindAllOf('Wall'                        ) -> 0 (none)
+  FindAllOf('Floor'                       ) -> 0 (none)
+  FindAllOf('Foundation'                  ) -> 0 (none)
+  FindAllOf('Door'                        ) -> 0 (none)
+  FindAllOf('Flag'                        ) -> 0 (none)
+  FindAllOf('BaseBuildingFlag'            ) -> 0 (none)
+  FindAllOf('ConZFlag'                    ) -> 0 (none)
+  FindAllOf('ConZBaseBuildingFlag'        ) -> 0 (none)
+  FindAllOf('TerritoryFlag'               ) -> 0 (none)
+  FindAllOf('BP_Flag_C'                   ) -> 0 (none)
+  FindAllOf('ConZCheatManager'            ) -> 0 (none)
+  FindAllOf('SCUMCheatManager'            ) -> 0 (none)
+  FindAllOf('Pawn'                        ) -> 3  e.g. BP_SpectatorPawn_C
+  FindAllOf('Character'                   ) -> 1  e.g. BP_Prisoner_C
+  FindAllOf('PlayerState'                 ) -> 1  e.g. ConZPlayerState
+
+  >>> hits with >0 instances:
+    Pawn                                 3  sampleClass=BP_SpectatorPawn_C
+    Character                            1  sampleClass=BP_Prisoner_C
+    PlayerState                          1  sampleClass=ConZPlayerState
+
+=== E: dump properties of one Flag-like sample (if any hit) ===
+  no Flag sample
+
+=== F: dump properties of one BuildingElement-like sample (if any hit) ===
+  no BuildingElement sample
+
+=== end of recon ===

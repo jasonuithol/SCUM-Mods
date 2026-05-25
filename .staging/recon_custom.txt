@@ -1,0 +1,55 @@
+=== HISM per-instance custom data probe :: 2026-05-25 12:34:22 ===
+
+BP_ConZBaseElement_C: AActor: 000001CF7CCBBD58
+
+#### _interactRayBlockingMeshInstancedComponent : class=IndexedHierarchicalInstancedStaticMeshComponent
+   instance count: 6
+   NumCustomDataFloats: 0
+   -- PerInstanceSMCustomData --
+      PerInstanceSMCustomData: lua-type=userdata
+         len(GetArrayNum)=0
+   -- PerInstanceSMData --
+      PerInstanceSMData: lua-type=userdata
+         len(GetArrayNum)=6
+         [1] = userdata
+         [2] = userdata
+         [3] = userdata
+         [4] = userdata
+   inst[0] loc = (-1058.9, -264.9, -246.7)
+
+#### elementClassMap HISM (SM_Foundation_Base_Cement) : class=IndexedHierarchicalInstancedStaticMeshComponent
+   instance count: 7
+   NumCustomDataFloats: 3
+   -- PerInstanceSMCustomData --
+      PerInstanceSMCustomData: lua-type=userdata
+         len(GetArrayNum)=21
+         [1] = 9.1834094859527e-41
+         [2] = -1.6947395303174e+38
+         [3] = -1.6947395303174e+38
+         [4] = 9.1834094859527e-41
+         [5] = -1.6947395303174e+38
+         [6] = -1.6947395303174e+38
+         [7] = 9.1834094859527e-41
+         [8] = -1.6947395303174e+38
+         [9] = -1.6947395303174e+38
+         [10] = 9.1834094859527e-41
+         [11] = -1.6947395303174e+38
+         [12] = -1.6947395303174e+38
+         [13] = 9.1834094859527e-41
+         [14] = -1.6947395303174e+38
+         [15] = -1.6947395303174e+38
+         [16] = 9.1834094859527e-41
+         [17] = -1.6947395303174e+38
+         [18] = -1.6947395303174e+38
+         [19] = 9.1834094859527e-41
+         [20] = -1.6947395303174e+38
+         [21] = -1.6947395303174e+38
+   -- PerInstanceSMData --
+      PerInstanceSMData: lua-type=userdata
+         len(GetArrayNum)=7
+         [1] = userdata
+         [2] = userdata
+         [3] = userdata
+         [4] = userdata
+   inst[0] loc = (-1033.6, -553.6, -381.7)
+

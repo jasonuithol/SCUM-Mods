@@ -1,0 +1,31 @@
+=== base-building ALL functions :: 2026-05-25 12:28:58 ===
+
+############################################################
+#### /Script/SCUM.ConZBaseManager
+   NetMulticast_ApplyDamageToBaseElement(dataVersion, BaseId, ElementID, elementLocation, damageAmount)
+   NetMulticast_ChangeFlagOwner(dataVersion, oldOwnerProfileId, newOwnerProfileId)
+   NetMulticast_ClearBaseOwnerPlayerId(dataVersion, baseData)
+   NetMulticast_DestroyAllElementsInRadius(dataVersion, Center, Radius, minElementAreaCovered, minAngleDeg, maxAngleDeg, forwardVector, typeFilter, damageActorType)
+   NetMulticast_DestroyElement(dataVersion, ElementIdentifier, reason, cascade)
+   NetMulticast_ExecuteFlagOvertake(dataVersion, ElementID, elementLocation, PlayerId)
+   NetMulticast_InteractWithElement(dataVersion, interactionType, baseData, baseElementData, User)
+   NetMulticast_ProcessDecay(dataVersion, DeltaSeconds)
+   NetMulticast_SetBaseHasActiveEncounter(dataVersion, BaseId, Value)
+   NetMulticast_SetBaseOwnerPlayerId(dataVersion, baseData, PlayerId)
+   NetMulticast_SetDebugMode(Prisoner, mode)
+   NetMulticast_SpawnBaseElement(dataVersion, Transform, baseData, ElementClass, ElementID, OwnerUserProfileId, CreatorPrisonerId, IsOwnedByPlayer, params)
+   NetMulticast_TransferOwnership(dataVersion, oldId, newId)
+   NetMulticast_UpdateItemElementsLocationsAndRotations(dataVersion, itemElements)
+   [14 functions]
+
+############################################################
+#### /Script/SCUM.ConZBaseElement
+   [0 functions]
+
+############################################################
+#### /Script/SCUM.ConZBase
+   AwardFamePointsToOnlineFlagOwners(flagIndex, totalFlagInterval, fameInterval)
+   GetBaseName(ReturnValue)
+   OnElementInteracted(User, interactionType, InteractionData, BaseInteractionParams)
+   [3 functions]
+

@@ -1,0 +1,17 @@
+=== _bases registry explore :: 2026-05-25 12:18:03 ===
+
+ConZBaseManager: AActor: 000001CF7CCBD058  class=BP_ConZBaseManager_C
+_bases value type: userdata
+
+#### entry 1 : key(number) val(userdata)
+   key = 2
+   val class = BP_ConZBase_C
+   val properties:
+      .UberGraphFrame
+      .DefaultSceneRoot
+
+total _bases entries: 1
+
+#### BP_ConZBase_C (flag): AActor: 000001CF7CCBC358  class=BP_ConZBase_C
+   .UberGraphFrame
+   .DefaultSceneRoot

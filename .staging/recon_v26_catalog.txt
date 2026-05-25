@@ -1,0 +1,246 @@
+=== FlagUpgrade v26 catalog :: 2026-05-25 11:15:46 ===
+
+Total HISM entries in _elementClassMap: 149
+
+--- ALL ENTRIES (mesh / tier / instance count) ---
+  [?     ] count=1    SM_Base_Flag
+  [twig  ] count=0    SM_Foundation_Base_Twig
+  [wood  ] count=0    SM_Foundation_Base_Wood
+  [metal ] count=0    SM_Foundation_Base_Metal
+  [brick ] count=0    SM_Foundation_Base_Brick
+  [cement] count=7    SM_Foundation_Base_Cement
+  [twig  ] count=0    SM_Foundation_Triangle_Base_Twig
+  [wood  ] count=0    SM_Foundation_Triangle_Base_Wood
+  [metal ] count=0    SM_Foundation_Triangle_Base_Metal
+  [brick ] count=0    SM_Foundation_Triangle_Base_Brick
+  [cement] count=1    SM_Foundation_Triangle_Base_Cement
+  [twig  ] count=0    SM_Ramp_Base_Twig
+  [wood  ] count=0    SM_Ramp_Base_Wood
+  [metal ] count=0    SM_Ramp_Base_Metal
+  [brick ] count=0    SM_Ramp_Base_Brick
+  [cement] count=1    SM_Ramp_Base_Cement
+  [twig  ] count=0    SM_Wall_Loophole_Twig
+  [wood  ] count=0    SM_Wall_Loophole_Wood
+  [metal ] count=0    SM_Wall_Loophole_Metal
+  [brick ] count=0    SM_Wall_Loophole_Brick
+  [cement] count=1    SM_Wall_Loophole_Cement
+  [twig  ] count=0    SM_Wall_Standard_Twig
+  [wood  ] count=0    SM_Wall_Standard_Wood
+  [metal ] count=0    SM_Wall_Standard_Metal
+  [brick ] count=0    SM_Wall_Standard_Brick
+  [cement] count=1    SM_Wall_Standard_Cement
+  [twig  ] count=0    SM_Floor_Triangle_Base_Twig
+  [wood  ] count=0    SM_Floor_Triangle_Base_Wood
+  [metal ] count=0    SM_Floor_Triangle_Base_Metal
+  [brick ] count=0    SM_Floor_Triangle_Base_Brick
+  [cement] count=1    SM_Floor_Triangle_Base_Cement
+  [twig  ] count=0    SM_Wall_Window_Twig
+  [wood  ] count=0    SM_Wall_Window_Wood
+  [metal ] count=0    SM_Wall_Window_Metal
+  [brick ] count=0    SM_Wall_Window_Brick
+  [cement] count=1    SM_Wall_Window_Cement
+  [twig  ] count=0    SM_Wall_Base_Bars_Twig
+  [wood  ] count=0    SM_Wall_Base_Bars_Wood
+  [metal ] count=0    SM_Wall_Base_Bars_Metal
+  [brick ] count=0    SM_Wall_Base_Bars_Brick
+  [cement] count=1    SM_Wall_Base_Bars_Cement
+  [twig  ] count=0    SM_Wall_Hole_Base_Half_Twig
+  [wood  ] count=0    SM_Wall_Hole_Base_Half_Wood
+  [metal ] count=0    SM_Wall_Hole_Base_Half_Metal
+  [brick ] count=0    SM_Wall_Hole_Base_Half_Brick
+  [cement] count=1    SM_Wall_Hole_Base_Half_Cement
+  [twig  ] count=0    SM_Wall_Support_L_Twig
+  [wood  ] count=0    SM_Wall_Support_L_Wood
+  [metal ] count=0    SM_Wall_Support_L_Metal
+  [brick ] count=0    SM_Wall_Support_L_Brick
+  [cement] count=1    SM_Wall_Support_L_Cement
+  [twig  ] count=0    SM_Floor_Hole_Twig
+  [wood  ] count=0    SM_Floor_Hole_Wood
+  [metal ] count=0    SM_Floor_Hole_Metal
+  [brick ] count=0    SM_Floor_Hole_Brick
+  [cement] count=1    SM_Floor_Hole_Cement
+  [twig  ] count=0    SM_Wall_Support_U_Twig
+  [wood  ] count=0    SM_Wall_Support_U_Wood
+  [metal ] count=0    SM_Wall_Support_U_Metal
+  [brick ] count=0    SM_Wall_Support_U_Brick
+  [cement] count=1    SM_Wall_Support_U_Cement
+  [twig  ] count=0    SM_Floor_Hatch_Twig
+  [wood  ] count=0    SM_Floor_Hatch_Wood
+  [metal ] count=0    SM_Floor_Hatch_Metal
+  [brick ] count=0    SM_Floor_Hatch_Brick
+  [cement] count=1    SM_Floor_Hatch_Cement
+  [twig  ] count=2    SM_Ladder_Base_Twig
+  [twig  ] count=0    SM_Wall_Hole_Base_Third_Twig
+  [wood  ] count=0    SM_Wall_Hole_Base_Third_Wood
+  [metal ] count=0    SM_Wall_Hole_Base_Third_Metal
+  [brick ] count=1    SM_Wall_Hole_Base_Third_Brick
+  [twig  ] count=0    SM_Wall_Door_Single_Twig
+  [wood  ] count=0    SM_Wall_Door_Single_Wood
+  [metal ] count=0    SM_Wall_Door_Single_Metal
+  [brick ] count=0    SM_Wall_Door_Single_Brick
+  [cement] count=2    SM_Wall_Door_Single_Cement
+  [twig  ] count=0    SM_Floor_Triangle_Hatch_Twig
+  [wood  ] count=0    SM_Floor_Triangle_Hatch_Wood
+  [metal ] count=0    SM_Floor_Triangle_Hatch_Metal
+  [brick ] count=0    SM_Floor_Triangle_Hatch_Brick
+  [cement] count=1    SM_Floor_Triangle_Hatch_Cement
+  [twig  ] count=0    SM_Floor_Base_Twig
+  [wood  ] count=0    SM_Floor_Base_Wood
+  [metal ] count=0    SM_Floor_Base_Metal
+  [brick ] count=0    SM_Floor_Base_Brick
+  [cement] count=1    SM_Floor_Base_Cement
+  [?     ] count=1    SM_CamoNet_Floor_Base
+  [twig  ] count=0    SM_Wall_Base_Half_Width_Twig
+  [wood  ] count=0    SM_Wall_Base_Half_Width_Wood
+  [metal ] count=0    SM_Wall_Base_Half_Width_Metal
+  [brick ] count=0    SM_Wall_Base_Half_Width_Brick
+  [cement] count=1    SM_Wall_Base_Half_Width_Cement
+  [twig  ] count=0    SM_Wall_Base_Third_Height_Twig
+  [wood  ] count=0    SM_Wall_Base_Third_Height_Wood
+  [metal ] count=0    SM_Wall_Base_Third_Height_Metal
+  [brick ] count=0    SM_Wall_Base_Third_Height_Brick
+  [cement] count=1    SM_Wall_Base_Third_Height_Cement
+  [twig  ] count=0    SM_Wall_Base_Half_Height_Twig
+  [wood  ] count=0    SM_Wall_Base_Half_Height_Wood
+  [metal ] count=0    SM_Wall_Base_Half_Height_Metal
+  [brick ] count=0    SM_Wall_Base_Half_Height_Brick
+  [cement] count=1    SM_Wall_Base_Half_Height_Cement
+  [twig  ] count=0    SM_Wall_Door_Double_Twig
+  [wood  ] count=0    SM_Wall_Door_Double_Wood
+  [metal ] count=0    SM_Wall_Door_Double_Metal
+  [brick ] count=0    SM_Wall_Door_Double_Brick
+  [cement] count=2    SM_Wall_Door_Double_Cement
+  [twig  ] count=0    SM_Roof_Base_Twig
+  [wood  ] count=0    SM_Roof_Base_Wood
+  [metal ] count=0    SM_Roof_Base_Metal
+  [brick ] count=0    SM_Roof_Base_Brick
+  [cement] count=1    SM_Roof_Base_Cement
+  [twig  ] count=0    SM_Roof_Triangle_Twig
+  [wood  ] count=0    SM_Roof_Triangle_Wood
+  [metal ] count=0    SM_Roof_Triangle_Metal
+  [brick ] count=0    SM_Roof_Triangle_Brick
+  [cement] count=1    SM_Roof_Triangle_Cement
+  [twig  ] count=0    SM_Ramp_Small_Twig
+  [wood  ] count=0    SM_Ramp_Small_Wood
+  [metal ] count=0    SM_Ramp_Small_Metal
+  [brick ] count=0    SM_Ramp_Small_Brick
+  [cement] count=1    SM_Ramp_Small_Cement
+  [twig  ] count=0    SM_Stairs_Spiral_End_Twig
+  [wood  ] count=0    SM_Stairs_Spiral_End_Wood
+  [metal ] count=0    SM_Stairs_Spiral_End_Metal
+  [brick ] count=0    SM_Stairs_Spiral_End_Brick
+  [cement] count=1    SM_Stairs_Spiral_End_Cement
+  [twig  ] count=0    SM_Stairs_Spiral_Base_Twig
+  [wood  ] count=0    SM_Stairs_Spiral_Base_Wood
+  [metal ] count=0    SM_Stairs_Spiral_Base_Metal
+  [brick ] count=0    SM_Stairs_Spiral_Base_Brick
+  [cement] count=1    SM_Stairs_Spiral_Base_Cement
+  [twig  ] count=0    SM_Stairs_L_Flip_Twig
+  [wood  ] count=0    SM_Stairs_L_Flip_Wood
+  [metal ] count=0    SM_Stairs_L_Flip_Metal
+  [brick ] count=0    SM_Stairs_L_Flip_Brick
+  [cement] count=1    SM_Stairs_L_Flip_Cement
+  [twig  ] count=0    SM_Stairs_L_Base_Twig
+  [wood  ] count=0    SM_Stairs_L_Base_Wood
+  [metal ] count=0    SM_Stairs_L_Base_Metal
+  [brick ] count=0    SM_Stairs_L_Base_Brick
+  [cement] count=1    SM_Stairs_L_Base_Cement
+  [twig  ] count=0    SM_Stairs_U_Twig
+  [wood  ] count=0    SM_Stairs_U_Wood
+  [metal ] count=0    SM_Stairs_U_Metal
+  [brick ] count=0    SM_Stairs_U_Brick
+  [cement] count=1    SM_Stairs_U_Cement
+  [?     ] count=1    SM_CamoNet_Wall
+  [?     ] count=1    SM_CamoNet_Floor_Triangle
+
+--- UPGRADE PLAN (per shape) ---
+  shape 'sm_wall_support_l_'
+    tiers present : metal=0, twig=0, brick=0, cement=1, wood=0
+    PLAN: nothing to drain (no lower-tier instances)
+  shape 'sm_stairs_l_base_'
+    tiers present : metal=0, twig=0, brick=0, cement=1, wood=0
+    PLAN: nothing to drain (no lower-tier instances)
+  shape 'sm_floor_base_'
+    tiers present : metal=0, twig=0, brick=0, cement=1, wood=0
+    PLAN: nothing to drain (no lower-tier instances)
+  shape 'sm_stairs_u_'
+    tiers present : metal=0, twig=0, brick=0, cement=1, wood=0
+    PLAN: nothing to drain (no lower-tier instances)
+  shape 'sm_stairs_l_flip_'
+    tiers present : metal=0, twig=0, brick=0, cement=1, wood=0
+    PLAN: nothing to drain (no lower-tier instances)
+  shape 'sm_wall_standard_'
+    tiers present : metal=0, twig=0, brick=0, cement=1, wood=0
+    PLAN: nothing to drain (no lower-tier instances)
+  shape 'sm_ramp_small_'
+    tiers present : metal=0, twig=0, brick=0, cement=1, wood=0
+    PLAN: nothing to drain (no lower-tier instances)
+  shape 'sm_wall_door_double_'
+    tiers present : metal=0, twig=0, brick=0, cement=2, wood=0
+    PLAN: nothing to drain (no lower-tier instances)
+  shape 'sm_floor_hatch_'
+    tiers present : metal=0, twig=0, brick=0, cement=1, wood=0
+    PLAN: nothing to drain (no lower-tier instances)
+  shape 'sm_stairs_spiral_end_'
+    tiers present : metal=0, twig=0, brick=0, cement=1, wood=0
+    PLAN: nothing to drain (no lower-tier instances)
+  shape 'sm_ladder_base_'
+    tiers present : twig=2
+    PLAN: only Twig loaded -> no higher tier to drain into (upgrade one in-game)
+  shape 'sm_wall_window_'
+    tiers present : metal=0, twig=0, brick=0, cement=1, wood=0
+    PLAN: nothing to drain (no lower-tier instances)
+  shape 'sm_stairs_spiral_base_'
+    tiers present : metal=0, twig=0, brick=0, cement=1, wood=0
+    PLAN: nothing to drain (no lower-tier instances)
+  shape 'sm_roof_triangle_'
+    tiers present : metal=0, twig=0, brick=0, cement=1, wood=0
+    PLAN: nothing to drain (no lower-tier instances)
+  shape 'sm_floor_triangle_hatch_'
+    tiers present : metal=0, twig=0, brick=0, cement=1, wood=0
+    PLAN: nothing to drain (no lower-tier instances)
+  shape 'sm_roof_base_'
+    tiers present : metal=0, twig=0, brick=0, cement=1, wood=0
+    PLAN: nothing to drain (no lower-tier instances)
+  shape 'sm_floor_hole_'
+    tiers present : metal=0, twig=0, brick=0, cement=1, wood=0
+    PLAN: nothing to drain (no lower-tier instances)
+  shape 'sm_wall_hole_base_half_'
+    tiers present : metal=0, twig=0, brick=0, cement=1, wood=0
+    PLAN: nothing to drain (no lower-tier instances)
+  shape 'sm_wall_base_half_height_'
+    tiers present : metal=0, twig=0, brick=0, cement=1, wood=0
+    PLAN: nothing to drain (no lower-tier instances)
+  shape 'sm_wall_base_third_height_'
+    tiers present : metal=0, twig=0, brick=0, cement=1, wood=0
+    PLAN: nothing to drain (no lower-tier instances)
+  shape 'sm_wall_base_half_width_'
+    tiers present : metal=0, twig=0, brick=0, cement=1, wood=0
+    PLAN: nothing to drain (no lower-tier instances)
+  shape 'sm_ramp_base_'
+    tiers present : metal=0, twig=0, brick=0, cement=1, wood=0
+    PLAN: nothing to drain (no lower-tier instances)
+  shape 'sm_foundation_triangle_base_'
+    tiers present : metal=0, twig=0, brick=0, cement=1, wood=0
+    PLAN: nothing to drain (no lower-tier instances)
+  shape 'sm_floor_triangle_base_'
+    tiers present : metal=0, twig=0, brick=0, cement=1, wood=0
+    PLAN: nothing to drain (no lower-tier instances)
+  shape 'sm_wall_loophole_'
+    tiers present : metal=0, twig=0, brick=0, cement=1, wood=0
+    PLAN: nothing to drain (no lower-tier instances)
+  shape 'sm_wall_door_single_'
+    tiers present : metal=0, twig=0, brick=0, cement=2, wood=0
+    PLAN: nothing to drain (no lower-tier instances)
+  shape 'sm_wall_support_u_'
+    tiers present : metal=0, twig=0, brick=0, cement=1, wood=0
+    PLAN: nothing to drain (no lower-tier instances)
+  shape 'sm_foundation_base_'
+    tiers present : metal=0, twig=0, brick=0, cement=7, wood=0
+    PLAN: nothing to drain (no lower-tier instances)
+  shape 'sm_wall_base_bars_'
+    tiers present : metal=0, twig=0, brick=0, cement=1, wood=0
+    PLAN: nothing to drain (no lower-tier instances)
+  shape 'sm_wall_hole_base_third_'
+    tiers present : brick=1, metal=0, twig=0, wood=0
+    PLAN: nothing to drain (no lower-tier instances)

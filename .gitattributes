@@ -1,0 +1,9 @@
+# Normalize line endings: store text as LF in the repo
+* text=auto eol=lf
+
+# Treat known binaries as binary (no EOL conversion)
+*.dll binary
+*.pak binary
+*.exe binary
+*.zip binary
+*.db binary

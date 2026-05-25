@@ -1,0 +1,124 @@
+=== FlagUpgrade v29 native enum :: 2026-05-25 11:49:35 ===
+
+############################################################
+#### ConZPlayerController (native)   (/Script/SCUM.ConZPlayerController)
+   -- ALL PROPERTIES --
+      prop: ComponentsToHide
+      prop: IsTalkButtonPressed
+      prop: _playerRpcChannel
+      prop: _playerQuestComponent
+      prop: _userProfile
+      prop: _lastNameChangeTime
+      prop: _userFakeName
+      prop: _bankAccountNumber
+      prop: _spawnedPawn
+      prop: _possessedPawn
+      prop: _prisonerClassLazy
+      prop: _teleportWorldStreamingLocationChangeDelay
+      prop: _teleportWorldStreamingTriggerLag
+      prop: _repFamePoints
+      prop: _moneyBalanceRep
+      prop: _goldBalanceRep
+      prop: _weatherHeightUpdatePeriod
+      prop: _achievementsManagerClient
+      prop: _achievementsManagerClientClass
+      prop: _isReadyForPlayDelay
+      prop: _reportPlayTimeInterval
+      prop: _replicatedServerUtcNow
+      prop: _pathFollowingComponent
+      prop: _forceSpawnAsDrone
+      prop: _mpSpawnDroneAndPrisoner
+      prop: _photoModePawnClassLazy
+      prop: _refreshTimeForPawnLocationOnMap
+      prop: _mainMPC
+      prop: _numTrySpawnsForTimeout
+   -- FUNCTIONS matching keywords --
+      fn: Server_AllowCertainInventoryInteractions()
+      fn: IsUserAdmin(ReturnValue)
+      fn: Client_SetIsServerSettingsAdmin(Value)
+      fn: Client_SetIsAdmin(Value)
+      fn: Client_AllowCertainInventoryInteractions()
+
+############################################################
+#### ConZPlayerState (native)   (/Script/SCUM.ConZPlayerState)
+   -- ALL PROPERTIES --
+   -- FUNCTIONS matching keywords --
+
+############################################################
+#### PlayerRpcChannel (native)   (/Script/SCUM.PlayerRpcChannel)
+   -- ALL PROPERTIES --
+      prop: _unprocessedProjectileDamageEventsServer
+      prop: _unprocessedExplosiveProjectileDamageEventsServer
+   -- FUNCTIONS matching keywords --
+      fn: TrapItem_Server_ClientAuthoritativeTriggerTrap(TrapItem, params)
+      fn: Server_ProjectileStoppedOnAuthorityClient(clientProjectileUniqueID)
+      fn: Server_InteractWithHuntingClue(HuntingClue)
+      fn: Server_ApplyBaseDamageInteractionEventToZombie(Zombie, Damage, HitResult)
+      fn: Server_ApplyBaseDamageInteractionEventToArmedNPC(npcBase, Damage, HitResult)
+      fn: InteractWithObjectOnServer(interactable, userController, interactionType, InteractionData)
+      fn: InteractItemWithItemOnServer(Item, PlayerController, otherItem, interactionType, InteractionData)
+      fn: Chat_Server_ProcessAdminCommand(commandText)
+      fn: Chat_Client_ProcessAdminCommand(commandText)
+      fn: BaseBuilding_Server_RequestElementStateUpdate(Location, areaSize)
+      fn: BaseBuilding_Server_OnFlagAreaExited(Character)
+      fn: BaseBuilding_Server_OnFlagAreaEntered(Character)
+      fn: BaseBuilding_Client_UpdateElementState(Location, areaSize, Data)
+      fn: Admin_Server_TeleportTo_VehicleLocation(Controller, TeleportRequest, vehicleName)
+      fn: Admin_Server_TeleportTo_Location(Controller, TeleportRequest)
+      fn: Admin_Server_TeleportTo(Controller, teleportToUserPlayerState)
+      fn: Admin_Client_ShowSpawnedVehiclesPartial(Controller, spawnedVehiclesInfo, commandId, bunchId, totalVehicles, ShouldCopyToClientClipboard)
+      fn: Admin_Client_SendRespawnTimes(respawnTime, respawnTimeReset)
+
+############################################################
+#### ConZBaseManager (native)   (/Script/SCUM.ConZBaseManager)
+   -- ALL PROPERTIES --
+      prop: _damageEventProcessingPeriod
+      prop: _decayProcessingPeriod
+      prop: _flagOvertakePeriod   <<<< KW  value=1.0
+      prop: _baseInteractionsPeriod
+      prop: _baseClass
+      prop: _baseElementClass
+      prop: _flagAreaVisualizerClass   <<<< KW
+      prop: _initialBaseSize
+      prop: _serverSettingMaxAmountParentTag
+      prop: _serverSettingMaxAmountTagsToIgnoreForDecaySetting
+      prop: _flagInfluenceRadius   <<<< KW  value=5000.0
+      prop: _flagOvertakeDuration   <<<< KW  value=86400
+      prop: _maxElementsPerFlag   <<<< KW  value=100
+      prop: _extraElementsPerFlagForAdditionalSquadMember   <<<< KW  value=25
+      prop: _maxNumberOfExpandedElementsPerFlag   <<<< KW  value=75
+      prop: _allowMultipleFlagsPerPlayer   <<<< KW  value=false
+      prop: _allowFlagPlacementOnBBElements   <<<< KW  value=false
+      prop: _maxBaseBuildingHeight
+      prop: _shortRepairDuration
+      prop: _mediumRepairDuration
+      prop: _longRepairDuration
+      prop: _bases
+   -- FUNCTIONS matching keywords --
+      fn: NetMulticast_UpdateItemElementsLocationsAndRotations(dataVersion, itemElements)
+      fn: NetMulticast_SpawnBaseElement(dataVersion, Transform, baseData, ElementClass, ElementID, OwnerUserProfileId, CreatorPrisonerId, IsOwnedByPlayer, params)
+      fn: NetMulticast_InteractWithElement(dataVersion, interactionType, baseData, baseElementData, User)
+      fn: NetMulticast_DestroyElement(dataVersion, ElementIdentifier, reason, cascade)
+      fn: NetMulticast_DestroyAllElementsInRadius(dataVersion, Center, Radius, minElementAreaCovered, minAngleDeg, maxAngleDeg, forwardVector, typeFilter, damageActorType)
+      fn: NetMulticast_ApplyDamageToBaseElement(dataVersion, BaseId, ElementID, elementLocation, damageAmount)
+
+############################################################
+#### ConZBaseElement (native)   (/Script/SCUM.ConZBaseElement)
+   -- ALL PROPERTIES --
+      prop: _weatherMaskComponentClass
+      prop: _elementClassMap
+      prop: _interactRayBlockingMeshInstancedComponent
+   -- FUNCTIONS matching keywords --
+
+############################################################
+#### ConZBase (native)   (/Script/SCUM.ConZBase)
+   -- ALL PROPERTIES --
+      prop: _baseElementActor
+      prop: _referencedBaseElementClasses
+      prop: _overrideBlockStackingRules
+      prop: _debugRenderingDistance
+      prop: _decayProcessingNumberOfFrames
+      prop: _decayProcessingMaxDestroyedElementsPerUpdate
+   -- FUNCTIONS matching keywords --
+      fn: OnElementInteracted(User, interactionType, InteractionData, BaseInteractionParams)
+

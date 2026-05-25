@@ -1,0 +1,17 @@
+=== base actor own-property dump :: 2026-05-25 12:21:26 ===
+
+############################################################
+#### BP_ConZBaseManager_C : AActor: 000001CF7CCBBD58
+   DefaultSceneRoot               : ObjectProperty   <GetPropertyClass->SceneComponent>
+
+############################################################
+#### BP_ConZBaseElement_C : AActor: 000001CF7CCBCF58
+   UberGraphFrame                 : StructProperty   <GetStruct->PointerToUberGraphFrame>
+   _hismComponent                 : ObjectProperty   <GetPropertyClass->HierarchicalInstancedStaticMeshComponent>
+   MeshMap                        : MapProperty         <<<< COLLECTION
+
+############################################################
+#### BP_ConZBase_C : AActor: 000001D120626EB8
+   UberGraphFrame                 : StructProperty   <GetStruct->PointerToUberGraphFrame>
+   DefaultSceneRoot               : ObjectProperty   <GetPropertyClass->SceneComponent>
+

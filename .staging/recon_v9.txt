@@ -1,0 +1,1272 @@
+=== recon v9 :: 2026-05-24 13:57:15 ===
+
+=== A: BP_ConZBaseElement_C  ALL properties + functions ===
+  sample = BP_ConZBaseElement_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.c58ca26c_ConZBaseElement_1
+  -- ELEM[0] BP_ConZBaseElement_C --
+    UberGraphFrame                               : StructProperty
+    _hismComponent                               : ObjectProperty  (-> HierarchicalInstancedStaticMeshComponent)
+    MeshMap                                      : MapProperty
+    [total props on BP_ConZBaseElement_C: 3]
+  -- ELEM[1] ConZBaseElement --
+    _weatherMaskComponentClass                   : ClassProperty  (-> Class)
+    _elementClassMap                             : MapProperty
+    _interactRayBlockingMeshInstancedComponent   : ObjectProperty  (-> IndexedHierarchicalInstancedStaticMeshComponent)
+    [total props on ConZBaseElement: 3]
+  -- ELEM[2] Actor --
+    PrimaryActorTick                             : StructProperty
+    bNetTemporary                                : BoolProperty
+    bNetStartup                                  : BoolProperty
+    bOnlyRelevantToOwner                         : BoolProperty
+    bAlwaysRelevant                              : BoolProperty
+    bReplicateMovement                           : BoolProperty
+    bHidden                                      : BoolProperty
+    bTearOff                                     : BoolProperty
+    bForceNetAddressable                         : BoolProperty
+    bExchangedRoles                              : BoolProperty
+    bNetLoadOnClient                             : BoolProperty
+    bNetUseOwnerRelevancy                        : BoolProperty
+    bRelevantForNetworkReplays                   : BoolProperty
+    bRelevantForLevelBounds                      : BoolProperty
+    bReplayRewindable                            : BoolProperty
+    bAllowTickBeforeBeginPlay                    : BoolProperty
+    bAutoDestroyWhenFinished                     : BoolProperty
+    bCanBeDamaged                                : BoolProperty
+    bBlockInput                                  : BoolProperty
+    bCollideWhenPlacing                          : BoolProperty
+    bFindCameraComponentWhenViewTarget           : BoolProperty
+    bGenerateOverlapEventsDuringLevelStreaming   : BoolProperty
+    bIgnoresOriginShifting                       : BoolProperty
+    bEnableAutoLODGeneration                     : BoolProperty
+    bIsEditorOnlyActor                           : BoolProperty
+    bActorSeamlessTraveled                       : BoolProperty
+    bReplicates                                  : BoolProperty
+    bCanBeInCluster                              : BoolProperty
+    bAllowReceiveTickEventOnDedicatedServer      : BoolProperty
+    bActorEnableCollision                        : BoolProperty
+    bActorIsBeingDestroyed                       : BoolProperty
+    UpdateOverlapsMethodDuringLevelStreaming     : EnumProperty
+    DefaultUpdateOverlapsMethodDuringLevelStreaming : EnumProperty
+    RemoteRole                                   : ByteProperty
+    ReplicatedMovement                           : StructProperty
+    InitialLifeSpan                              : FloatProperty
+    CustomTimeDilation                           : FloatProperty
+    AttachmentReplication                        : StructProperty
+    Owner                                        : ObjectProperty  (-> Actor)
+    NetDriverName                                : NameProperty
+    Role                                         : ByteProperty
+    NetDormancy                                  : ByteProperty
+    SpawnCollisionHandlingMethod                 : EnumProperty
+    AutoReceiveInput                             : ByteProperty
+    InputPriority                                : IntProperty
+    InputComponent                               : ObjectProperty  (-> InputComponent)
+    NetCullDistanceSquared                       : FloatProperty
+    NetTag                                       : IntProperty
+    NetUpdateFrequency                           : FloatProperty
+    MinNetUpdateFrequency                        : FloatProperty
+    NetPriority                                  : FloatProperty
+    Instigator                                   : ObjectProperty  (-> Pawn)
+    Children                                     : ArrayProperty
+    RootComponent                                : ObjectProperty  (-> SceneComponent)
+    ControllingMatineeActors                     : ArrayProperty
+    Layers                                       : ArrayProperty
+    ParentComponent                              : WeakObjectProperty
+    Tags                                         : ArrayProperty
+    OnTakeAnyDamage                              : MulticastSparseDelegateProperty
+    OnTakePointDamage                            : MulticastSparseDelegateProperty
+    OnTakeRadialDamage                           : MulticastSparseDelegateProperty
+    OnActorBeginOverlap                          : MulticastSparseDelegateProperty
+    OnActorEndOverlap                            : MulticastSparseDelegateProperty
+    OnBeginCursorOver                            : MulticastSparseDelegateProperty
+    OnEndCursorOver                              : MulticastSparseDelegateProperty
+    OnClicked                                    : MulticastSparseDelegateProperty
+    OnReleased                                   : MulticastSparseDelegateProperty
+    OnInputTouchBegin                            : MulticastSparseDelegateProperty
+    OnInputTouchEnd                              : MulticastSparseDelegateProperty
+    OnInputTouchEnter                            : MulticastSparseDelegateProperty
+    OnInputTouchLeave                            : MulticastSparseDelegateProperty
+    OnActorHit                                   : MulticastSparseDelegateProperty
+    OnDestroyed                                  : MulticastSparseDelegateProperty
+    OnEndPlay                                    : MulticastSparseDelegateProperty
+    InstanceComponents                           : ArrayProperty
+    BlueprintCreatedComponents                   : ArrayProperty
+    [total props on Actor: 76]
+  -- ELEM[3] Object --
+    [total props on Object: 0]
+
+  -- ELEM[0] BP_ConZBaseElement_C functions --
+    fn: ExecuteUbergraph_BP_ConZBaseElement
+    [total funcs on BP_ConZBaseElement_C: 1  ok=true]
+  -- ELEM[1] ConZBaseElement functions --
+    [total funcs on ConZBaseElement: 0  ok=true]
+  -- ELEM[2] Actor functions --
+    fn: WasRecentlyRendered
+    fn: UserConstructionScript
+    fn: TearOff
+    fn: SnapRootComponentTo
+    fn: SetTickGroup
+    fn: SetTickableWhenPaused
+    fn: SetReplicates
+    fn: SetReplicateMovement
+    fn: SetOwner
+    fn: SetNetDormancy
+    fn: SetLifeSpan
+    fn: SetAutoDestroyWhenFinished
+    fn: SetActorTickInterval
+    fn: SetActorTickEnabled
+    fn: SetActorScale3D
+    fn: SetActorRelativeScale3D
+    fn: SetActorHiddenInGame
+    fn: SetActorEnableCollision
+    fn: RemoveTickPrerequisiteComponent
+    fn: RemoveTickPrerequisiteActor
+    fn: ReceiveTick
+    fn: ReceiveRadialDamage
+    fn: ReceivePointDamage
+    fn: ReceiveHit
+    fn: ReceiveEndPlay
+    fn: ReceiveDestroyed
+    fn: ReceiveBeginPlay
+    fn: ReceiveAnyDamage
+    fn: ReceiveActorOnReleased
+    fn: ReceiveActorOnInputTouchLeave
+    fn: ReceiveActorOnInputTouchEnter
+    fn: ReceiveActorOnInputTouchEnd
+    fn: ReceiveActorOnInputTouchBegin
+    fn: ReceiveActorOnClicked
+    fn: ReceiveActorEndOverlap
+    fn: ReceiveActorEndCursorOver
+    fn: ReceiveActorBeginOverlap
+    fn: ReceiveActorBeginCursorOver
+    fn: PrestreamTextures
+    fn: OnRep_ReplicateMovement
+    fn: OnRep_ReplicatedMovement
+    fn: OnRep_Owner
+    fn: OnRep_Instigator
+    fn: OnRep_AttachmentReplication
+    fn: MakeNoise
+    fn: MakeMIDForMaterial
+    fn: K2_TeleportTo
+    fn: K2_SetActorTransform
+    fn: K2_SetActorRotation
+    fn: K2_SetActorRelativeTransform
+    fn: K2_SetActorRelativeRotation
+    fn: K2_SetActorRelativeLocation
+    fn: K2_SetActorLocationAndRotation
+    fn: K2_SetActorLocation
+    fn: K2_OnReset
+    fn: K2_OnEndViewTarget
+    fn: K2_OnBecomeViewTarget
+    fn: K2_GetRootComponent
+    fn: K2_GetComponentsByClass
+    fn: K2_GetActorRotation
+    fn: K2_GetActorLocation
+    fn: K2_DetachFromActor
+    fn: K2_DestroyComponent
+    fn: K2_DestroyActor
+    fn: K2_AttachToComponent
+    fn: K2_AttachToActor
+    fn: K2_AttachRootComponentToActor
+    fn: K2_AttachRootComponentTo
+    fn: K2_AddActorWorldTransformKeepScale
+    fn: K2_AddActorWorldTransform
+    fn: K2_AddActorWorldRotation
+    fn: K2_AddActorWorldOffset
+    fn: K2_AddActorLocalTransform
+    fn: K2_AddActorLocalRotation
+    fn: K2_AddActorLocalOffset
+    fn: IsOverlappingActor
+    fn: IsChildActor
+    fn: IsActorTickEnabled
+    fn: IsActorBeingDestroyed
+    fn: HasAuthority
+    fn: GetVerticalDistanceTo
+    fn: GetVelocity
+    fn: GetTransform
+    fn: GetTickableWhenPaused
+    fn: GetSquaredHorizontalDistanceTo
+    fn: GetSquaredDistanceTo
+    fn: GetRemoteRole
+    fn: GetParentComponent
+    fn: GetParentActor
+    fn: GetOwner
+    fn: GetOverlappingComponents
+    fn: GetOverlappingActors
+    fn: GetLocalRole
+    fn: GetLifeSpan
+    fn: GetInstigatorController
+    fn: GetInstigator
+    fn: GetInputVectorAxisValue
+    fn: GetInputAxisValue
+    fn: GetInputAxisKeyValue
+    fn: GetHorizontalDotProductTo
+    fn: GetHorizontalDistanceTo
+    fn: GetGameTimeSinceCreation
+    fn: GetDotProductTo
+    fn: GetDistanceTo
+    fn: GetComponentsByTag
+    fn: GetComponentsByInterface
+    fn: GetComponentByClass
+    fn: GetAttachParentSocketName
+    fn: GetAttachParentActor
+    fn: GetAttachedActors
+    fn: GetAllChildActors
+    fn: GetActorUpVector
+    fn: GetActorTimeDilation
+    fn: GetActorTickInterval
+    fn: GetActorScale3D
+    fn: GetActorRightVector
+    fn: GetActorRelativeScale3D
+    fn: GetActorForwardVector
+    fn: GetActorEyesViewPoint
+    fn: GetActorEnableCollision
+    fn: GetActorBounds
+    fn: ForceNetUpdate
+    fn: FlushNetDormancy
+    fn: FinishAddComponent
+    fn: EnableInput
+    fn: DisableInput
+    fn: DetachRootComponentFromParent
+    fn: AddTickPrerequisiteComponent
+    fn: AddTickPrerequisiteActor
+    fn: AddComponentByClass
+    fn: AddComponent
+    fn: ActorHasTag
+    [total funcs on Actor: 132  ok=true]
+  -- ELEM[3] Object functions --
+    fn: ExecuteUbergraph
+    [total funcs on Object: 1  ok=true]
+
+=== B: BP_ConZBase_C  ALL properties + functions ===
+  sample = BP_ConZBase_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.c58ca26c_ConZBase_1
+  -- BASE[0] BP_ConZBase_C --
+    UberGraphFrame                               : StructProperty
+    DefaultSceneRoot                             : ObjectProperty  (-> SceneComponent)
+    [total props on BP_ConZBase_C: 2]
+  -- BASE[1] ConZBase --
+    _baseElementActor                            : WeakObjectProperty
+    _referencedBaseElementClasses                : SetProperty
+    _overrideBlockStackingRules                  : BoolProperty
+    _debugRenderingDistance                      : FloatProperty
+    _decayProcessingNumberOfFrames               : IntProperty
+    _decayProcessingMaxDestroyedElementsPerUpdate : IntProperty
+    [total props on ConZBase: 6]
+  -- BASE[2] Actor --
+    PrimaryActorTick                             : StructProperty
+    bNetTemporary                                : BoolProperty
+    bNetStartup                                  : BoolProperty
+    bOnlyRelevantToOwner                         : BoolProperty
+    bAlwaysRelevant                              : BoolProperty
+    bReplicateMovement                           : BoolProperty
+    bHidden                                      : BoolProperty
+    bTearOff                                     : BoolProperty
+    bForceNetAddressable                         : BoolProperty
+    bExchangedRoles                              : BoolProperty
+    bNetLoadOnClient                             : BoolProperty
+    bNetUseOwnerRelevancy                        : BoolProperty
+    bRelevantForNetworkReplays                   : BoolProperty
+    bRelevantForLevelBounds                      : BoolProperty
+    bReplayRewindable                            : BoolProperty
+    bAllowTickBeforeBeginPlay                    : BoolProperty
+    bAutoDestroyWhenFinished                     : BoolProperty
+    bCanBeDamaged                                : BoolProperty
+    bBlockInput                                  : BoolProperty
+    bCollideWhenPlacing                          : BoolProperty
+    bFindCameraComponentWhenViewTarget           : BoolProperty
+    bGenerateOverlapEventsDuringLevelStreaming   : BoolProperty
+    bIgnoresOriginShifting                       : BoolProperty
+    bEnableAutoLODGeneration                     : BoolProperty
+    bIsEditorOnlyActor                           : BoolProperty
+    bActorSeamlessTraveled                       : BoolProperty
+    bReplicates                                  : BoolProperty
+    bCanBeInCluster                              : BoolProperty
+    bAllowReceiveTickEventOnDedicatedServer      : BoolProperty
+    bActorEnableCollision                        : BoolProperty
+    bActorIsBeingDestroyed                       : BoolProperty
+    UpdateOverlapsMethodDuringLevelStreaming     : EnumProperty
+    DefaultUpdateOverlapsMethodDuringLevelStreaming : EnumProperty
+    RemoteRole                                   : ByteProperty
+    ReplicatedMovement                           : StructProperty
+    InitialLifeSpan                              : FloatProperty
+    CustomTimeDilation                           : FloatProperty
+    AttachmentReplication                        : StructProperty
+    Owner                                        : ObjectProperty  (-> Actor)
+    NetDriverName                                : NameProperty
+    Role                                         : ByteProperty
+    NetDormancy                                  : ByteProperty
+    SpawnCollisionHandlingMethod                 : EnumProperty
+    AutoReceiveInput                             : ByteProperty
+    InputPriority                                : IntProperty
+    InputComponent                               : ObjectProperty  (-> InputComponent)
+    NetCullDistanceSquared                       : FloatProperty
+    NetTag                                       : IntProperty
+    NetUpdateFrequency                           : FloatProperty
+    MinNetUpdateFrequency                        : FloatProperty
+    NetPriority                                  : FloatProperty
+    Instigator                                   : ObjectProperty  (-> Pawn)
+    Children                                     : ArrayProperty
+    RootComponent                                : ObjectProperty  (-> SceneComponent)
+    ControllingMatineeActors                     : ArrayProperty
+    Layers                                       : ArrayProperty
+    ParentComponent                              : WeakObjectProperty
+    Tags                                         : ArrayProperty
+    OnTakeAnyDamage                              : MulticastSparseDelegateProperty
+    OnTakePointDamage                            : MulticastSparseDelegateProperty
+    OnTakeRadialDamage                           : MulticastSparseDelegateProperty
+    OnActorBeginOverlap                          : MulticastSparseDelegateProperty
+    OnActorEndOverlap                            : MulticastSparseDelegateProperty
+    OnBeginCursorOver                            : MulticastSparseDelegateProperty
+    OnEndCursorOver                              : MulticastSparseDelegateProperty
+    OnClicked                                    : MulticastSparseDelegateProperty
+    OnReleased                                   : MulticastSparseDelegateProperty
+    OnInputTouchBegin                            : MulticastSparseDelegateProperty
+    OnInputTouchEnd                              : MulticastSparseDelegateProperty
+    OnInputTouchEnter                            : MulticastSparseDelegateProperty
+    OnInputTouchLeave                            : MulticastSparseDelegateProperty
+    OnActorHit                                   : MulticastSparseDelegateProperty
+    OnDestroyed                                  : MulticastSparseDelegateProperty
+    OnEndPlay                                    : MulticastSparseDelegateProperty
+    InstanceComponents                           : ArrayProperty
+    BlueprintCreatedComponents                   : ArrayProperty
+    [total props on Actor: 76]
+  -- BASE[3] Object --
+    [total props on Object: 0]
+
+  -- BASE[0] BP_ConZBase_C functions --
+    fn: ReceiveBeginPlay
+    fn: ReceiveTick
+    fn: ExecuteUbergraph_BP_ConZBase
+    [total funcs on BP_ConZBase_C: 3  ok=true]
+  -- BASE[1] ConZBase functions --
+    fn: OnElementInteracted
+    fn: GetBaseName
+    fn: AwardFamePointsToOnlineFlagOwners
+    [total funcs on ConZBase: 3  ok=true]
+  -- BASE[2] Actor functions --
+    fn: WasRecentlyRendered
+    fn: UserConstructionScript
+    fn: TearOff
+    fn: SnapRootComponentTo
+    fn: SetTickGroup
+    fn: SetTickableWhenPaused
+    fn: SetReplicates
+    fn: SetReplicateMovement
+    fn: SetOwner
+    fn: SetNetDormancy
+    fn: SetLifeSpan
+    fn: SetAutoDestroyWhenFinished
+    fn: SetActorTickInterval
+    fn: SetActorTickEnabled
+    fn: SetActorScale3D
+    fn: SetActorRelativeScale3D
+    fn: SetActorHiddenInGame
+    fn: SetActorEnableCollision
+    fn: RemoveTickPrerequisiteComponent
+    fn: RemoveTickPrerequisiteActor
+    fn: ReceiveTick
+    fn: ReceiveRadialDamage
+    fn: ReceivePointDamage
+    fn: ReceiveHit
+    fn: ReceiveEndPlay
+    fn: ReceiveDestroyed
+    fn: ReceiveBeginPlay
+    fn: ReceiveAnyDamage
+    fn: ReceiveActorOnReleased
+    fn: ReceiveActorOnInputTouchLeave
+    fn: ReceiveActorOnInputTouchEnter
+    fn: ReceiveActorOnInputTouchEnd
+    fn: ReceiveActorOnInputTouchBegin
+    fn: ReceiveActorOnClicked
+    fn: ReceiveActorEndOverlap
+    fn: ReceiveActorEndCursorOver
+    fn: ReceiveActorBeginOverlap
+    fn: ReceiveActorBeginCursorOver
+    fn: PrestreamTextures
+    fn: OnRep_ReplicateMovement
+    fn: OnRep_ReplicatedMovement
+    fn: OnRep_Owner
+    fn: OnRep_Instigator
+    fn: OnRep_AttachmentReplication
+    fn: MakeNoise
+    fn: MakeMIDForMaterial
+    fn: K2_TeleportTo
+    fn: K2_SetActorTransform
+    fn: K2_SetActorRotation
+    fn: K2_SetActorRelativeTransform
+    fn: K2_SetActorRelativeRotation
+    fn: K2_SetActorRelativeLocation
+    fn: K2_SetActorLocationAndRotation
+    fn: K2_SetActorLocation
+    fn: K2_OnReset
+    fn: K2_OnEndViewTarget
+    fn: K2_OnBecomeViewTarget
+    fn: K2_GetRootComponent
+    fn: K2_GetComponentsByClass
+    fn: K2_GetActorRotation
+    fn: K2_GetActorLocation
+    fn: K2_DetachFromActor
+    fn: K2_DestroyComponent
+    fn: K2_DestroyActor
+    fn: K2_AttachToComponent
+    fn: K2_AttachToActor
+    fn: K2_AttachRootComponentToActor
+    fn: K2_AttachRootComponentTo
+    fn: K2_AddActorWorldTransformKeepScale
+    fn: K2_AddActorWorldTransform
+    fn: K2_AddActorWorldRotation
+    fn: K2_AddActorWorldOffset
+    fn: K2_AddActorLocalTransform
+    fn: K2_AddActorLocalRotation
+    fn: K2_AddActorLocalOffset
+    fn: IsOverlappingActor
+    fn: IsChildActor
+    fn: IsActorTickEnabled
+    fn: IsActorBeingDestroyed
+    fn: HasAuthority
+    fn: GetVerticalDistanceTo
+    fn: GetVelocity
+    fn: GetTransform
+    fn: GetTickableWhenPaused
+    fn: GetSquaredHorizontalDistanceTo
+    fn: GetSquaredDistanceTo
+    fn: GetRemoteRole
+    fn: GetParentComponent
+    fn: GetParentActor
+    fn: GetOwner
+    fn: GetOverlappingComponents
+    fn: GetOverlappingActors
+    fn: GetLocalRole
+    fn: GetLifeSpan
+    fn: GetInstigatorController
+    fn: GetInstigator
+    fn: GetInputVectorAxisValue
+    fn: GetInputAxisValue
+    fn: GetInputAxisKeyValue
+    fn: GetHorizontalDotProductTo
+    fn: GetHorizontalDistanceTo
+    fn: GetGameTimeSinceCreation
+    fn: GetDotProductTo
+    fn: GetDistanceTo
+    fn: GetComponentsByTag
+    fn: GetComponentsByInterface
+    fn: GetComponentByClass
+    fn: GetAttachParentSocketName
+    fn: GetAttachParentActor
+    fn: GetAttachedActors
+    fn: GetAllChildActors
+    fn: GetActorUpVector
+    fn: GetActorTimeDilation
+    fn: GetActorTickInterval
+    fn: GetActorScale3D
+    fn: GetActorRightVector
+    fn: GetActorRelativeScale3D
+    fn: GetActorForwardVector
+    fn: GetActorEyesViewPoint
+    fn: GetActorEnableCollision
+    fn: GetActorBounds
+    fn: ForceNetUpdate
+    fn: FlushNetDormancy
+    fn: FinishAddComponent
+    fn: EnableInput
+    fn: DisableInput
+    fn: DetachRootComponentFromParent
+    fn: AddTickPrerequisiteComponent
+    fn: AddTickPrerequisiteActor
+    fn: AddComponentByClass
+    fn: AddComponent
+    fn: ActorHasTag
+    [total funcs on Actor: 132  ok=true]
+  -- BASE[3] Object functions --
+    fn: ExecuteUbergraph
+    [total funcs on Object: 1  ok=true]
+
+=== C: BP_ConZBaseManager_C  ALL properties + functions ===
+  sample = BP_ConZBaseManager_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.BP_ConZBaseManager_C_2147470847
+  -- MGR[0] BP_ConZBaseManager_C --
+    DefaultSceneRoot                             : ObjectProperty  (-> SceneComponent)
+    [total props on BP_ConZBaseManager_C: 1]
+  -- MGR[1] ConZBaseManager --
+    _damageEventProcessingPeriod                 : FloatProperty
+    _decayProcessingPeriod                       : FloatProperty
+    _flagOvertakePeriod                          : FloatProperty
+    _baseInteractionsPeriod                      : FloatProperty
+    _baseClass                                   : ClassProperty  (-> Class)
+    _baseElementClass                            : ClassProperty  (-> Class)
+    _flagAreaVisualizerClass                     : ClassProperty  (-> Class)
+    _initialBaseSize                             : StructProperty
+    _serverSettingMaxAmountParentTag             : StructProperty
+    _serverSettingMaxAmountTagsToIgnoreForDecaySetting : StructProperty
+    _flagInfluenceRadius                         : FloatProperty
+    _flagOvertakeDuration                        : IntProperty
+    _maxElementsPerFlag                          : IntProperty
+    _extraElementsPerFlagForAdditionalSquadMember : IntProperty
+    _maxNumberOfExpandedElementsPerFlag          : IntProperty
+    _allowMultipleFlagsPerPlayer                 : BoolProperty
+    _allowFlagPlacementOnBBElements              : BoolProperty
+    _maxBaseBuildingHeight                       : FloatProperty
+    _shortRepairDuration                         : StructProperty
+    _mediumRepairDuration                        : StructProperty
+    _longRepairDuration                          : StructProperty
+    _bases                                       : MapProperty
+    [total props on ConZBaseManager: 22]
+  -- MGR[2] Actor --
+    PrimaryActorTick                             : StructProperty
+    bNetTemporary                                : BoolProperty
+    bNetStartup                                  : BoolProperty
+    bOnlyRelevantToOwner                         : BoolProperty
+    bAlwaysRelevant                              : BoolProperty
+    bReplicateMovement                           : BoolProperty
+    bHidden                                      : BoolProperty
+    bTearOff                                     : BoolProperty
+    bForceNetAddressable                         : BoolProperty
+    bExchangedRoles                              : BoolProperty
+    bNetLoadOnClient                             : BoolProperty
+    bNetUseOwnerRelevancy                        : BoolProperty
+    bRelevantForNetworkReplays                   : BoolProperty
+    bRelevantForLevelBounds                      : BoolProperty
+    bReplayRewindable                            : BoolProperty
+    bAllowTickBeforeBeginPlay                    : BoolProperty
+    bAutoDestroyWhenFinished                     : BoolProperty
+    bCanBeDamaged                                : BoolProperty
+    bBlockInput                                  : BoolProperty
+    bCollideWhenPlacing                          : BoolProperty
+    bFindCameraComponentWhenViewTarget           : BoolProperty
+    bGenerateOverlapEventsDuringLevelStreaming   : BoolProperty
+    bIgnoresOriginShifting                       : BoolProperty
+    bEnableAutoLODGeneration                     : BoolProperty
+    bIsEditorOnlyActor                           : BoolProperty
+    bActorSeamlessTraveled                       : BoolProperty
+    bReplicates                                  : BoolProperty
+    bCanBeInCluster                              : BoolProperty
+    bAllowReceiveTickEventOnDedicatedServer      : BoolProperty
+    bActorEnableCollision                        : BoolProperty
+    bActorIsBeingDestroyed                       : BoolProperty
+    UpdateOverlapsMethodDuringLevelStreaming     : EnumProperty
+    DefaultUpdateOverlapsMethodDuringLevelStreaming : EnumProperty
+    RemoteRole                                   : ByteProperty
+    ReplicatedMovement                           : StructProperty
+    InitialLifeSpan                              : FloatProperty
+    CustomTimeDilation                           : FloatProperty
+    AttachmentReplication                        : StructProperty
+    Owner                                        : ObjectProperty  (-> Actor)
+    NetDriverName                                : NameProperty
+    Role                                         : ByteProperty
+    NetDormancy                                  : ByteProperty
+    SpawnCollisionHandlingMethod                 : EnumProperty
+    AutoReceiveInput                             : ByteProperty
+    InputPriority                                : IntProperty
+    InputComponent                               : ObjectProperty  (-> InputComponent)
+    NetCullDistanceSquared                       : FloatProperty
+    NetTag                                       : IntProperty
+    NetUpdateFrequency                           : FloatProperty
+    MinNetUpdateFrequency                        : FloatProperty
+    NetPriority                                  : FloatProperty
+    Instigator                                   : ObjectProperty  (-> Pawn)
+    Children                                     : ArrayProperty
+    RootComponent                                : ObjectProperty  (-> SceneComponent)
+    ControllingMatineeActors                     : ArrayProperty
+    Layers                                       : ArrayProperty
+    ParentComponent                              : WeakObjectProperty
+    Tags                                         : ArrayProperty
+    OnTakeAnyDamage                              : MulticastSparseDelegateProperty
+    OnTakePointDamage                            : MulticastSparseDelegateProperty
+    OnTakeRadialDamage                           : MulticastSparseDelegateProperty
+    OnActorBeginOverlap                          : MulticastSparseDelegateProperty
+    OnActorEndOverlap                            : MulticastSparseDelegateProperty
+    OnBeginCursorOver                            : MulticastSparseDelegateProperty
+    OnEndCursorOver                              : MulticastSparseDelegateProperty
+    OnClicked                                    : MulticastSparseDelegateProperty
+    OnReleased                                   : MulticastSparseDelegateProperty
+    OnInputTouchBegin                            : MulticastSparseDelegateProperty
+    OnInputTouchEnd                              : MulticastSparseDelegateProperty
+    OnInputTouchEnter                            : MulticastSparseDelegateProperty
+    OnInputTouchLeave                            : MulticastSparseDelegateProperty
+    OnActorHit                                   : MulticastSparseDelegateProperty
+    OnDestroyed                                  : MulticastSparseDelegateProperty
+    OnEndPlay                                    : MulticastSparseDelegateProperty
+    InstanceComponents                           : ArrayProperty
+    BlueprintCreatedComponents                   : ArrayProperty
+    [total props on Actor: 76]
+  -- MGR[3] Object --
+    [total props on Object: 0]
+
+  -- MGR[0] BP_ConZBaseManager_C functions --
+    [total funcs on BP_ConZBaseManager_C: 0  ok=true]
+  -- MGR[1] ConZBaseManager functions --
+    fn: NetMulticast_UpdateItemElementsLocationsAndRotations
+    fn: NetMulticast_TransferOwnership
+    fn: NetMulticast_SpawnBaseElement
+    fn: NetMulticast_SetDebugMode
+    fn: NetMulticast_SetBaseOwnerPlayerId
+    fn: NetMulticast_SetBaseHasActiveEncounter
+    fn: NetMulticast_ProcessDecay
+    fn: NetMulticast_InteractWithElement
+    fn: NetMulticast_ExecuteFlagOvertake
+    fn: NetMulticast_DestroyElement
+    fn: NetMulticast_DestroyAllElementsInRadius
+    fn: NetMulticast_ClearBaseOwnerPlayerId
+    fn: NetMulticast_ChangeFlagOwner
+    fn: NetMulticast_ApplyDamageToBaseElement
+    [total funcs on ConZBaseManager: 14  ok=true]
+  -- MGR[2] Actor functions --
+    fn: WasRecentlyRendered
+    fn: UserConstructionScript
+    fn: TearOff
+    fn: SnapRootComponentTo
+    fn: SetTickGroup
+    fn: SetTickableWhenPaused
+    fn: SetReplicates
+    fn: SetReplicateMovement
+    fn: SetOwner
+    fn: SetNetDormancy
+    fn: SetLifeSpan
+    fn: SetAutoDestroyWhenFinished
+    fn: SetActorTickInterval
+    fn: SetActorTickEnabled
+    fn: SetActorScale3D
+    fn: SetActorRelativeScale3D
+    fn: SetActorHiddenInGame
+    fn: SetActorEnableCollision
+    fn: RemoveTickPrerequisiteComponent
+    fn: RemoveTickPrerequisiteActor
+    fn: ReceiveTick
+    fn: ReceiveRadialDamage
+    fn: ReceivePointDamage
+    fn: ReceiveHit
+    fn: ReceiveEndPlay
+    fn: ReceiveDestroyed
+    fn: ReceiveBeginPlay
+    fn: ReceiveAnyDamage
+    fn: ReceiveActorOnReleased
+    fn: ReceiveActorOnInputTouchLeave
+    fn: ReceiveActorOnInputTouchEnter
+    fn: ReceiveActorOnInputTouchEnd
+    fn: ReceiveActorOnInputTouchBegin
+    fn: ReceiveActorOnClicked
+    fn: ReceiveActorEndOverlap
+    fn: ReceiveActorEndCursorOver
+    fn: ReceiveActorBeginOverlap
+    fn: ReceiveActorBeginCursorOver
+    fn: PrestreamTextures
+    fn: OnRep_ReplicateMovement
+    fn: OnRep_ReplicatedMovement
+    fn: OnRep_Owner
+    fn: OnRep_Instigator
+    fn: OnRep_AttachmentReplication
+    fn: MakeNoise
+    fn: MakeMIDForMaterial
+    fn: K2_TeleportTo
+    fn: K2_SetActorTransform
+    fn: K2_SetActorRotation
+    fn: K2_SetActorRelativeTransform
+    fn: K2_SetActorRelativeRotation
+    fn: K2_SetActorRelativeLocation
+    fn: K2_SetActorLocationAndRotation
+    fn: K2_SetActorLocation
+    fn: K2_OnReset
+    fn: K2_OnEndViewTarget
+    fn: K2_OnBecomeViewTarget
+    fn: K2_GetRootComponent
+    fn: K2_GetComponentsByClass
+    fn: K2_GetActorRotation
+    fn: K2_GetActorLocation
+    fn: K2_DetachFromActor
+    fn: K2_DestroyComponent
+    fn: K2_DestroyActor
+    fn: K2_AttachToComponent
+    fn: K2_AttachToActor
+    fn: K2_AttachRootComponentToActor
+    fn: K2_AttachRootComponentTo
+    fn: K2_AddActorWorldTransformKeepScale
+    fn: K2_AddActorWorldTransform
+    fn: K2_AddActorWorldRotation
+    fn: K2_AddActorWorldOffset
+    fn: K2_AddActorLocalTransform
+    fn: K2_AddActorLocalRotation
+    fn: K2_AddActorLocalOffset
+    fn: IsOverlappingActor
+    fn: IsChildActor
+    fn: IsActorTickEnabled
+    fn: IsActorBeingDestroyed
+    fn: HasAuthority
+    fn: GetVerticalDistanceTo
+    fn: GetVelocity
+    fn: GetTransform
+    fn: GetTickableWhenPaused
+    fn: GetSquaredHorizontalDistanceTo
+    fn: GetSquaredDistanceTo
+    fn: GetRemoteRole
+    fn: GetParentComponent
+    fn: GetParentActor
+    fn: GetOwner
+    fn: GetOverlappingComponents
+    fn: GetOverlappingActors
+    fn: GetLocalRole
+    fn: GetLifeSpan
+    fn: GetInstigatorController
+    fn: GetInstigator
+    fn: GetInputVectorAxisValue
+    fn: GetInputAxisValue
+    fn: GetInputAxisKeyValue
+    fn: GetHorizontalDotProductTo
+    fn: GetHorizontalDistanceTo
+    fn: GetGameTimeSinceCreation
+    fn: GetDotProductTo
+    fn: GetDistanceTo
+    fn: GetComponentsByTag
+    fn: GetComponentsByInterface
+    fn: GetComponentByClass
+    fn: GetAttachParentSocketName
+    fn: GetAttachParentActor
+    fn: GetAttachedActors
+    fn: GetAllChildActors
+    fn: GetActorUpVector
+    fn: GetActorTimeDilation
+    fn: GetActorTickInterval
+    fn: GetActorScale3D
+    fn: GetActorRightVector
+    fn: GetActorRelativeScale3D
+    fn: GetActorForwardVector
+    fn: GetActorEyesViewPoint
+    fn: GetActorEnableCollision
+    fn: GetActorBounds
+    fn: ForceNetUpdate
+    fn: FlushNetDormancy
+    fn: FinishAddComponent
+    fn: EnableInput
+    fn: DisableInput
+    fn: DetachRootComponentFromParent
+    fn: AddTickPrerequisiteComponent
+    fn: AddTickPrerequisiteActor
+    fn: AddComponentByClass
+    fn: AddComponent
+    fn: ActorHasTag
+    [total funcs on Actor: 132  ok=true]
+  -- MGR[3] Object functions --
+    fn: ExecuteUbergraph
+    [total funcs on Object: 1  ok=true]
+
+=== D: BuildingManager  ALL properties + functions ===
+  sample = BuildingManager /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.BuildingManager_1
+  -- BMGR[0] BuildingManager --
+    _buildingsDataRepHelper                      : StructProperty
+    [total props on BuildingManager: 1]
+  -- BMGR[1] Actor --
+    PrimaryActorTick                             : StructProperty
+    bNetTemporary                                : BoolProperty
+    bNetStartup                                  : BoolProperty
+    bOnlyRelevantToOwner                         : BoolProperty
+    bAlwaysRelevant                              : BoolProperty
+    bReplicateMovement                           : BoolProperty
+    bHidden                                      : BoolProperty
+    bTearOff                                     : BoolProperty
+    bForceNetAddressable                         : BoolProperty
+    bExchangedRoles                              : BoolProperty
+    bNetLoadOnClient                             : BoolProperty
+    bNetUseOwnerRelevancy                        : BoolProperty
+    bRelevantForNetworkReplays                   : BoolProperty
+    bRelevantForLevelBounds                      : BoolProperty
+    bReplayRewindable                            : BoolProperty
+    bAllowTickBeforeBeginPlay                    : BoolProperty
+    bAutoDestroyWhenFinished                     : BoolProperty
+    bCanBeDamaged                                : BoolProperty
+    bBlockInput                                  : BoolProperty
+    bCollideWhenPlacing                          : BoolProperty
+    bFindCameraComponentWhenViewTarget           : BoolProperty
+    bGenerateOverlapEventsDuringLevelStreaming   : BoolProperty
+    bIgnoresOriginShifting                       : BoolProperty
+    bEnableAutoLODGeneration                     : BoolProperty
+    bIsEditorOnlyActor                           : BoolProperty
+    bActorSeamlessTraveled                       : BoolProperty
+    bReplicates                                  : BoolProperty
+    bCanBeInCluster                              : BoolProperty
+    bAllowReceiveTickEventOnDedicatedServer      : BoolProperty
+    bActorEnableCollision                        : BoolProperty
+    bActorIsBeingDestroyed                       : BoolProperty
+    UpdateOverlapsMethodDuringLevelStreaming     : EnumProperty
+    DefaultUpdateOverlapsMethodDuringLevelStreaming : EnumProperty
+    RemoteRole                                   : ByteProperty
+    ReplicatedMovement                           : StructProperty
+    InitialLifeSpan                              : FloatProperty
+    CustomTimeDilation                           : FloatProperty
+    AttachmentReplication                        : StructProperty
+    Owner                                        : ObjectProperty  (-> Actor)
+    NetDriverName                                : NameProperty
+    Role                                         : ByteProperty
+    NetDormancy                                  : ByteProperty
+    SpawnCollisionHandlingMethod                 : EnumProperty
+    AutoReceiveInput                             : ByteProperty
+    InputPriority                                : IntProperty
+    InputComponent                               : ObjectProperty  (-> InputComponent)
+    NetCullDistanceSquared                       : FloatProperty
+    NetTag                                       : IntProperty
+    NetUpdateFrequency                           : FloatProperty
+    MinNetUpdateFrequency                        : FloatProperty
+    NetPriority                                  : FloatProperty
+    Instigator                                   : ObjectProperty  (-> Pawn)
+    Children                                     : ArrayProperty
+    RootComponent                                : ObjectProperty  (-> SceneComponent)
+    ControllingMatineeActors                     : ArrayProperty
+    Layers                                       : ArrayProperty
+    ParentComponent                              : WeakObjectProperty
+    Tags                                         : ArrayProperty
+    OnTakeAnyDamage                              : MulticastSparseDelegateProperty
+    OnTakePointDamage                            : MulticastSparseDelegateProperty
+    OnTakeRadialDamage                           : MulticastSparseDelegateProperty
+    OnActorBeginOverlap                          : MulticastSparseDelegateProperty
+    OnActorEndOverlap                            : MulticastSparseDelegateProperty
+    OnBeginCursorOver                            : MulticastSparseDelegateProperty
+    OnEndCursorOver                              : MulticastSparseDelegateProperty
+    OnClicked                                    : MulticastSparseDelegateProperty
+    OnReleased                                   : MulticastSparseDelegateProperty
+    OnInputTouchBegin                            : MulticastSparseDelegateProperty
+    OnInputTouchEnd                              : MulticastSparseDelegateProperty
+    OnInputTouchEnter                            : MulticastSparseDelegateProperty
+    OnInputTouchLeave                            : MulticastSparseDelegateProperty
+    OnActorHit                                   : MulticastSparseDelegateProperty
+    OnDestroyed                                  : MulticastSparseDelegateProperty
+    OnEndPlay                                    : MulticastSparseDelegateProperty
+    InstanceComponents                           : ArrayProperty
+    BlueprintCreatedComponents                   : ArrayProperty
+    [total props on Actor: 76]
+  -- BMGR[2] Object --
+    [total props on Object: 0]
+
+  -- BMGR[0] BuildingManager functions --
+    fn: NetMulticast_UpdateBuildingData
+    [total funcs on BuildingManager: 1  ok=true]
+  -- BMGR[1] Actor functions --
+    fn: WasRecentlyRendered
+    fn: UserConstructionScript
+    fn: TearOff
+    fn: SnapRootComponentTo
+    fn: SetTickGroup
+    fn: SetTickableWhenPaused
+    fn: SetReplicates
+    fn: SetReplicateMovement
+    fn: SetOwner
+    fn: SetNetDormancy
+    fn: SetLifeSpan
+    fn: SetAutoDestroyWhenFinished
+    fn: SetActorTickInterval
+    fn: SetActorTickEnabled
+    fn: SetActorScale3D
+    fn: SetActorRelativeScale3D
+    fn: SetActorHiddenInGame
+    fn: SetActorEnableCollision
+    fn: RemoveTickPrerequisiteComponent
+    fn: RemoveTickPrerequisiteActor
+    fn: ReceiveTick
+    fn: ReceiveRadialDamage
+    fn: ReceivePointDamage
+    fn: ReceiveHit
+    fn: ReceiveEndPlay
+    fn: ReceiveDestroyed
+    fn: ReceiveBeginPlay
+    fn: ReceiveAnyDamage
+    fn: ReceiveActorOnReleased
+    fn: ReceiveActorOnInputTouchLeave
+    fn: ReceiveActorOnInputTouchEnter
+    fn: ReceiveActorOnInputTouchEnd
+    fn: ReceiveActorOnInputTouchBegin
+    fn: ReceiveActorOnClicked
+    fn: ReceiveActorEndOverlap
+    fn: ReceiveActorEndCursorOver
+    fn: ReceiveActorBeginOverlap
+    fn: ReceiveActorBeginCursorOver
+    fn: PrestreamTextures
+    fn: OnRep_ReplicateMovement
+    fn: OnRep_ReplicatedMovement
+    fn: OnRep_Owner
+    fn: OnRep_Instigator
+    fn: OnRep_AttachmentReplication
+    fn: MakeNoise
+    fn: MakeMIDForMaterial
+    fn: K2_TeleportTo
+    fn: K2_SetActorTransform
+    fn: K2_SetActorRotation
+    fn: K2_SetActorRelativeTransform
+    fn: K2_SetActorRelativeRotation
+    fn: K2_SetActorRelativeLocation
+    fn: K2_SetActorLocationAndRotation
+    fn: K2_SetActorLocation
+    fn: K2_OnReset
+    fn: K2_OnEndViewTarget
+    fn: K2_OnBecomeViewTarget
+    fn: K2_GetRootComponent
+    fn: K2_GetComponentsByClass
+    fn: K2_GetActorRotation
+    fn: K2_GetActorLocation
+    fn: K2_DetachFromActor
+    fn: K2_DestroyComponent
+    fn: K2_DestroyActor
+    fn: K2_AttachToComponent
+    fn: K2_AttachToActor
+    fn: K2_AttachRootComponentToActor
+    fn: K2_AttachRootComponentTo
+    fn: K2_AddActorWorldTransformKeepScale
+    fn: K2_AddActorWorldTransform
+    fn: K2_AddActorWorldRotation
+    fn: K2_AddActorWorldOffset
+    fn: K2_AddActorLocalTransform
+    fn: K2_AddActorLocalRotation
+    fn: K2_AddActorLocalOffset
+    fn: IsOverlappingActor
+    fn: IsChildActor
+    fn: IsActorTickEnabled
+    fn: IsActorBeingDestroyed
+    fn: HasAuthority
+    fn: GetVerticalDistanceTo
+    fn: GetVelocity
+    fn: GetTransform
+    fn: GetTickableWhenPaused
+    fn: GetSquaredHorizontalDistanceTo
+    fn: GetSquaredDistanceTo
+    fn: GetRemoteRole
+    fn: GetParentComponent
+    fn: GetParentActor
+    fn: GetOwner
+    fn: GetOverlappingComponents
+    fn: GetOverlappingActors
+    fn: GetLocalRole
+    fn: GetLifeSpan
+    fn: GetInstigatorController
+    fn: GetInstigator
+    fn: GetInputVectorAxisValue
+    fn: GetInputAxisValue
+    fn: GetInputAxisKeyValue
+    fn: GetHorizontalDotProductTo
+    fn: GetHorizontalDistanceTo
+    fn: GetGameTimeSinceCreation
+    fn: GetDotProductTo
+    fn: GetDistanceTo
+    fn: GetComponentsByTag
+    fn: GetComponentsByInterface
+    fn: GetComponentByClass
+    fn: GetAttachParentSocketName
+    fn: GetAttachParentActor
+    fn: GetAttachedActors
+    fn: GetAllChildActors
+    fn: GetActorUpVector
+    fn: GetActorTimeDilation
+    fn: GetActorTickInterval
+    fn: GetActorScale3D
+    fn: GetActorRightVector
+    fn: GetActorRelativeScale3D
+    fn: GetActorForwardVector
+    fn: GetActorEyesViewPoint
+    fn: GetActorEnableCollision
+    fn: GetActorBounds
+    fn: ForceNetUpdate
+    fn: FlushNetDormancy
+    fn: FinishAddComponent
+    fn: EnableInput
+    fn: DisableInput
+    fn: DetachRootComponentFromParent
+    fn: AddTickPrerequisiteComponent
+    fn: AddTickPrerequisiteActor
+    fn: AddComponentByClass
+    fn: AddComponent
+    fn: ActorHasTag
+    [total funcs on Actor: 132  ok=true]
+  -- BMGR[2] Object functions --
+    fn: ExecuteUbergraph
+    [total funcs on Object: 1  ok=true]
+
+=== E: try UpgradeBaseBuildingElementsWithinRadius on managers ===
+  BP_ConZBaseManager_C      :Upgrade...(60) -> ERR: ...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:149: Tried calling a member function but the UObject instance is nullptr
+
+stack traceback:
+	[C]: in method 'UpgradeBaseBuildingElementsWithi
+  BuildingManager           :Upgrade...(60) -> ERR: ...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:149: Tried calling a member function but the UObject instance is nullptr
+
+stack traceback:
+	[C]: in method 'UpgradeBaseBuildingElementsWithi
+  BP_ConZBase_C             :Upgrade...(60) -> ERR: ...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:149: Tried calling a member function but the UObject instance is nullptr
+
+stack traceback:
+	[C]: in method 'UpgradeBaseBuildingElementsWithi
+  BP_ConZBaseElement_C      :Upgrade...(60) -> ERR: ...M\Binaries\Win64\ue4ss\Mods\FlagUpgrade\Scripts\main.lua:149: Tried calling a member function but the UObject instance is nullptr
+
+stack traceback:
+	[C]: in method 'UpgradeBaseBuildingElementsWithi
+
+=== F: PC ALL properties (no more `return false` bug) ===
+  -- PC[0] BP_ConZPlayerController_C --
+    [total props on BP_ConZPlayerController_C: 0]
+  -- PC[1] ConZPlayerController --
+    ComponentsToHide                             : ArrayProperty
+    IsTalkButtonPressed                          : BoolProperty
+    _playerRpcChannel                            : ObjectProperty  (-> PlayerRpcChannel)
+    _playerQuestComponent                        : ObjectProperty  (-> PlayerQuestComponent)
+    _userProfile                                 : ObjectProperty  (-> UserProfile)
+    _lastNameChangeTime                          : StructProperty
+    _userFakeName                                : StrProperty
+    _bankAccountNumber                           : Int64Property
+    _spawnedPawn                                 : ObjectProperty  (-> Pawn)
+    _possessedPawn                               : ObjectProperty  (-> Pawn)
+    _prisonerClassLazy                           : StructProperty
+    _teleportWorldStreamingLocationChangeDelay   : FloatProperty
+    _teleportWorldStreamingTriggerLag            : FloatProperty
+    _repFamePoints                               : IntProperty
+    _moneyBalanceRep                             : Int64Property
+    _goldBalanceRep                              : Int64Property
+    _weatherHeightUpdatePeriod                   : FloatProperty
+    _achievementsManagerClient                   : ObjectProperty  (-> AchievementsManagerClient)
+    _achievementsManagerClientClass              : ClassProperty  (-> Class)
+    _isReadyForPlayDelay                         : FloatProperty
+    _reportPlayTimeInterval                      : FloatProperty
+    _replicatedServerUtcNow                      : StructProperty
+    _pathFollowingComponent                      : ObjectProperty  (-> PathFollowingComponent)
+    _forceSpawnAsDrone                           : BoolProperty
+    _mpSpawnDroneAndPrisoner                     : BoolProperty
+    _photoModePawnClassLazy                      : StructProperty
+    _refreshTimeForPawnLocationOnMap             : FloatProperty
+    _mainMPC                                     : ObjectProperty  (-> MaterialParameterCollection)
+    _numTrySpawnsForTimeout                      : IntProperty
+    [total props on ConZPlayerController: 29]
+  -- PC[2] ConZPlayerControllerBase --
+    [total props on ConZPlayerControllerBase: 0]
+  -- PC[3] PlayerController --
+    Player                                       : ObjectProperty  (-> Player)
+    AcknowledgedPawn                             : ObjectProperty  (-> Pawn)
+    ControllingDirTrackInst                      : ObjectProperty  (-> InterpTrackInstDirector)
+    MyHUD                                        : ObjectProperty  (-> HUD)
+    PlayerCameraManager                          : ObjectProperty  (-> PlayerCameraManager)
+    PlayerCameraManagerClass                     : ClassProperty  (-> Class)
+    bAutoManageActiveCameraTarget                : BoolProperty
+    TargetViewRotation                           : StructProperty
+    SmoothTargetViewRotationSpeed                : FloatProperty
+    HiddenActors                                 : ArrayProperty
+    HiddenPrimitiveComponents                    : ArrayProperty
+    LastSpectatorStateSynchTime                  : FloatProperty
+    LastSpectatorSyncLocation                    : StructProperty
+    LastSpectatorSyncRotation                    : StructProperty
+    ClientCap                                    : IntProperty
+    CheatManager                                 : ObjectProperty  (-> CheatManager)
+    CheatClass                                   : ClassProperty  (-> Class)
+    PlayerInput                                  : ObjectProperty  (-> PlayerInput)
+    ActiveForceFeedbackEffects                   : ArrayProperty
+    bPlayerIsWaiting                             : BoolProperty
+    NetPlayerIndex                               : ByteProperty
+    PendingSwapConnection                        : ObjectProperty  (-> NetConnection)
+    NetConnection                                : ObjectProperty  (-> NetConnection)
+    InputYawScale                                : FloatProperty
+    InputPitchScale                              : FloatProperty
+    InputRollScale                               : FloatProperty
+    bShowMouseCursor                             : BoolProperty
+    bEnableClickEvents                           : BoolProperty
+    bEnableTouchEvents                           : BoolProperty
+    bEnableMouseOverEvents                       : BoolProperty
+    bEnableTouchOverEvents                       : BoolProperty
+    bForceFeedbackEnabled                        : BoolProperty
+    ForceFeedbackScale                           : FloatProperty
+    ClickEventKeys                               : ArrayProperty
+    DefaultMouseCursor                           : ByteProperty
+    CurrentMouseCursor                           : ByteProperty
+    DefaultClickTraceChannel                     : ByteProperty
+    CurrentClickTraceChannel                     : ByteProperty
+    HitResultTraceDistance                       : FloatProperty
+    SeamlessTravelCount                          : UInt16Property
+    LastCompletedSeamlessTravelCount             : UInt16Property
+    InactiveStateInputComponent                  : ObjectProperty  (-> InputComponent)
+    bShouldPerformFullTickWhenPaused             : BoolProperty
+    CurrentTouchInterface                        : ObjectProperty  (-> TouchInterface)
+    SpectatorPawn                                : ObjectProperty  (-> SpectatorPawn)
+    bIsLocalPlayerController                     : BoolProperty
+    spawnLocation                                : StructProperty
+    [total props on PlayerController: 47]
+  -- PC[4] Controller --
+    PlayerState                                  : ObjectProperty  (-> PlayerState)
+    OnInstigatedAnyDamage                        : MulticastInlineDelegateProperty
+    StateName                                    : NameProperty
+    Pawn                                         : ObjectProperty  (-> Pawn)
+    Character                                    : ObjectProperty  (-> Character)
+    TransformComponent                           : ObjectProperty  (-> SceneComponent)
+    ControlRotation                              : StructProperty
+    bAttachToPawn                                : BoolProperty
+    [total props on Controller: 8]
+  -- PC[5] Actor --
+    PrimaryActorTick                             : StructProperty
+    bNetTemporary                                : BoolProperty
+    bNetStartup                                  : BoolProperty
+    bOnlyRelevantToOwner                         : BoolProperty
+    bAlwaysRelevant                              : BoolProperty
+    bReplicateMovement                           : BoolProperty
+    bHidden                                      : BoolProperty
+    bTearOff                                     : BoolProperty
+    bForceNetAddressable                         : BoolProperty
+    bExchangedRoles                              : BoolProperty
+    bNetLoadOnClient                             : BoolProperty
+    bNetUseOwnerRelevancy                        : BoolProperty
+    bRelevantForNetworkReplays                   : BoolProperty
+    bRelevantForLevelBounds                      : BoolProperty
+    bReplayRewindable                            : BoolProperty
+    bAllowTickBeforeBeginPlay                    : BoolProperty
+    bAutoDestroyWhenFinished                     : BoolProperty
+    bCanBeDamaged                                : BoolProperty
+    bBlockInput                                  : BoolProperty
+    bCollideWhenPlacing                          : BoolProperty
+    bFindCameraComponentWhenViewTarget           : BoolProperty
+    bGenerateOverlapEventsDuringLevelStreaming   : BoolProperty
+    bIgnoresOriginShifting                       : BoolProperty
+    bEnableAutoLODGeneration                     : BoolProperty
+    bIsEditorOnlyActor                           : BoolProperty
+    bActorSeamlessTraveled                       : BoolProperty
+    bReplicates                                  : BoolProperty
+    bCanBeInCluster                              : BoolProperty
+    bAllowReceiveTickEventOnDedicatedServer      : BoolProperty
+    bActorEnableCollision                        : BoolProperty
+    bActorIsBeingDestroyed                       : BoolProperty
+    UpdateOverlapsMethodDuringLevelStreaming     : EnumProperty
+    DefaultUpdateOverlapsMethodDuringLevelStreaming : EnumProperty
+    RemoteRole                                   : ByteProperty
+    ReplicatedMovement                           : StructProperty
+    InitialLifeSpan                              : FloatProperty
+    CustomTimeDilation                           : FloatProperty
+    AttachmentReplication                        : StructProperty
+    Owner                                        : ObjectProperty  (-> Actor)
+    NetDriverName                                : NameProperty
+    Role                                         : ByteProperty
+    NetDormancy                                  : ByteProperty
+    SpawnCollisionHandlingMethod                 : EnumProperty
+    AutoReceiveInput                             : ByteProperty
+    InputPriority                                : IntProperty
+    InputComponent                               : ObjectProperty  (-> InputComponent)
+    NetCullDistanceSquared                       : FloatProperty
+    NetTag                                       : IntProperty
+    NetUpdateFrequency                           : FloatProperty
+    MinNetUpdateFrequency                        : FloatProperty
+    NetPriority                                  : FloatProperty
+    Instigator                                   : ObjectProperty  (-> Pawn)
+    Children                                     : ArrayProperty
+    RootComponent                                : ObjectProperty  (-> SceneComponent)
+    ControllingMatineeActors                     : ArrayProperty
+    Layers                                       : ArrayProperty
+    ParentComponent                              : WeakObjectProperty
+    Tags                                         : ArrayProperty
+    OnTakeAnyDamage                              : MulticastSparseDelegateProperty
+    OnTakePointDamage                            : MulticastSparseDelegateProperty
+    OnTakeRadialDamage                           : MulticastSparseDelegateProperty
+    OnActorBeginOverlap                          : MulticastSparseDelegateProperty
+    OnActorEndOverlap                            : MulticastSparseDelegateProperty
+    OnBeginCursorOver                            : MulticastSparseDelegateProperty
+    OnEndCursorOver                              : MulticastSparseDelegateProperty
+    OnClicked                                    : MulticastSparseDelegateProperty
+    OnReleased                                   : MulticastSparseDelegateProperty
+    OnInputTouchBegin                            : MulticastSparseDelegateProperty
+    OnInputTouchEnd                              : MulticastSparseDelegateProperty
+    OnInputTouchEnter                            : MulticastSparseDelegateProperty
+    OnInputTouchLeave                            : MulticastSparseDelegateProperty
+    OnActorHit                                   : MulticastSparseDelegateProperty
+    OnDestroyed                                  : MulticastSparseDelegateProperty
+    OnEndPlay                                    : MulticastSparseDelegateProperty
+    InstanceComponents                           : ArrayProperty
+    BlueprintCreatedComponents                   : ArrayProperty
+    [total props on Actor: 76]
+  -- PC[6] Object --
+    [total props on Object: 0]
+
+=== G: PlayerState ALL properties ===
+  -- PS[0] ConZPlayerState --
+    [total props on ConZPlayerState: 0]
+  -- PS[1] PlayerState --
+    Score                                        : FloatProperty
+    PlayerId                                     : IntProperty
+    Ping                                         : ByteProperty
+    bShouldUpdateReplicatedPing                  : BoolProperty
+    bIsSpectator                                 : BoolProperty
+    bOnlySpectator                               : BoolProperty
+    bIsABot                                      : BoolProperty
+    bIsInactive                                  : BoolProperty
+    bFromPreviousLevel                           : BoolProperty
+    StartTime                                    : IntProperty
+    EngineMessageClass                           : ClassProperty  (-> Class)
+    SavedNetworkAddress                          : StrProperty
+    UniqueId                                     : StructProperty
+    PawnPrivate                                  : ObjectProperty  (-> Pawn)
+    PlayerNamePrivate                            : StrProperty
+    [total props on PlayerState: 15]
+  -- PS[2] Info --
+    [total props on Info: 0]
+  -- PS[3] Actor --
+    PrimaryActorTick                             : StructProperty
+    bNetTemporary                                : BoolProperty
+    bNetStartup                                  : BoolProperty
+    bOnlyRelevantToOwner                         : BoolProperty
+    bAlwaysRelevant                              : BoolProperty
+    bReplicateMovement                           : BoolProperty
+    bHidden                                      : BoolProperty
+    bTearOff                                     : BoolProperty
+    bForceNetAddressable                         : BoolProperty
+    bExchangedRoles                              : BoolProperty
+    bNetLoadOnClient                             : BoolProperty
+    bNetUseOwnerRelevancy                        : BoolProperty
+    bRelevantForNetworkReplays                   : BoolProperty
+    bRelevantForLevelBounds                      : BoolProperty
+    bReplayRewindable                            : BoolProperty
+    bAllowTickBeforeBeginPlay                    : BoolProperty
+    bAutoDestroyWhenFinished                     : BoolProperty
+    bCanBeDamaged                                : BoolProperty
+    bBlockInput                                  : BoolProperty
+    bCollideWhenPlacing                          : BoolProperty
+    bFindCameraComponentWhenViewTarget           : BoolProperty
+    bGenerateOverlapEventsDuringLevelStreaming   : BoolProperty
+    bIgnoresOriginShifting                       : BoolProperty
+    bEnableAutoLODGeneration                     : BoolProperty
+    bIsEditorOnlyActor                           : BoolProperty
+    bActorSeamlessTraveled                       : BoolProperty
+    bReplicates                                  : BoolProperty
+    bCanBeInCluster                              : BoolProperty
+    bAllowReceiveTickEventOnDedicatedServer      : BoolProperty
+    bActorEnableCollision                        : BoolProperty
+    bActorIsBeingDestroyed                       : BoolProperty
+    UpdateOverlapsMethodDuringLevelStreaming     : EnumProperty
+    DefaultUpdateOverlapsMethodDuringLevelStreaming : EnumProperty
+    RemoteRole                                   : ByteProperty
+    ReplicatedMovement                           : StructProperty
+    InitialLifeSpan                              : FloatProperty
+    CustomTimeDilation                           : FloatProperty
+    AttachmentReplication                        : StructProperty
+    Owner                                        : ObjectProperty  (-> Actor)
+    NetDriverName                                : NameProperty
+    Role                                         : ByteProperty
+    NetDormancy                                  : ByteProperty
+    SpawnCollisionHandlingMethod                 : EnumProperty
+    AutoReceiveInput                             : ByteProperty
+    InputPriority                                : IntProperty
+    InputComponent                               : ObjectProperty  (-> InputComponent)
+    NetCullDistanceSquared                       : FloatProperty
+    NetTag                                       : IntProperty
+    NetUpdateFrequency                           : FloatProperty
+    MinNetUpdateFrequency                        : FloatProperty
+    NetPriority                                  : FloatProperty
+    Instigator                                   : ObjectProperty  (-> Pawn)
+    Children                                     : ArrayProperty
+    RootComponent                                : ObjectProperty  (-> SceneComponent)
+    ControllingMatineeActors                     : ArrayProperty
+    Layers                                       : ArrayProperty
+    ParentComponent                              : WeakObjectProperty
+    Tags                                         : ArrayProperty
+    OnTakeAnyDamage                              : MulticastSparseDelegateProperty
+    OnTakePointDamage                            : MulticastSparseDelegateProperty
+    OnTakeRadialDamage                           : MulticastSparseDelegateProperty
+    OnActorBeginOverlap                          : MulticastSparseDelegateProperty
+    OnActorEndOverlap                            : MulticastSparseDelegateProperty
+    OnBeginCursorOver                            : MulticastSparseDelegateProperty
+    OnEndCursorOver                              : MulticastSparseDelegateProperty
+    OnClicked                                    : MulticastSparseDelegateProperty
+    OnReleased                                   : MulticastSparseDelegateProperty
+    OnInputTouchBegin                            : MulticastSparseDelegateProperty
+    OnInputTouchEnd                              : MulticastSparseDelegateProperty
+    OnInputTouchEnter                            : MulticastSparseDelegateProperty
+    OnInputTouchLeave                            : MulticastSparseDelegateProperty
+    OnActorHit                                   : MulticastSparseDelegateProperty
+    OnDestroyed                                  : MulticastSparseDelegateProperty
+    OnEndPlay                                    : MulticastSparseDelegateProperty
+    InstanceComponents                           : ArrayProperty
+    BlueprintCreatedComponents                   : ArrayProperty
+    [total props on Actor: 76]
+  -- PS[4] Object --
+    [total props on Object: 0]
+
+=== end of recon ===

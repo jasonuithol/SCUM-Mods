@@ -1,0 +1,132 @@
+=== recon v11 :: 2026-05-24 15:05:49 ===
+
+=== A: _elementClassMap derefed (the 11-entry tier ladder) ===
+  element = BP_ConZBaseElement_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.c58ca26c_ConZBaseElement_1
+    [ 1]  key = SM_Foundation_Base_Twig  [StaticMesh /Game/ConZ_Files/Models/Objects/Outdoor/Base_Building_Elements/Modular/Foundation/Twig/SM_Foundation_Base_Twig.SM_Foundation_Base_Twig]
+          val = HISM 0  [IndexedHierarchicalInstancedStaticMeshComponent /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.c58ca26c_ConZBaseElement_1.HISM 0]
+    [ 2]  key = SM_Ramp_Base_Twig  [StaticMesh /Game/ConZ_Files/Models/Objects/Outdoor/Base_Building_Elements/Modular/Ramp/Twig/SM_Ramp_Base_Twig.SM_Ramp_Base_Twig]
+          val = HISM 1  [IndexedHierarchicalInstancedStaticMeshComponent /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.c58ca26c_ConZBaseElement_1.HISM 1]
+    [ 3]  key = SM_Wall_Door_Double_Twig  [StaticMesh /Game/ConZ_Files/Models/Objects/Outdoor/Base_Building_Elements/Modular/Wall/Twig/SM_Wall_Door_Double_Twig.SM_Wall_Door_Double_Twig]
+          val = HISM 2  [IndexedHierarchicalInstancedStaticMeshComponent /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.c58ca26c_ConZBaseElement_1.HISM 2]
+    [ 4]  key = SM_Wall_Base_Bars_Twig  [StaticMesh /Game/ConZ_Files/Models/Objects/Outdoor/Base_Building_Elements/Modular/Wall/Twig/SM_Wall_Base_Bars_Twig.SM_Wall_Base_Bars_Twig]
+          val = HISM 3  [IndexedHierarchicalInstancedStaticMeshComponent /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.c58ca26c_ConZBaseElement_1.HISM 3]
+    [ 5]  key = SM_Wall_Loophole_Twig  [StaticMesh /Game/ConZ_Files/Models/Objects/Outdoor/Base_Building_Elements/Modular/Wall/Twig/SM_Wall_Loophole_Twig.SM_Wall_Loophole_Twig]
+          val = HISM 4  [IndexedHierarchicalInstancedStaticMeshComponent /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.c58ca26c_ConZBaseElement_1.HISM 4]
+    [ 6]  key = SM_Wall_Window_Twig  [StaticMesh /Game/ConZ_Files/Models/Objects/Outdoor/Base_Building_Elements/Modular/Wall/Twig/SM_Wall_Window_Twig.SM_Wall_Window_Twig]
+          val = HISM 5  [IndexedHierarchicalInstancedStaticMeshComponent /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.c58ca26c_ConZBaseElement_1.HISM 5]
+    [ 7]  key = SM_Wall_Hole_Base_Third_Twig  [StaticMesh /Game/ConZ_Files/Models/Objects/Outdoor/Base_Building_Elements/Modular/Wall/Twig/SM_Wall_Hole_Base_Third_Twig.SM_Wall_Hole_Base_Third_Twig]
+          val = HISM 6  [IndexedHierarchicalInstancedStaticMeshComponent /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.c58ca26c_ConZBaseElement_1.HISM 6]
+    [ 8]  key = SM_Roof_Base_Twig  [StaticMesh /Game/ConZ_Files/Models/Objects/Outdoor/Base_Building_Elements/Modular/Roof/Twig/SM_Roof_Base_Twig.SM_Roof_Base_Twig]
+          val = HISM 7  [IndexedHierarchicalInstancedStaticMeshComponent /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.c58ca26c_ConZBaseElement_1.HISM 7]
+    [ 9]  key = SM_CamoNet_Wall  [StaticMesh /Game/ConZ_Files/Models/Objects/Outdoor/Base_Building_Elements/Camo_Net/SM_CamoNet_Wall.SM_CamoNet_Wall]
+          val = HISM 8  [IndexedHierarchicalInstancedStaticMeshComponent /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.c58ca26c_ConZBaseElement_1.HISM 8]
+    [10]  key = SM_Bed_Improvised  [StaticMesh /Game/ConZ_Files/Models/Objects/Outdoor/Base_Building_Elements/Craftable_Furniture/Bed/Improvised_Bed/SM_Bed_Improvised.SM_Bed_Improvised]
+          val = HISM 9  [IndexedHierarchicalInstancedStaticMeshComponent /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.c58ca26c_ConZBaseElement_1.HISM 9]
+    [11]  key = SM_Base_Flag  [StaticMesh /Game/ConZ_Files/Models/Objects/Outdoor/Base_Building_Elements/Flag/Base_Flag/SM_Base_Flag.SM_Base_Flag]
+          val = HISM 10  [IndexedHierarchicalInstancedStaticMeshComponent /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.c58ca26c_ConZBaseElement_1.HISM 10]
+
+  -- MeshMap same treatment --
+    (empty -- no elements placed yet?)
+
+=== B: struct layouts via StaticFindObject ===
+  -- struct /Script/SCUM.ConZBaseElementIdentifier :: ScriptStruct /Script/SCUM.ConZBaseElementIdentifier --
+    BaseId                                       : Int64Property
+    ElementID                                    : Int64Property
+    Location                                     : StructProperty  (struct Vector)
+    [props: 3]
+  -- struct /Script/SCUM.ConZBaseData :: ScriptStruct /Script/SCUM.ConZBaseData --
+    BaseId                                       : Int64Property
+    BaseName                                     : StrProperty
+    BaseSize                                     : StructProperty  (struct Vector2D)
+    BaseLocation                                 : StructProperty  (struct Vector)
+    BaseOwnerPlayerId                            : Int64Property
+    IsOwnedByPlayer                              : BoolProperty
+    BaseBoundsMin                                : StructProperty  (struct Vector2D)
+    BaseBoundsMax                                : StructProperty  (struct Vector2D)
+    [props: 8]
+  -- struct /Script/SCUM.ConZBaseInteractionData :: ScriptStruct /Script/SCUM.ConZBaseInteractionData --
+    BaseId                                       : Int64Property
+    BaseLocation                                 : StructProperty  (struct Vector)
+    [props: 2]
+  -- struct /Script/SCUM.ConZBaseElementInteractionData :: ScriptStruct /Script/SCUM.ConZBaseElementInteractionData --
+    BaseElementId                                : Int64Property
+    GardenId                                     : UInt16Property
+    BaseElementLocation                          : StructProperty  (struct Vector)
+    RepairValue                                  : FloatProperty
+    InteractionTimestamp                         : Int64Property
+    IntegerData                                  : Int64Property
+    PointerData                                  : ObjectProperty
+    [props: 7]
+  -- struct /Script/SCUM.BaseElementSpawnParams :: ScriptStruct /Script/SCUM.BaseElementSpawnParams --
+    Quality                                      : FloatProperty
+    OverrideColor0                               : UInt32Property
+    OverrideColor1                               : UInt32Property
+    ShelterId                                    : StructProperty  (struct DbIntegerId)
+    EntityId                                     : StructProperty  (struct EntityId)
+    OverridePattern0                             : ByteProperty
+    OverridePattern1                             : ByteProperty
+    [props: 7]
+  -- struct /Script/SCUM.DbIntegerId :: ScriptStruct /Script/SCUM.DbIntegerId --
+    Value                                        : Int64Property
+    [props: 1]
+
+=== C: HISM PerInstanceSMData (if instances exist) ===
+  instance count = 0
+  PerInstanceSMData type=userdata tostring=TArray: 00000172FF0CEC98
+  PerInstanceSMData #=0
+
+=== D: manager funcs that LOOK like getters (no Multicast prefix) ===
+  scanning ConZBaseManager + parents for Get*/Find*/Make* functions
+  -- BP_ConZBaseManager_C --
+  -- ConZBaseManager --
+  -- Actor --
+    fn: MakeNoise
+    fn: MakeMIDForMaterial
+    fn: GetVerticalDistanceTo
+    fn: GetVelocity
+    fn: GetTransform
+    fn: GetTickableWhenPaused
+    fn: GetSquaredHorizontalDistanceTo
+    fn: GetSquaredDistanceTo
+    fn: GetRemoteRole
+    fn: GetParentComponent
+    fn: GetParentActor
+    fn: GetOwner
+    fn: GetOverlappingComponents
+    fn: GetOverlappingActors
+    fn: GetLocalRole
+    fn: GetLifeSpan
+    fn: GetInstigatorController
+    fn: GetInstigator
+    fn: GetInputVectorAxisValue
+    fn: GetInputAxisValue
+    fn: GetInputAxisKeyValue
+    fn: GetHorizontalDotProductTo
+    fn: GetHorizontalDistanceTo
+    fn: GetGameTimeSinceCreation
+    fn: GetDotProductTo
+    fn: GetDistanceTo
+    fn: GetComponentsByTag
+    fn: GetComponentsByInterface
+    fn: GetComponentByClass
+    fn: GetAttachParentSocketName
+    fn: GetAttachParentActor
+    fn: GetAttachedActors
+    fn: GetAllChildActors
+    fn: GetActorUpVector
+    fn: GetActorTimeDilation
+    fn: GetActorTickInterval
+    fn: GetActorScale3D
+    fn: GetActorRightVector
+    fn: GetActorRelativeScale3D
+    fn: GetActorForwardVector
+    fn: GetActorEyesViewPoint
+    fn: GetActorEnableCollision
+    fn: GetActorBounds
+  -- Object --
+
+=== E: try iterating manager._bases via ForEach + describe ===
+    [ 1]  key = ?  [?]
+          val = c58ca26c_ConZBase_1  [BP_ConZBase_C /Game/ConZ_Files/Maps/The_Island/The_Island.The_Island:PersistentLevel.c58ca26c_ConZBase_1]
+
+=== end of recon ===
