@@ -79,17 +79,42 @@ It runs under UE4SS (Experimental v3.0.1, from the `herbie96x/SCUM-AllowMods` bu
 
 ---
 
+## Server-side / online upgrade — investigated (blocked)
+
+The admin use case wanted to bulk-upgrade a player's base **online, with no
+restart**. That was investigated thoroughly and is currently blocked: SCUM's
+native `#UpgradeBaseBuildingElementsWithinRadius` is gated as an *internal*
+command that neither `elevated_users` developer access nor server-side
+invocation can satisfy, and the upgrade can't be driven via reflection (no
+callable function, no element registry — element IDs are native-only). Full
+write-up: [`docs/server-side-upgrade-findings.md`](docs/server-side-upgrade-findings.md).
+
+Two reusable artifacts came out of it:
+
+- **`tools/elevate.py`** — grant/revoke SCUM "Elevated User" (developer-command)
+  status by editing the `elevated_users` table in a server's `SCUM.db`. Same
+  safety pattern as `db_tier` (dry-run default, refuses while the server holds
+  the DB, timestamped backup). `python tools/elevate.py --list` / `... <steam64> --apply`.
+- **`Mods/BulkUpgrade/Scripts/main.lua`** — a **server-side** UE4SS hot-reload
+  harness. A headless server has no F11, so it hooks the admin-command RPC; typing
+  `#bu` in chat re-runs an external `live.lua` with the caller's player context.
+  Reusable for any future server-side modding.
+
+The working upgrade method remains the offline DB edit (`db_tier`, above).
+
 ## Repo layout
 
 ```
 tools/
   db_tier.py                          # the tier tool (main deliverable)
+  elevate.py                          # grant/revoke elevated-user (dev cmds) via SCUM.db
 Mods/
-  FlagUpgrade/Scripts/main.lua        # UE4SS hot-reload harness (loads .staging/live.lua)
+  FlagUpgrade/Scripts/main.lua        # client-side UE4SS hot-reload harness
+  BulkUpgrade/Scripts/main.lua        # server-side UE4SS harness (#bu -> live.lua)
   HelloScum/Scripts/main.lua          # minimal UE4SS sanity mod
-docs/recon/                           # research archive:
-  recon_*.txt                         #   the lab notebook (findings)
-  *.py                                #   the DB / UE probe scripts used to gather them
+docs/
+  server-side-upgrade-findings.md     # online-upgrade investigation + conclusions
+  recon/                              # research archive (lab notebook + probe scripts)
 .staging/                             # git-ignored scratch
 ```
 
