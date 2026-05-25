@@ -1,83 +1,111 @@
-# SCUM Modding — HelloScum starter
+# SCUM Base-Building Tier Tool & Modding Research
 
-A minimal UE4SS Lua mod for SCUM (UE 4.27.2). Proves the toolchain works end-to-end before touching anything more invasive.
+Tools and reverse-engineering notes for modding **SCUM** (UE 4.27.2, build 1.2.3.2 CL-115523).
 
-> **Status (2026-05-23): not installed on the game.** Stock UE4SS v3.0.1 crashes SCUM 1.2.3.2 (CL-115523) at the splash screen — access violation in UE4SS's `HookProcessInternal` trampoline, callstack stable regardless of mod loadout. SCUM's UE 4.27 fork has internals stock UE4SS doesn't handle. The next attempt should skip vanilla UE4SS and start from the `herbie96x/SCUM-AllowMods` bundle, which ships SCUM-tuned signatures and hook config.
+The headline deliverable is **`db_tier`** — an offline tool that bulk **upgrades/downgrades every base-building element's tier** (Twig → Wood → Metal → Brick → Cement) by editing SCUM's local SQLite save database. The change is a *real, persistent* tier change (correct mesh, HP, raid-resistance), because SCUM rebuilds each element from the DB on world load.
 
-The files below are kept as source-of-truth for the next attempt; they are no longer deployed to the SCUM install.
+> **Scope / ethics:** this only works where you have the save file — **single-player sandbox and your own dedicated server**. It is impossible on someone else's server (no DB access), which is exactly the intended boundary. Use it only on bases/servers you own.
 
-## Layout
+---
 
-```
-Mods/HelloScum/
-  Scripts/main.lua     # the mod itself
-```
+## `db_tier` — the tier editor
 
-Enable is done by an entry in `Mods/mods.txt`: `HelloScum : 1`. Do **not** also drop an `enabled.txt` in the mod folder — that legacy marker overrides `mods.txt` and will load the mod even when you've set the line to `: 0`, which breaks bisect debugging.
-
-Source-of-truth lives here under `Mods/`. The same tree is deployed to:
+`.staging/db_tier.py` (also buildable to a standalone `db_tier.exe`, see below).
 
 ```
-C:\Program Files (x86)\Steam\steamapps\common\SCUM\SCUM\Binaries\Win64\Mods\HelloScum
+python db_tier.py (--tier NAME | --levels N) [--playerid ID] [--apply] [--db PATH]
 ```
 
-UE4SS itself (DLLs + settings + default mods) was extracted into the same `Win64` folder.
+| Parameter | Meaning |
+| :--- | :--- |
+| `--tier NAME` | **Absolute** target tier: `twig`/`wood`/`metal`/`brick`/`cement`. Clamped to each shape's cap (e.g. doors stop at Metal). Best when the base is a mix of tiers. |
+| `--levels N` | **Relative**: raise N tiers; **negative downgrades** (`-5` → Twig). Clamped per shape. |
+| `--playerid ID` | **Server mode** — target bases where `owner_user_profile_id = ID`. Omit → **sandbox mode** (your `is_owned_by_player` flag). |
+| `--apply` | Actually write. **Without it, it's a dry-run** (preview only; read-only, safe even while SCUM runs). |
+| `--db PATH` | Use a different `SCUM.db` (e.g. a server's). Default: your local save. |
 
-## Launching
+Run with **no arguments** to print this help.
 
-1. In Steam, right-click SCUM → Properties → Launch Options, add:
+### Workflow
+
+1. **Quit SCUM to desktop** (releases the DB; the tool refuses to write while the game holds it).
+2. Preview, then apply:
    ```
-   -nobattleye
+   python db_tier.py --tier cement            # dry-run: see the plan
+   python db_tier.py --tier cement --apply    # do it (backs up the DB first)
    ```
-2. Launch the game from Steam as normal. SCUM.exe loads `dwmapi.dll` (UE4SS proxy), which loads `UE4SS.dll`, which scans `Mods/mods.txt` and runs every entry marked `: 1`.
-3. UE4SS console stays hidden at startup (`GuiConsoleVisible = 0`). Use the in-game console (F10 — provided by `ConsoleEnablerMod`) to type `hello` and confirm the mod is alive. UE4SS rendering is set to `GraphicsAPI = dx11` to match SCUM; do NOT switch this to `opengl` — it crashes the game during splash.
+3. **Relaunch and load** — SCUM rebuilds the elements at the new tier.
 
-## What you should see
+`--apply` always writes a timestamped backup (`SCUM.db.bak-<ts>`) next to the save first.
 
-In the UE4SS console:
-
-```
-[HelloScum] main.lua loaded
-```
-
-…printed during startup. Then once you spawn into a server / SP world:
+### Build a standalone binary
 
 ```
-[HelloScum] ClientRestart fired -- player spawned in world
+pip install pyinstaller
+pyinstaller --onefile --console db_tier.py
+# -> dist/db_tier.exe  (no Python needed to run)
 ```
 
-Open the UE4SS console input and type `hello` — you should get:
+---
+
+## How it works (and why it's a DB edit, not a live mod)
+
+SCUM persists the whole world — including every base element — to a local SQLite DB:
 
 ```
-Hello from HelloScum!
+%LOCALAPPDATA%\SCUM\Saved\SaveFiles\SCUM.db
 ```
 
-## Iteration loop
+In the `base_element` table, the **`asset` column is the element's class path, which *is* its tier**:
 
-- Edit `Mods/HelloScum/Scripts/main.lua` here.
-- Copy to the deployed path (or symlink — see below).
-- Restart SCUM (UE4SS hot-reload is off by default; flipping `EnableHotReloadSystem = 1` in `UE4SS-settings.ini` works but is flaky).
-
-Symlink the deployed folder back to this repo so edits land in both places:
-
-```powershell
-Remove-Item "C:\Program Files (x86)\Steam\steamapps\common\SCUM\SCUM\Binaries\Win64\Mods\HelloScum" -Recurse -Force
-New-Item -ItemType SymbolicLink `
-  -Path   "C:\Program Files (x86)\Steam\steamapps\common\SCUM\SCUM\Binaries\Win64\Mods\HelloScum" `
-  -Target "C:\Users\jason\Desktop\Projects\SCUM-Modding\Mods\HelloScum"
+```
+Twig:          /Game/ConZ_Files/.../Modular/BP_Base_Modular_<Shape>_Twig...
+Wood/.../Cement: /Game/ConZ_Files/.../Modular/BPC_Base_Modular_<Shape>_<Tier>...   (note the BPC_ prefix)
 ```
 
-(Run that PowerShell as Administrator — symlinks need elevation unless Windows is in Developer Mode.)
+Rewriting that string to a higher/lower tier, then reloading, makes SCUM reconstruct the element at the new tier via its normal, fully-supported load path. `element_health` is a 0–1 fraction, so the new tier loads at full HP automatically.
 
-## Caveats
+**Why not do it live from the UE4SS mod?** The in-game upgrade is `EInteractionType::UpgradeBaseElement` (value `180`), sent via `PlayerRpcChannel.InteractWithObjectOnServer(...)`. But it needs the element's `BaseElementId`, which is only resolved natively from the player's aim-trace — not reachable through UE reflection. Feeding a real ID (read from the DB) into the RPC **hangs the game** (the native upgrade handler called without its interaction context). The DB edit sidesteps all of that.
 
-- BattlEye must be bypassed (`-nobattleye`) — you cannot join official servers with UE4SS injected.
-- UE4SS hooks DLLs at runtime; this is detectable. Use private/community servers only.
-- The May 7 2026 SCUM hotfix restored `.pak` mod loading, but Lua mods like this one don't ship as `.pak`; they're just files UE4SS loads.
-- If SCUM crashes at startup, check `UE4SS.log` next to `UE4SS.dll`. If the log shows clean init through "Event loop start" but the game still dies at splash, the GUI renderer is the usual culprit — confirm `GraphicsAPI = dx11`. Next thing to try is `bUseUObjectArrayCache = false`. Last resort: set `HookInitGameState = 0`.
+`db_tier` learns which (shape, tier) classes are valid from the live DB **plus every `SCUM*.db` backup** in the save folder — so it still knows the full tier chain even after a downgrade has wiped the higher-tier strings out of the live DB. Per-shape caps (e.g. doors → Metal) and non-upgradeable pieces (ladders, camo nets, the flag) are handled automatically.
 
-## Next steps
+---
 
-- Replace the hello with something concrete (e.g. `RegisterHook` on a weapon-fire UFunction).
-- Add Blueprint mods via `BPModLoaderMod` if you want to load `.pak`-packaged Blueprints.
-- Build a true content `.pak` later with `UnrealPak.exe` once you have assets to ship.
+## `FlagUpgrade` — the UE4SS research harness
+
+`Mods/FlagUpgrade/Scripts/main.lua` is a tiny **bootstrap** that, on **F11**, executes `.staging/live.lua` fresh each press — a hot-reload loop so the actual logic can be iterated without restarting SCUM. This is how the base-building system was reverse-engineered (HISM layout, the interaction RPCs, the `EInteractionType` enum, struct layouts). It is **not** required for `db_tier`.
+
+It runs under UE4SS (Experimental v3.0.1, from the `herbie96x/SCUM-AllowMods` bundle), which is unpacked into the game's `Win64` folder. Launch by running `SCUM.exe` directly with `-nobattleye`; leave the BattlEye service at its default `Manual` (don't disable it), and never create an `enabled.txt` (it overrides `mods.txt`).
+
+---
+
+## Repo layout
+
+```
+db_tier  ──────────────  .staging/db_tier.py        # the tier tool (main deliverable)
+helper/recon scripts ──  .staging/db_upgrade.py, dbread.py, dbcheck.py,
+                         dbexplore.py, inspect_pak.py
+hot-reload mod ────────  Mods/FlagUpgrade/Scripts/main.lua  (+ .staging/live.lua)
+research notes ────────  .staging/recon_*.txt        # the lab notebook (see below)
+```
+
+Build artifacts, the SCUM-AllowMods bundle, DLLs, the `.exe`, PAKs, zips, and DB
+backups (save data) are **git-ignored** — they're large, binary, third-party, or personal.
+
+### Research notes (`.staging/recon_*.txt`)
+
+Key references produced during the reverse-engineering:
+
+- `recon_enum.txt` — the full `EInteractionType` enum (incl. `UpgradeBaseElement = 180`).
+- `recon_structs.txt` — interaction struct field layouts.
+- `recon_params.txt` / `recon_funcs.txt` — interaction-function signatures.
+- `recon_v26_catalog.txt` — every base-element mesh/tier in a built base.
+- `recon_bases.txt`, `recon_custom.txt`, `recon_elemprops.txt`, `recon_interact.txt` — the dead-ends that proved the DB route was necessary.
+
+---
+
+## Safety
+
+- Dry-run is the default; `--apply` is required to write.
+- Every `--apply` backs up `SCUM.db` first, and refuses to run while SCUM is open.
+- Scope is always a single player's own flag(s) — sandbox auto-detects you, server uses `--playerid`.
