@@ -1,4 +1,4 @@
-// ScumDevGate — UE4SS C++ mod for SCUMServer.exe
+// DeveloperMode — UE4SS C++ mod for SCUMServer.exe
 //
 // Unlocks SCUM's tier-4 "developer" admin commands (chiefly
 // #UpgradeBaseBuildingElementsWithinRadius) by neutralising the IsDeveloper
@@ -33,7 +33,7 @@ static void log_line(const char* msg) {
     if (!n || n >= MAX_PATH) return;
     char* slash = strrchr(path, '\\');
     if (!slash) return;
-    strcpy(slash + 1, "devgate.log");
+    strcpy(slash + 1, "DeveloperMode.log");
     HANDLE h = CreateFileA(path, FILE_APPEND_DATA, FILE_SHARE_READ | FILE_SHARE_WRITE,
                            nullptr, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
     if (h == INVALID_HANDLE_VALUE) return;
@@ -128,7 +128,7 @@ static void do_patch() {
 // v3.0.1 null-checks the start_mod return and guards every virtual call with
 // `if (m_mod)`, so returning nullptr is safe: the patch is already applied.
 extern "C" __declspec(dllexport) void* start_mod() {
-    log_line("==== ScumDevGate start_mod ====");
+    log_line("==== DeveloperMode start_mod ====");
     do_patch();
     return nullptr;
 }

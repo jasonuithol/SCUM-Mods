@@ -1,0 +1,46 @@
+[size=5][b]DeveloperMode — unlock SCUM's developer-tier admin commands[/b][/size]
+
+A server-side tool for [b]SCUM dedicated servers[/b] that unlocks the game's built-in [b]developer-tier admin commands[/b] — the ones gated above the normal admin/elevated tiers, which otherwise return [i]"Player must be developer."[/i] for everyone on a retail server.
+
+The headline command:
+[code]#UpgradeBaseBuildingElementsWithinRadius <radius>[/code]
+upgrades every base-building element within [i]radius[/i] (in cm) of you to its max tier — [b]live, no restart, persistent[/b] — using SCUM's own native code. No save-file editing, no rebuilding game state.
+
+[size=4][b]⚠ Server operators only[/b][/size]
+This patches your dedicated-server process [b]in memory[/b]. Installing it requires file-system access to the server and UE4SS injection — in other words, a server you run or are authorised to administer. It does nothing on a game client and cannot affect a server you don't control. Use it on your own / authorised servers only.
+
+[size=4][b]Requirements[/b][/size]
+[list]
+[*]A SCUM [b]dedicated server[/b] you administer (SteamCMD app 3792580).
+[*][b]UE4SS injected server-side[/b] (the same setup other SCUM server mods use). UE4SS must be able to load into SCUMServer.exe.
+[*]Server launched so injection is allowed (self-hosted is fine — BattlEye is client-side; on a rented host, server-side mod/DLL injection must be permitted).
+[*]Your account already has admin/elevated rights to issue [b]#[/b] commands.
+[/list]
+
+[size=4][b]Installation[/b][/size]
+[list=1]
+[*]Copy the [b]DeveloperMode[/b] folder into your server's UE4SS mods directory, so you have:
+[code]<server>\SCUM\Binaries\Win64\ue4ss\Mods\DeveloperMode\dlls\main.dll[/code]
+[*]Enable it in [b]...\ue4ss\Mods\mods.txt[/b] by adding the line:
+[code]DeveloperMode : 1[/code]
+[*]Start the server. Confirm it worked in [b]...\Mods\DeveloperMode\dlls\DeveloperMode.log[/b]:
+[code]PATCHED predicate 0x... -> B0 01 C3. Tier-4 developer commands unlocked.[/code]
+[*]In-game, an admin stands in the base and runs e.g. [b]#UpgradeBaseBuildingElementsWithinRadius 5000[/b].
+[/list]
+
+[size=4][b]How it works[/b][/size]
+SCUM admin commands carry a required-privilege tier; the top tier ("developer") is checked against an in-memory developer-ID set that is empty on retail servers, so nobody qualifies. DeveloperMode locates the shared check at boot and makes it always return true, opening the developer tier. The game's own dispatcher then runs the command normally.
+
+It does [b]not[/b] modify SCUMServer.exe on disk — the 3-byte patch is applied to memory each boot and is gone when the process exits. The location is found by pattern-scan (not a hardcoded address), so it generally keeps working across SCUM updates; if a future patch changes it, the mod logs that and patches nothing rather than risk a bad write.
+
+[size=4][b]Troubleshooting[/b][/size]
+[list]
+[*]No effect? Check [b]DeveloperMode.log[/b] next to the DLL. "PATCHED ..." = success; "dev gate not located" = SCUM changed the gate (wait for an updated version).
+[*]Still "Player must be developer."? The mod isn't loading — verify UE4SS loads server-side and the mods.txt line is present.
+[/list]
+
+[size=4][b]Notes[/b][/size]
+[list]
+[*]This opens the entire developer tier, not only the upgrade command.
+[*]All rights reserved. Personal use on servers you administer; please don't re-upload or repackage.
+[/list]
