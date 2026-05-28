@@ -210,61 +210,187 @@ local function matchChest(path, candidates)
 end
 
 -- ---- entitlement gate (per-player primary, per-flag fallback) ------------
--- The flag owner isn't readable from the live actor, so an external Python
--- resolver reads SCUM.db and writes goober_resolved.lua (an enabled-baseId set)
--- + goober_reply.txt. We shell out to it (os.execute confirmed available).
--- Untrusted text (a player name) is handed over via a file, never the command
--- line, so there's no shell-injection surface; fixed verbs/numeric ids only.
+-- The flag owner isn't readable from the live actor, so the mod reads SCUM.db
+-- read-only via the bundled sqlite3.exe to map baseId -> owner Steam64, keeps
+-- its own store (entitlements.lua), and computes the enabled-baseId set in Lua.
+-- All SQL is constant; the only untrusted input (a player name) is matched in
+-- Lua against the user list, so there's no SQL/shell-injection surface.
 
--- load goober_resolved.lua -> GG.resolved (table with .enabled[baseId]=true)
-function GG.loadResolvedFile()
-    local path = GG.resolvedFile
-    local f = path and io.open(path, "r") or nil
-    if not f then GG.resolved = nil; return false end
+-- ---- DB access via the bundled sqlite3.exe (read-only) -------------------
+-- Every query below is a FIXED constant: no untrusted input is interpolated
+-- into SQL or the command line. Player-name matching for add/remove is done
+-- in Lua against the full user list, so there is zero SQL/shell-injection
+-- surface. sqlite3.exe is fetched by install-libraries.ps1.
+local OWNER_SQL = "SELECT b.id, up.user_id FROM base b JOIN user_profile up ON up.id=b.owner_user_profile_id WHERE b.is_owned_by_player=1;"
+local USERS_SQL = "SELECT u.id, COALESCE(up.name,''), COALESCE(u.name,'') FROM user u LEFT JOIN user_profile up ON up.user_id=u.id;"
+local STEAM64_PAT = "^%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d$" -- 17 digits
+
+local function dq(s) return '"' .. tostring(s) .. '"' end
+
+-- run a fixed SELECT through sqlite3.exe; returns array-of-rows (each row an
+-- array of pipe-split fields), or nil+err. Read-only; safe while the game runs.
+function GG.dbRows(sql)
+    local exe = (GG.config and GG.config.sqliteExe) or GG.sqliteExe
+    local db = GG.config and GG.config.dbPath
+    if not exe or not db then return nil, "sqlite/db path not configured" end
+    -- Wrap the whole command in one extra pair of quotes: cmd.exe strips exactly
+    -- one outer pair, leaving the inner quoting (which protects spaces in the
+    -- exe/db paths) intact. 2>&1 lets us see sqlite errors on stdout.
+    local inner = string.format('%s -readonly -batch -noheader -separator "|" %s %s 2>&1',
+        dq(exe), dq(db), dq(sql))
+    local h = io.popen('"' .. inner .. '"', "r")
+    if not h then return nil, "io.popen failed" end
+    local rows, errline = {}, nil
+    for line in h:lines() do
+        line = (line:gsub("\r$", ""))
+        if line:match("^Error:") then
+            errline = line
+        elseif line ~= "" then
+            local fields = {}
+            for f in (line .. "|"):gmatch("(.-)|") do fields[#fields + 1] = f end
+            rows[#rows + 1] = fields
+        end
+    end
+    h:close()
+    if errline then return nil, errline end
+    return rows
+end
+
+-- ---- entitlement store (entitlements.lua in this mod's folder) ------------
+local function defaultStore() return { defaultEnabled = false, players = {}, flagOverrides = {} } end
+
+function GG.loadStore()
+    GG.store = defaultStore()
+    local f = GG.storeFile and io.open(GG.storeFile, "r") or nil
+    if not f then return end
     local src = f:read("*a"); f:close()
-    local chunk = load(src, "@goober_resolved.lua")
-    if not chunk then GG.resolved = nil; return false end
-    local ok, res = pcall(chunk)
-    if ok and type(res) == "table" then GG.resolved = res; GG.resolvedAt = os.time(); return true end
-    GG.resolved = nil; return false
+    local chunk = load(src, "@entitlements.lua")
+    local ok, t = false, nil
+    if chunk then ok, t = pcall(chunk) end
+    if ok and type(t) == "table" then
+        GG.store.defaultEnabled = (t.defaultEnabled == true)
+        if type(t.players) == "table" then
+            for _, s in ipairs(t.players) do GG.store.players[#GG.store.players + 1] = tostring(s) end
+        end
+        if type(t.flagOverrides) == "table" then
+            for k, v in pairs(t.flagOverrides) do
+                local id = math.tointeger(tonumber(k))
+                if id ~= nil then GG.store.flagOverrides[id] = (v == true) end
+            end
+        end
+    end
 end
 
--- run the resolver with a FIXED token string (validated by the caller); pass any
--- untrusted free text via the arg file. Reloads resolved.lua + returns reply lines.
-function GG.runResolver(tokens, untrusted)
-    local cfg = GG.config or {}
-    if not (GG.resolverScript and GG.modDir and cfg.dbPath) then
-        GG.log("resolver paths not set — cannot run entitlement resolver")
-        return {}
+local function serializeStore(s)
+    local out = {
+        "-- GarbageGoober entitlement store. Written by the goober chat commands;",
+        "-- hand-edits are fine (then 'goober reload'). players = Steam64 IDs.",
+        "return {",
+        "  defaultEnabled = " .. (s.defaultEnabled and "true" or "false") .. ",",
+        "  players = {",
+    }
+    for _, sid in ipairs(s.players) do out[#out + 1] = string.format("    %q,", tostring(sid)) end
+    out[#out + 1] = "  },"
+    out[#out + 1] = "  flagOverrides = {"
+    local keys = {}
+    for k in pairs(s.flagOverrides) do keys[#keys + 1] = k end
+    table.sort(keys)
+    for _, k in ipairs(keys) do
+        out[#out + 1] = string.format("    [%d] = %s,", k, s.flagOverrides[k] and "true" or "false")
     end
-    local argPart = ""
-    if untrusted ~= nil then
-        local af = io.open(GG.argFile, "w")
-        if af then af:write(tostring(untrusted)); af:close() end
-        argPart = string.format(' --argfile "%s"', GG.argFile)
-    end
-    local cmd = string.format('cmd /c %s "%s" --db "%s" --dir "%s" %s%s',
-        cfg.pythonExe or "python", GG.resolverScript, cfg.dbPath, GG.modDir, tokens, argPart)
-    GG.log("resolver: " .. tokens)
-    pcall(os.execute, cmd)
-    GG.loadResolvedFile()
-    local lines = {}
-    local rf = io.open(GG.replyFile, "r")
-    if rf then for l in rf:lines() do lines[#lines + 1] = l end; rf:close() end
-    return lines
+    out[#out + 1] = "  },"
+    out[#out + 1] = "}"
+    return table.concat(out, "\n") .. "\n"
 end
 
--- ensure GG.resolved is loaded & fresh. force=true re-syncs now; otherwise only
--- if older than resyncIntervalMs. No-op (and clears) when the gate is disabled.
+function GG.saveStore()
+    if not GG.store then return false end
+    local f = GG.storeFile and io.open(GG.storeFile, "w") or nil
+    if not f then GG.log("could not write store: " .. tostring(GG.storeFile)); return false end
+    f:write(serializeStore(GG.store)); f:close()
+    return true
+end
+
+local function tcount(t) local n = 0; for _ in pairs(t or {}) do n = n + 1 end; return n end
+
+-- recompute GG.resolved.enabled (set of baseIds to sort) from ownerMap + store.
+-- Precedence per base: per-flag override > player-entitled > global default.
+local function recomputeEnabled()
+    local s = GG.store or defaultStore()
+    local owners = GG.ownerMap or {} -- { [baseId] = ownerSteam64 }
+    local entitled = {}
+    for _, sid in ipairs(s.players) do entitled[sid] = true end
+    local consider = {}
+    for baseId in pairs(owners) do consider[baseId] = true end
+    for baseId in pairs(s.flagOverrides) do consider[baseId] = true end
+    local enabled, n = {}, 0
+    for baseId in pairs(consider) do
+        local ov = s.flagOverrides[baseId]
+        local en
+        if ov ~= nil then en = ov
+        elseif owners[baseId] and entitled[owners[baseId]] then en = true
+        else en = s.defaultEnabled end
+        if en then enabled[baseId] = true; n = n + 1 end
+    end
+    GG.resolved = {
+        enabled = enabled,
+        defaultEnabled = s.defaultEnabled,
+        counts = { enabled = n, bases = tcount(owners), players = #s.players, overrides = tcount(s.flagOverrides) },
+    }
+end
+
+-- refresh the owner map from the DB (throttled by resyncIntervalMs) then
+-- recompute the enabled set. force=true refreshes now. No-op (clears) if off.
 function GG.ensureResolved(force)
     local cfg = GG.config or {}
     if not cfg.entitlementsEnabled then GG.resolved = nil; return true end
+    if not GG.store then GG.loadStore() end
     local intervalSec = (cfg.resyncIntervalMs or 300000) / 1000
-    if not force and GG.resolved and GG.resolvedAt and (os.time() - GG.resolvedAt) < intervalSec then
-        return true
+    local fresh = GG.ownerMap and GG.ownerMapAt and (os.time() - GG.ownerMapAt) < intervalSec
+    if force or not fresh then
+        local rows, err = GG.dbRows(OWNER_SQL)
+        if rows then
+            local m = {}
+            for _, r in ipairs(rows) do
+                local id = math.tointeger(tonumber(r[1]))
+                if id ~= nil then m[id] = r[2] end
+            end
+            GG.ownerMap = m
+            GG.ownerMapAt = os.time()
+        else
+            GG.log("entitlement DB read failed: " .. tostring(err))
+        end
     end
-    GG.runResolver("sync", nil)
-    return GG.resolved ~= nil
+    if not GG.ownerMap then GG.resolved = nil; return false end
+    recomputeEnabled()
+    return true
+end
+
+-- resolve a typed name/Steam64 -> { status, id, name, matches }.
+-- status: ok | pregrant (valid id, not in DB yet) | ambiguous | notfound | dberror
+function GG.resolvePlayer(arg)
+    arg = trim(arg or "")
+    if arg == "" then return { status = "notfound" } end
+    local rows, err = GG.dbRows(USERS_SQL)
+    if not rows then GG.log("resolvePlayer DB read failed: " .. tostring(err)); return { status = "dberror" } end
+    if arg:match(STEAM64_PAT) then
+        for _, r in ipairs(rows) do
+            if r[1] == arg then return { status = "ok", id = r[1], name = (r[2] ~= "" and r[2] or r[3]) } end
+        end
+        return { status = "pregrant", id = arg }
+    end
+    local low = arg:lower()
+    local matches = {}
+    for _, r in ipairs(rows) do
+        if (r[2] or ""):lower() == low or (r[3] or ""):lower() == low then
+            matches[r[1]] = (r[2] ~= "" and r[2] or r[3])
+        end
+    end
+    local ids = {}
+    for sid in pairs(matches) do ids[#ids + 1] = sid end
+    if #ids == 1 then return { status = "ok", id = ids[1], name = matches[ids[1]] } end
+    if #ids > 1 then return { status = "ambiguous", matches = matches } end
+    return { status = "notfound" }
 end
 
 -- is this flag's loot allowed to be sorted? Fail-closed: if the gate is on but
@@ -293,8 +419,7 @@ local function currentFlagBaseId()
 end
 
 -- "goober flag on|off|clear [baseId]" — baseId optional (defaults to the flag
--- the admin is standing in). Verb + numeric id validated here before shelling
--- out, so only fixed/numeric tokens ever reach the command line.
+-- the admin is standing in). Sets/clears the per-flag override in the store.
 function GG.handleFlagCmd(rest)
     local mode, idtok = (rest or ""):match("^(%S*)%s*(%S*)$")
     mode = (mode or ""):lower()
@@ -314,9 +439,119 @@ function GG.handleFlagCmd(rest)
             return
         end
     end
-    for _, l in ipairs(GG.runResolver(string.format("flag %s %d", mode, baseId), nil)) do
-        GG.reply(l, true)
+    if not GG.store then GG.loadStore() end
+    if mode == "clear" then
+        if GG.store.flagOverrides[baseId] ~= nil then
+            GG.store.flagOverrides[baseId] = nil
+            GG.reply("cleared override on base " .. baseId .. " (back to player/default)")
+        else
+            GG.reply("base " .. baseId .. " had no override")
+        end
+    else
+        GG.store.flagOverrides[baseId] = (mode == "on")
+        GG.reply("base " .. baseId .. " override set to " .. mode:upper())
     end
+    GG.saveStore()
+    GG.ensureResolved(true)
+end
+
+-- list every entitled player + their owned base(s), the flag overrides, and the
+-- net result. Reads the DB for names/owners; echoes to the issuer's chat.
+function GG.cmdList()
+    if not GG.store then GG.loadStore() end
+    GG.ensureResolved(true)
+    local s = GG.store
+    GG.reply("GarbageGoober access (default: " .. (s.defaultEnabled and "ON" or "OFF") .. ")", true)
+    local users = GG.dbRows(USERS_SQL) or {}
+    local nameOf = {}
+    for _, u in ipairs(users) do nameOf[u[1]] = (u[2] ~= "" and u[2] or u[3]) end
+    GG.reply("enabled players (" .. #s.players .. "):", true)
+    if #s.players == 0 then GG.reply("  (none)", true) end
+    for _, sid in ipairs(s.players) do
+        local bids = {}
+        for baseId, owner in pairs(GG.ownerMap or {}) do if owner == sid then bids[#bids + 1] = baseId end end
+        table.sort(bids)
+        local where = #bids > 0 and ("base " .. table.concat(bids, ", ")) or "no base yet"
+        GG.reply(string.format("  %s  %s  -> %s", sid, nameOf[sid] or "?", where), true)
+    end
+    local ovk = {}
+    for k in pairs(s.flagOverrides) do ovk[#ovk + 1] = k end
+    table.sort(ovk)
+    GG.reply("flag overrides (" .. #ovk .. "):", true)
+    if #ovk == 0 then GG.reply("  (none)", true) end
+    for _, k in ipairs(ovk) do GG.reply("  base " .. k .. " -> " .. (s.flagOverrides[k] and "ON" or "OFF"), true) end
+    local c = (GG.resolved and GG.resolved.counts) or {}
+    GG.reply(string.format("result: %d of %d player-owned base(s) will be sorted", c.enabled or 0, c.bases or 0), true)
+end
+
+function GG.cmdStatus()
+    if not GG.store then GG.loadStore() end
+    GG.ensureResolved(true)
+    local s = GG.store
+    local c = (GG.resolved and GG.resolved.counts) or {}
+    GG.reply(string.format("default=%s  players=%d  flag overrides=%d  -> %d/%d base(s) sorted",
+        s.defaultEnabled and "ON" or "OFF", #s.players, tcount(s.flagOverrides), c.enabled or 0, c.bases or 0), true)
+end
+
+function GG.cmdAdd(who)
+    if not GG.store then GG.loadStore() end
+    local r = GG.resolvePlayer(who)
+    if r.status == "dberror" then GG.reply("DB read failed (see log)"); return end
+    if r.status == "notfound" then GG.reply("no player matched '" .. who .. "' (try their Steam64 ID)"); return end
+    if r.status == "ambiguous" then
+        GG.reply("'" .. who .. "' matches several players - add by Steam64:", true)
+        for sid, nm in pairs(r.matches) do GG.reply("  " .. sid .. "  " .. tostring(nm), true) end
+        return
+    end
+    local sid, nm = r.id, r.name
+    for _, p in ipairs(GG.store.players) do
+        if p == sid then GG.reply((nm or sid) .. " is already enabled"); return end
+    end
+    GG.store.players[#GG.store.players + 1] = sid
+    GG.saveStore()
+    GG.ensureResolved(true)
+    local bids = {}
+    for baseId, owner in pairs(GG.ownerMap or {}) do if owner == sid then bids[#bids + 1] = baseId end end
+    table.sort(bids)
+    local tail
+    if #bids > 0 then tail = "now sorting base " .. table.concat(bids, ", ")
+    elseif r.status == "pregrant" then tail = "not seen on this server yet - applies when they build"
+    else tail = "no base owned yet" end
+    GG.reply("enabled " .. (nm or sid) .. " (" .. sid .. ") - " .. tail)
+end
+
+function GG.cmdRemove(who)
+    if not GG.store then GG.loadStore() end
+    who = trim(who)
+    local target
+    for _, p in ipairs(GG.store.players) do if p == who then target = who; break end end
+    if not target then
+        local r = GG.resolvePlayer(who)
+        if r.status == "ambiguous" then
+            GG.reply("'" .. who .. "' matches several players - remove by Steam64:", true)
+            for sid, nm in pairs(r.matches) do GG.reply("  " .. sid .. "  " .. tostring(nm), true) end
+            return
+        end
+        if r.id then
+            for _, p in ipairs(GG.store.players) do if p == r.id then target = r.id; break end end
+        end
+    end
+    if not target then GG.reply("'" .. who .. "' is not in the enabled list"); return end
+    local kept = {}
+    for _, p in ipairs(GG.store.players) do if p ~= target then kept[#kept + 1] = p end end
+    GG.store.players = kept
+    GG.saveStore()
+    GG.ensureResolved(true)
+    GG.reply("removed " .. target .. " from enabled players")
+end
+
+function GG.cmdDefault(mode)
+    if not GG.store then GG.loadStore() end
+    GG.store.defaultEnabled = (mode == "on")
+    GG.saveStore()
+    GG.ensureResolved(true)
+    local c = (GG.resolved and GG.resolved.counts) or {}
+    GG.reply(string.format("global default set to %s - %d/%d base(s) now sorted", mode:upper(), c.enabled or 0, c.bases or 0))
 end
 
 -- ---- the sweep -----------------------------------------------------------
@@ -330,8 +565,8 @@ function GG.sweep()
     -- refresh the per-player/per-flag entitlement set (throttled; see Config)
     GG.ensureResolved(false)
     if GG.config.entitlementsEnabled and not GG.resolved then
-        GG.log("sweep: entitlement gate ON but resolver gave no result — NOT sorting " ..
-            "(fail-closed). Check pythonExe/dbPath; run 'goober status'.")
+        GG.log("sweep: gate ON but no enabled set (DB read failed?) — NOT sorting " ..
+            "(fail-closed). Check sqlite3.exe/dbPath; run 'goober status'.")
     end
 
     local flags, radius = collectFlags()
@@ -345,7 +580,7 @@ function GG.sweep()
     GG.log(string.format("sweep start: %d loose item(s), %d chest(s), %d flag(s), radius=%dcm%s",
         #items, #chests, #flags, radius,
         GG.config.entitlementsEnabled and (" | gate ON (" ..
-            (GG.resolved and GG.resolved.counts and GG.resolved.counts.enabled or 0) .. " base(s) entitled)") or " | gate OFF"))
+            (GG.resolved and GG.resolved.counts and GG.resolved.counts.enabled or 0) .. " base(s) enabled)") or " | gate OFF"))
 
     local moved, noFlag, disabled, noChest, noMatch, errs = 0, 0, 0, 0, 0, 0
     local unmapped = {} -- distinct item classes that hit no rule (tree gaps)
@@ -543,10 +778,10 @@ local function helpLines()
     }
     if GG.config and GG.config.entitlementsEnabled then
         h[#h + 1] = "  -- access control (per player; per flag = fallback) --"
-        h[#h + 1] = "  goober list     — entitled players / flag overrides / result"
-        h[#h + 1] = "  goober status   — one-line entitlement summary"
-        h[#h + 1] = "  goober add <player>    — entitle a player (name or Steam64)"
-        h[#h + 1] = "  goober remove <player> — un-entitle a player"
+        h[#h + 1] = "  goober list     — enabled players / flag overrides / result"
+        h[#h + 1] = "  goober status   — one-line access summary"
+        h[#h + 1] = "  goober add <player>    — enable the sorter for a player (name or Steam64)"
+        h[#h + 1] = "  goober remove <player> — disable the sorter for a player"
         h[#h + 1] = "  goober flag on|off|clear [baseId] — per-flag override (blank=your flag)"
         h[#h + 1] = "  goober default on|off  — sort every flag by default, or none"
     end
@@ -610,28 +845,20 @@ function GG.handleCommand(arg)
     elseif arg == "resume" then
         GG.enabled = true; GG.log("timer resumed"); GG.reply("auto-sweep resumed")
     elseif arg == "list" then
-        GG.log("entitlement list (goober list)")
-        local lines = GG.runResolver("list", nil)
-        if #lines == 0 then GG.reply("list: resolver gave no output (see log)")
-        else for _, l in ipairs(lines) do GG.reply(l, true) end end
+        GG.log("entitlement list (goober list)"); GG.cmdList()
     elseif arg == "status" then
-        local lines = GG.runResolver("status", nil)
-        if #lines == 0 then GG.reply("status: resolver gave no output (see log)")
-        else for _, l in ipairs(lines) do GG.reply(l, true) end end
+        GG.cmdStatus()
     elseif arg:sub(1, 4) == "add " then
         local who = trim(arg:sub(5))
-        if who == "" then GG.reply("usage: goober add <player name or Steam64>")
-        else for _, l in ipairs(GG.runResolver("add", who)) do GG.reply(l, true) end end
+        if who == "" then GG.reply("usage: goober add <player name or Steam64>") else GG.cmdAdd(who) end
     elseif arg:sub(1, 7) == "remove " then
         local who = trim(arg:sub(8))
-        if who == "" then GG.reply("usage: goober remove <player name or Steam64>")
-        else for _, l in ipairs(GG.runResolver("remove", who)) do GG.reply(l, true) end end
+        if who == "" then GG.reply("usage: goober remove <player name or Steam64>") else GG.cmdRemove(who) end
     elseif arg == "flag" or arg:sub(1, 5) == "flag " then
         GG.handleFlagCmd(trim(arg:sub(5)))
     elseif arg:sub(1, 8) == "default " then
         local m = trim(arg:sub(9)):lower()
-        if m ~= "on" and m ~= "off" then GG.reply("usage: goober default on|off")
-        else for _, l in ipairs(GG.runResolver("default " .. m, nil)) do GG.reply(l, true) end end
+        if m ~= "on" and m ~= "off" then GG.reply("usage: goober default on|off") else GG.cmdDefault(m) end
     else
         GG.log("unknown command 'goober " .. arg .. "'")
         GG.reply("unknown command 'goober " .. arg .. "'")

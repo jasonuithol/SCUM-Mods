@@ -28,14 +28,12 @@ local LOGFILE = MOD_DIR .. [[\GarbageGoober.log]]
 GarbageGoober = GarbageGoober or {}
 local GG = GarbageGoober
 
--- Paths used by the entitlement layer (resolver + its hand-off files). The
--- Python resolver reads SCUM.db and writes goober_resolved.lua / goober_reply.txt
--- here; sorter.lua reads them back. See Scripts/Config.lua + goober_entitlements.py.
+-- Paths for the entitlement layer. The mod reads SCUM.db via the bundled
+-- sqlite3.exe (fetched by install-libraries.ps1) and keeps its own store in
+-- entitlements.lua. See Scripts/sorter.lua + Scripts/Config.lua.
 GG.modDir = MOD_DIR
-GG.resolverScript = MOD_DIR .. [[\goober_entitlements.py]]
-GG.resolvedFile = MOD_DIR .. [[\goober_resolved.lua]]
-GG.replyFile = MOD_DIR .. [[\goober_reply.txt]]
-GG.argFile = MOD_DIR .. [[\goober_arg.txt]]
+GG.sqliteExe = MOD_DIR .. [[\sqlite3.exe]]
+GG.storeFile = MOD_DIR .. [[\entitlements.lua]]
 
 local function ts() return os.date("%Y-%m-%d %H:%M:%S") end
 function GG.log(m)
@@ -92,7 +90,8 @@ if not GG.reload() then
     return
 end
 
--- Prime the entitlement set once at boot (so the first sweep already has it).
+-- Prime the entitlement store + set once at boot (so the first sweep has them).
+if type(GG.loadStore) == "function" then pcall(GG.loadStore) end
 if type(GG.ensureResolved) == "function" then pcall(GG.ensureResolved, true) end
 
 GG.armTimer()

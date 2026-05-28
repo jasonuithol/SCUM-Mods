@@ -52,21 +52,22 @@ return {
     -- When ON, the sweep only sorts loot inside a flag whose owner has been
     -- entitled by an admin (the donation/premium model), with a per-flag
     -- override as the fallback. A flag's owner is NOT readable from the live
-    -- actor, so this shells out to goober_entitlements.py to read SCUM.db
-    -- read-only and resolve baseId -> owner Steam64 -> entitled?. Control it
-    -- in-game with:  goober add/remove <player> , goober list ,
+    -- actor, so the mod reads SCUM.db read-only via the bundled sqlite3.exe to
+    -- map baseId -> owner Steam64 -> entitled?. Control it in-game with:
+    -- goober add/remove <player> , goober list , goober status ,
     -- goober flag on|off|clear [baseId] , goober default on|off .
     --   true  = gate sorting by entitlement (per-player primary, per-flag fallback)
     --   false = sort EVERY flag (the entitlement layer is disabled)
     entitlementsEnabled = true,
     -- Path to the server's save DB (read-only). owner_user_profile_id lives here.
     dbPath = [[C:\scumserver\SCUM\Saved\SaveFiles\SCUM.db]],
-    -- Python launcher used to run the resolver (must be on PATH or absolute).
-    pythonExe = "python",
-    -- How often (ms) the sweep re-runs the resolver to refresh the enabled set.
-    -- Cheap (one read-only query). Lower = a donor's freshly built/rebuilt base
-    -- starts being sorted sooner; higher = fewer python spawns. add/remove/flag/
-    -- default commands always force an immediate refresh regardless of this.
+    -- sqlite3.exe used to read the DB. nil = use the copy in this mod's folder
+    -- (run install-libraries.ps1 to fetch it). Set a path to use a different one.
+    sqliteExe = nil,
+    -- How often (ms) the sweep re-reads the DB to refresh the owner map. Cheap
+    -- (one read-only query). Lower = a donor's freshly built/rebuilt base starts
+    -- being sorted sooner; higher = fewer sqlite spawns. add/remove/flag/default
+    -- commands always force an immediate refresh regardless of this.
     resyncIntervalMs = 300000, -- 5 min
 
     -- ---- category rules (path = { Trader, Category }) --------------------
