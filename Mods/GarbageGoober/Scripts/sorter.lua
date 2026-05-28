@@ -508,6 +508,7 @@ function GG.cmdStatus()
     GG.reply(string.format("default=%s  players=%d  flag overrides=%d  paused=%d  -> %d/%d base(s) sorted",
         s.defaultEnabled and "ON" or "OFF", #s.players, tcount(s.flagOverrides), tcount(s.pausedFlags),
         c.enabled or 0, c.bases or 0), true)
+    if GG.enabled == false then GG.reply("auto-sweep is PAUSED server-wide (pause-all active)", true) end
 end
 
 function GG.cmdAdd(who)
@@ -575,6 +576,7 @@ end
 -- flag the issuer is standing in (anyone with access to the flag can toggle it).
 function GG.cmdPauseFlag(pause)
     if not GG.store then GG.loadStore() end
+    GG.store.pausedFlags = GG.store.pausedFlags or {} -- older in-memory stores lack this field
     local baseId = currentFlagBaseId()
     if not baseId then
         GG.reply("stand in the flag you want to " .. (pause and "pause" or "resume") .. " sorting for")
@@ -883,7 +885,9 @@ function GG.handleCommand(arg)
     elseif arg == "now" then
         -- user: sort only the flag the issuer is standing in (if it's enabled)
         local baseId = currentFlagBaseId()
-        if not baseId then
+        if GG.enabled == false then
+            GG.reply("sorting is paused server-wide (an admin ran 'goober pause-all')")
+        elseif not baseId then
             GG.reply("stand in your flag, then 'goober now' to sort it")
         else
             GG.ensureResolved(false)
