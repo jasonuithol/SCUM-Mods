@@ -73,6 +73,19 @@ return {
     -- commands always force an immediate refresh regardless of this.
     resyncIntervalMs = 300000, -- 5 min
 
+    -- What a player whose base isn't enabled for sorting sees when they try a
+    -- user command (goober now/pause/resume):
+    --   "default" = the built-in "ask an admin to enable it" message
+    --   nil       = print NOTHING — stay silent so non-enabled players never see
+    --               the feature respond (pretend it isn't there)
+    --   a string  = that exact message (great for a donation/VIP/Discord link)
+    --   a list    = those lines, one chat message each
+    -- e.g.  notEnabledMessage = "Auto-sort is a VIP perk - unlock it at example.com/vip",
+    --       notEnabledMessage = { "Auto-sort is a VIP perk!", "Unlock it: example.com/vip" },
+    -- This is the SEED/default; admins can override it live (persisted) with
+    -- 'goober set-access-msg <text|default|off|reset>' — no Config edit needed.
+    notEnabledMessage = "default",
+
     -- ---- category rules (path = { Trader, Category }) --------------------
     -- First rule whose `match` substring (case-insensitive) is found in the
     -- item's class name wins. Order: specific/risky tokens BEFORE general ones.

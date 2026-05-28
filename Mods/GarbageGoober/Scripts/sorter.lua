@@ -286,6 +286,7 @@ function GG.loadStore()
                 if id ~= nil then GG.store.pausedFlags[id] = true end
             end
         end
+        if type(t.accessMessage) == "string" then GG.store.accessMessage = t.accessMessage end
     end
 end
 
@@ -313,6 +314,9 @@ local function serializeStore(s)
     table.sort(pk)
     out[#out + 1] = "    " .. table.concat(pk, ", ")
     out[#out + 1] = "  },"
+    if s.accessMessage ~= nil then
+        out[#out + 1] = string.format("  accessMessage = %q,", tostring(s.accessMessage))
+    end
     out[#out + 1] = "}"
     return table.concat(out, "\n") .. "\n"
 end
@@ -338,17 +342,23 @@ local function recomputeEnabled()
     for baseId in pairs(owners) do consider[baseId] = true end
     for baseId in pairs(s.flagOverrides) do consider[baseId] = true end
     local paused = s.pausedFlags or {}
-    local enabled, n = {}, 0
+    -- enabledBases = the access decision (override > player > default), ignoring pause.
+    -- enabled = enabledBases minus player-paused flags (what actually gets sorted).
+    local enabledBases, enabled, n = {}, {}, 0
     for baseId in pairs(consider) do
         local ov = s.flagOverrides[baseId]
         local en
         if ov ~= nil then en = ov
         elseif owners[baseId] and entitled[owners[baseId]] then en = true
         else en = s.defaultEnabled end
-        if en and not paused[baseId] then enabled[baseId] = true; n = n + 1 end -- player pause overrides
+        if en then
+            enabledBases[baseId] = true
+            if not paused[baseId] then enabled[baseId] = true; n = n + 1 end -- player pause overrides
+        end
     end
     GG.resolved = {
         enabled = enabled,
+        enabledBases = enabledBases,
         defaultEnabled = s.defaultEnabled,
         counts = { enabled = n, bases = tcount(owners), players = #s.players,
                    overrides = tcount(s.flagOverrides), paused = tcount(paused) },
@@ -572,6 +582,40 @@ function GG.cmdDefault(mode)
     GG.reply(string.format("global default set to %s - %d/%d base(s) now sorted", mode:upper(), c.enabled or 0, c.bases or 0))
 end
 
+-- The "not enabled" message a player sees. Source: a runtime override set via
+-- 'goober set-access-msg' (persisted in the store) takes priority; otherwise
+-- Config.notEnabledMessage. Value meaning: "default" = built-in line; nil = stay
+-- silent (pretend the feature isn't there); off/none/silent = also silent; any
+-- other string/list = that custom message.
+local DEFAULT_NOT_ENABLED = "sorting isn't enabled for your base — ask an admin to enable it"
+local SILENT_TOKENS = { off = true, none = true, silent = true, [""] = true }
+
+-- returns (value, source): value is string|table|nil; source is "command" or "config"
+local function accessSetting()
+    if GG.store and GG.store.accessMessage ~= nil then return GG.store.accessMessage, "command" end
+    return (GG.config and GG.config.notEnabledMessage), "config"
+end
+
+local function replyNotEnabled()
+    local m = accessSetting()
+    if m == nil then return end -- silent: pretend the feature isn't there
+    if type(m) == "string" then
+        local low = m:lower()
+        if SILENT_TOKENS[low] then return end
+        if low == "default" then GG.reply(DEFAULT_NOT_ENABLED, true); return end
+        GG.reply(m, true)
+    elseif type(m) == "table" then
+        for _, l in ipairs(m) do GG.reply(tostring(l), true) end
+    end
+end
+
+-- is the issuer's current flag enabled for sorting (access decision, ignoring
+-- pause)? nil baseId = not in a flag. Used to gate the user action commands.
+local function flagEnabledForIssuer(baseId)
+    if not (GG.config and GG.config.entitlementsEnabled) then return true end
+    return (GG.resolved and GG.resolved.enabledBases and GG.resolved.enabledBases[baseId]) == true
+end
+
 -- user 'goober pause'/'goober resume' — toggle a per-flag sorting opt-out for the
 -- flag the issuer is standing in (anyone with access to the flag can toggle it).
 function GG.cmdPauseFlag(pause)
@@ -582,6 +626,8 @@ function GG.cmdPauseFlag(pause)
         GG.reply("stand in the flag you want to " .. (pause and "pause" or "resume") .. " sorting for")
         return
     end
+    GG.ensureResolved(false)
+    if not flagEnabledForIssuer(baseId) then replyNotEnabled(); return end
     if pause then
         GG.store.pausedFlags[baseId] = true
         GG.reply("sorting PAUSED for your flag (base " .. baseId .. ") — 'goober resume' to undo")
@@ -593,6 +639,51 @@ function GG.cmdPauseFlag(pause)
     end
     GG.saveStore()
     GG.ensureResolved(true)
+end
+
+-- admin 'goober get-access-msg' — show the current "not enabled" message + source.
+function GG.cmdGetAccessMsg()
+    if not GG.store then GG.loadStore() end
+    local m, src = accessSetting()
+    if m == nil then GG.reply("access-msg [" .. src .. "]: SILENT (non-enabled players see nothing)"); return end
+    if type(m) == "table" then
+        GG.reply("access-msg [" .. src .. "] (" .. #m .. " lines):")
+        for _, l in ipairs(m) do GG.reply("  " .. tostring(l), true) end
+        return
+    end
+    local low = tostring(m):lower()
+    if SILENT_TOKENS[low] then
+        GG.reply("access-msg [" .. src .. "]: SILENT (non-enabled players see nothing)")
+    elseif low == "default" then
+        GG.reply("access-msg [" .. src .. "]: default => " .. DEFAULT_NOT_ENABLED)
+    else
+        GG.reply("access-msg [" .. src .. "]: " .. tostring(m))
+    end
+end
+
+-- admin 'goober set-access-msg <text|default|off|reset>' — set the message (stored
+-- persistently, overrides Config). default=built-in, off/none/silent=show nothing,
+-- reset=clear the override and fall back to Config.notEnabledMessage.
+function GG.cmdSetAccessMsg(text)
+    if not GG.store then GG.loadStore() end
+    text = trim(text or "")
+    if text == "" then GG.reply("usage: goober set-access-msg <text> | default | off | reset"); return end
+    local low = text:lower()
+    if low == "reset" then
+        GG.store.accessMessage = nil
+        GG.saveStore()
+        GG.reply("access-msg reset — now using Config.lua's notEnabledMessage")
+        return
+    end
+    GG.store.accessMessage = text
+    GG.saveStore()
+    if SILENT_TOKENS[low] then
+        GG.reply("access-msg set to SILENT — non-enabled players will see nothing")
+    elseif low == "default" then
+        GG.reply("access-msg set to the built-in default")
+    else
+        GG.reply("access-msg set to: " .. text)
+    end
 end
 
 -- ---- the sweep -----------------------------------------------------------
@@ -840,6 +931,7 @@ local function helpLines(includeAdmin)
             h[#h + 1] = "  goober remove <player> — disable the sorter for a player"
             h[#h + 1] = "  goober flag on|off|clear [baseId] — per-flag override (blank=your flag)"
             h[#h + 1] = "  goober default on|off  — sort every flag by default, or none"
+            h[#h + 1] = "  goober get-access-msg / set-access-msg <text|default|off|reset>"
         end
     end
     return h
@@ -891,14 +983,18 @@ function GG.handleCommand(arg)
             GG.reply("stand in your flag, then 'goober now' to sort it")
         else
             GG.ensureResolved(false)
-            local en = (not GG.config.entitlementsEnabled)
-                or (GG.resolved and GG.resolved.enabled and GG.resolved.enabled[baseId] == true)
-            if not en then
-                GG.reply("sorting isn't enabled for your base (not entitled, or paused)")
-            else
+            local r = GG.resolved
+            local gateOn = GG.config.entitlementsEnabled
+            local sortable = (not gateOn) or (r and r.enabled and r.enabled[baseId] == true)
+            if sortable then
                 GG.log("manual sweep of base " .. baseId .. " (goober now)")
                 local ok, s = pcall(GG.sweep, baseId)
                 GG.reply(ok and (s or "swept") or "sweep error (see log)")
+            elseif r and r.enabledBases and r.enabledBases[baseId] then
+                -- enabled, but the owner paused it (not-enabled would take precedence above)
+                GG.reply("sorting is paused for your base — 'goober resume' to turn it back on")
+            else
+                replyNotEnabled()
             end
         end
     elseif arg == "classes" then
@@ -944,6 +1040,10 @@ function GG.handleCommand(arg)
     elseif arg:sub(1, 8) == "default " then
         local m = trim(arg:sub(9)):lower()
         if m ~= "on" and m ~= "off" then GG.reply("usage: goober default on|off") else GG.cmdDefault(m) end
+    elseif arg == "get-access-msg" then
+        GG.cmdGetAccessMsg()
+    elseif arg == "set-access-msg" or arg:sub(1, 15) == "set-access-msg " then
+        GG.cmdSetAccessMsg(arg:sub(16))
     else
         GG.log("unknown command 'goober " .. arg .. "'")
         GG.reply("unknown command 'goober " .. arg .. "'")
