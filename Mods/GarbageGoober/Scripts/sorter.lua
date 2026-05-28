@@ -908,7 +908,7 @@ local function helpLines(includeAdmin)
     local sec = math.floor(((GG.config and GG.config.sweepIntervalMs) or 60000) / 1000)
     local h = {
         "GarbageGoober — auto-sorts loose ground loot inside a flag into chests",
-        "named after each item's category (e.g. Ammo, Food, Feet, Armorer).",
+        "named after each item's category (e.g. Ammo, Food, Armorer).",
         "Runs automatically every " .. sec .. "s. Commands (type in normal chat):",
         "  goober              — show this help",
         "  goober now          — sort the loose loot in your flag right now",
