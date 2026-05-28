@@ -1045,9 +1045,9 @@ function GG.handleCommand(arg)
     elseif arg == "set-access-msg" or arg:sub(1, 15) == "set-access-msg " then
         GG.cmdSetAccessMsg(arg:sub(16))
     else
-        GG.log("unknown command 'goober " .. arg .. "'")
-        GG.reply("unknown command 'goober " .. arg .. "'")
-        GG.replyHelp()
+        GG.log("unrecognised command 'goober " .. arg .. "'")
+        GG.reply("Command unrecognised: '" .. arg .. "'")
+        GG.reply("Type 'goober' for a list of valid commands")
     end
 end
 
