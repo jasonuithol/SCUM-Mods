@@ -44,8 +44,11 @@ return {
     -- (No "#" — that goes through SCUM's admin processor and replies "Unrecognized
     -- command".) The trigger word still appears in chat to whoever shares the channel.
     chatTrigger = "goober",
-    -- Only let SCUM admins drive the mod via chat (normal chat has no privilege gate).
-    -- true = require IsUserAdmin; false = anyone can type the command.
+    -- Access control. The user commands (bare 'goober' help, 'goober types',
+    -- 'goober chests') are always open to any player. Everything else — now,
+    -- classes, reload, pause, resume, and all access-control commands — is
+    -- admin-only when this is true (checks IsUserAdmin). Set false to drop the
+    -- gate entirely so anyone can run every command (e.g. private/test servers).
     requireAdmin = true,
 
     -- ---- per-player / per-flag entitlement gate --------------------------
@@ -510,6 +513,10 @@ return {
         { match = "copper_coin", path = { "GeneralGoods", "Misc" } },
         { match = "diary", path = { "GeneralGoods", "Misc" } },
         { match = "arm_guard", path = { "GeneralGoods", "Armour" } },
+        -- found live via 'goober classes' (not in the wiki list):
+        { match = "boxer", path = { "GeneralGoods", "Underwear" } },
+        { match = "briefs", path = { "GeneralGoods", "Underwear" } },
+        { match = "credit_card", path = { "GeneralGoods", "Misc" } },
         { match = "stew", path = { "Bartender", "Food" } },
         { match = "pasta", path = { "Bartender", "Food" } },
         { match = "toaster", path = { "Bartender", "Food" } },

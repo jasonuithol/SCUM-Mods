@@ -257,7 +257,9 @@ function GG.dbRows(sql)
 end
 
 -- ---- entitlement store (entitlements.lua in this mod's folder) ------------
-local function defaultStore() return { defaultEnabled = false, players = {}, flagOverrides = {} } end
+-- pausedFlags = baseIds a player has paused (user 'goober pause'); a per-flag
+-- opt-out applied on top of the admin entitlement (suppresses sorting there).
+local function defaultStore() return { defaultEnabled = false, players = {}, flagOverrides = {}, pausedFlags = {} } end
 
 function GG.loadStore()
     GG.store = defaultStore()
@@ -276,6 +278,12 @@ function GG.loadStore()
             for k, v in pairs(t.flagOverrides) do
                 local id = math.tointeger(tonumber(k))
                 if id ~= nil then GG.store.flagOverrides[id] = (v == true) end
+            end
+        end
+        if type(t.pausedFlags) == "table" then
+            for _, b in ipairs(t.pausedFlags) do
+                local id = math.tointeger(tonumber(b))
+                if id ~= nil then GG.store.pausedFlags[id] = true end
             end
         end
     end
@@ -298,6 +306,12 @@ local function serializeStore(s)
     for _, k in ipairs(keys) do
         out[#out + 1] = string.format("    [%d] = %s,", k, s.flagOverrides[k] and "true" or "false")
     end
+    out[#out + 1] = "  },"
+    out[#out + 1] = "  pausedFlags = {"
+    local pk = {}
+    for k in pairs(s.pausedFlags or {}) do pk[#pk + 1] = k end
+    table.sort(pk)
+    out[#out + 1] = "    " .. table.concat(pk, ", ")
     out[#out + 1] = "  },"
     out[#out + 1] = "}"
     return table.concat(out, "\n") .. "\n"
@@ -323,6 +337,7 @@ local function recomputeEnabled()
     local consider = {}
     for baseId in pairs(owners) do consider[baseId] = true end
     for baseId in pairs(s.flagOverrides) do consider[baseId] = true end
+    local paused = s.pausedFlags or {}
     local enabled, n = {}, 0
     for baseId in pairs(consider) do
         local ov = s.flagOverrides[baseId]
@@ -330,12 +345,13 @@ local function recomputeEnabled()
         if ov ~= nil then en = ov
         elseif owners[baseId] and entitled[owners[baseId]] then en = true
         else en = s.defaultEnabled end
-        if en then enabled[baseId] = true; n = n + 1 end
+        if en and not paused[baseId] then enabled[baseId] = true; n = n + 1 end -- player pause overrides
     end
     GG.resolved = {
         enabled = enabled,
         defaultEnabled = s.defaultEnabled,
-        counts = { enabled = n, bases = tcount(owners), players = #s.players, overrides = tcount(s.flagOverrides) },
+        counts = { enabled = n, bases = tcount(owners), players = #s.players,
+                   overrides = tcount(s.flagOverrides), paused = tcount(paused) },
     }
 end
 
@@ -489,8 +505,9 @@ function GG.cmdStatus()
     GG.ensureResolved(true)
     local s = GG.store
     local c = (GG.resolved and GG.resolved.counts) or {}
-    GG.reply(string.format("default=%s  players=%d  flag overrides=%d  -> %d/%d base(s) sorted",
-        s.defaultEnabled and "ON" or "OFF", #s.players, tcount(s.flagOverrides), c.enabled or 0, c.bases or 0), true)
+    GG.reply(string.format("default=%s  players=%d  flag overrides=%d  paused=%d  -> %d/%d base(s) sorted",
+        s.defaultEnabled and "ON" or "OFF", #s.players, tcount(s.flagOverrides), tcount(s.pausedFlags),
+        c.enabled or 0, c.bases or 0), true)
 end
 
 function GG.cmdAdd(who)
@@ -554,8 +571,32 @@ function GG.cmdDefault(mode)
     GG.reply(string.format("global default set to %s - %d/%d base(s) now sorted", mode:upper(), c.enabled or 0, c.bases or 0))
 end
 
+-- user 'goober pause'/'goober resume' — toggle a per-flag sorting opt-out for the
+-- flag the issuer is standing in (anyone with access to the flag can toggle it).
+function GG.cmdPauseFlag(pause)
+    if not GG.store then GG.loadStore() end
+    local baseId = currentFlagBaseId()
+    if not baseId then
+        GG.reply("stand in the flag you want to " .. (pause and "pause" or "resume") .. " sorting for")
+        return
+    end
+    if pause then
+        GG.store.pausedFlags[baseId] = true
+        GG.reply("sorting PAUSED for your flag (base " .. baseId .. ") — 'goober resume' to undo")
+    elseif GG.store.pausedFlags[baseId] then
+        GG.store.pausedFlags[baseId] = nil
+        GG.reply("sorting RESUMED for your flag (base " .. baseId .. ")")
+    else
+        GG.reply("your flag (base " .. baseId .. ") was not paused")
+    end
+    GG.saveStore()
+    GG.ensureResolved(true)
+end
+
 -- ---- the sweep -----------------------------------------------------------
-function GG.sweep()
+-- onlyBaseId (optional): restrict the sweep to that one flag (for the user
+-- 'goober now', which sorts just the flag the issuer is standing in).
+function GG.sweep(onlyBaseId)
     local iuc = findIUC()
     if not iuc then
         GG.log("sweep: no InventoryUserComponent (no player online / near) — nothing live to sort, skipping.")
@@ -570,6 +611,11 @@ function GG.sweep()
     end
 
     local flags, radius = collectFlags()
+    if onlyBaseId then
+        local only = {}
+        for _, f in ipairs(flags) do if f.baseId == onlyBaseId then only[#only + 1] = f end end
+        flags = only
+    end
     if #flags == 0 then
         GG.log("sweep: no flags found in world — skipping.")
         return "no flags found"
@@ -647,8 +693,10 @@ function GG.dumpClasses()
             if c ~= "?" and not seen[c] then
                 seen[c] = true
                 local p, isDef = categoryPath(c)
+                local tag = isDeployable(it) and "   [deployable - skipped]"
+                    or (isDef and "   [UNMAPPED]" or "")
                 rows[#rows + 1] = string.format("  %-44s -> %s%s", c,
-                    p and table.concat(p, ">") or "<none>", isDef and "   [UNMAPPED]" or "")
+                    p and table.concat(p, ">") or "<none>", tag)
             end
         end
     end end
@@ -761,33 +809,40 @@ end
 -- Build the help text (commands + descriptions), shared by the log (printHelp)
 -- and the in-game reply (GG.replyHelp). Built fresh so the live sweep interval
 -- and trigger word are accurate.
-local function helpLines()
+-- includeAdmin=true also lists the admin commands (used for the log + when an
+-- admin issues the help). Regular users only see the user commands.
+local function helpLines(includeAdmin)
     local sec = math.floor(((GG.config and GG.config.sweepIntervalMs) or 60000) / 1000)
     local h = {
         "GarbageGoober — auto-sorts loose ground loot inside a flag into chests",
         "named after each item's category (e.g. Ammo, Food, Feet, Armorer).",
         "Runs automatically every " .. sec .. "s. Commands (type in normal chat):",
         "  goober          — show this help",
-        "  goober now      — sort the loose loot into chests right now",
-        "  goober classes  — list every live item class + its category (to the log)",
-        "  goober chests   — audit chests in your flag: each chest's category",
+        "  goober now      — sort the loose loot in your flag right now",
+        "  goober pause    — stop auto-sorting your flag",
+        "  goober resume   — resume auto-sorting your flag",
         "  goober types    — list categories ('goober types <name>' = its sub-types)",
-        "  goober reload   — reload Config.lua (categories/settings), then sort once",
-        "  goober pause    — pause the automatic sweep",
-        "  goober resume   — resume the automatic sweep",
+        "  goober chests   — audit chests in your flag: each chest's category",
     }
-    if GG.config and GG.config.entitlementsEnabled then
-        h[#h + 1] = "  -- access control (per player; per flag = fallback) --"
-        h[#h + 1] = "  goober list     — enabled players / flag overrides / result"
-        h[#h + 1] = "  goober status   — one-line access summary"
-        h[#h + 1] = "  goober add <player>    — enable the sorter for a player (name or Steam64)"
-        h[#h + 1] = "  goober remove <player> — disable the sorter for a player"
-        h[#h + 1] = "  goober flag on|off|clear [baseId] — per-flag override (blank=your flag)"
-        h[#h + 1] = "  goober default on|off  — sort every flag by default, or none"
+    if includeAdmin then
+        h[#h + 1] = "  -- admin --"
+        h[#h + 1] = "  goober pause-all  — pause the automatic sweep server-wide"
+        h[#h + 1] = "  goober resume-all — resume the automatic sweep server-wide"
+        h[#h + 1] = "  goober classes    — list every live item class + its category (to the log)"
+        h[#h + 1] = "  goober reload     — reload Config.lua (categories/settings), then sort once"
+        if GG.config and GG.config.entitlementsEnabled then
+            h[#h + 1] = "  -- admin: access control (per player; per flag = fallback) --"
+            h[#h + 1] = "  goober list     — enabled players / flag overrides / result"
+            h[#h + 1] = "  goober status   — one-line access summary"
+            h[#h + 1] = "  goober add <player>    — enable the sorter for a player (name or Steam64)"
+            h[#h + 1] = "  goober remove <player> — disable the sorter for a player"
+            h[#h + 1] = "  goober flag on|off|clear [baseId] — per-flag override (blank=your flag)"
+            h[#h + 1] = "  goober default on|off  — sort every flag by default, or none"
+        end
     end
     return h
 end
-local function printHelp() for _, l in ipairs(helpLines()) do GG.log(l) end end
+local function printHelp() for _, l in ipairs(helpLines(true)) do GG.log(l) end end
 
 -- Reply in-game (chat box) to the admin who issued the current chat command,
 -- via the Chat_Client_SendMessageToChat server->client RPC on their channel.
@@ -807,19 +862,41 @@ function GG.reply(text, raw)
     return ok
 end
 
--- send the full multi-line help to the issuing admin's chat (one msg per line)
-function GG.replyHelp() for _, l in ipairs(helpLines()) do GG.reply(l, true) end end
+-- send the help to the issuer's chat; admins also see the admin commands.
+function GG.replyHelp() for _, l in ipairs(helpLines(GG.callerIsAdmin == true)) do GG.reply(l, true) end end
 
 -- dispatch "goober <arg>" (arg = text after "goober", already prefix-stripped)
+-- commands open to any player; everything else is admin-only (gated below).
+local USER_CMDS = { [""] = true, types = true, chests = true, now = true, pause = true, resume = true }
+
 function GG.handleCommand(arg)
     arg = (arg or ""):gsub("^%s+", ""):gsub("%s+$", "")
+    local word = (arg == "") and "" or (arg:match("^(%S+)") or "")
+    if not USER_CMDS[word] and (not GG.config or GG.config.requireAdmin ~= false) and not GG.callerIsAdmin then
+        GG.log("ignored 'goober " .. arg .. "' — admin-only (sender not admin)")
+        GG.reply("'goober " .. word .. "' is admin-only")
+        return
+    end
     if arg == "" then
         printHelp()
         GG.replyHelp()
     elseif arg == "now" then
-        GG.log("manual sweep (goober now)")
-        local ok, s = pcall(GG.sweep)
-        GG.reply(ok and (s or "swept") or "sweep error (see log)")
+        -- user: sort only the flag the issuer is standing in (if it's enabled)
+        local baseId = currentFlagBaseId()
+        if not baseId then
+            GG.reply("stand in your flag, then 'goober now' to sort it")
+        else
+            GG.ensureResolved(false)
+            local en = (not GG.config.entitlementsEnabled)
+                or (GG.resolved and GG.resolved.enabled and GG.resolved.enabled[baseId] == true)
+            if not en then
+                GG.reply("sorting isn't enabled for your base (not entitled, or paused)")
+            else
+                GG.log("manual sweep of base " .. baseId .. " (goober now)")
+                local ok, s = pcall(GG.sweep, baseId)
+                GG.reply(ok and (s or "swept") or "sweep error (see log)")
+            end
+        end
     elseif arg == "classes" then
         GG.log("dumping distinct live item classes (goober classes)")
         local n = 0
@@ -841,9 +918,13 @@ function GG.handleCommand(arg)
             GG.reply("reload FAILED (see log)")
         end
     elseif arg == "pause" then
-        GG.enabled = false; GG.log("timer paused"); GG.reply("auto-sweep paused")
+        GG.cmdPauseFlag(true)
     elseif arg == "resume" then
-        GG.enabled = true; GG.log("timer resumed"); GG.reply("auto-sweep resumed")
+        GG.cmdPauseFlag(false)
+    elseif arg == "pause-all" then
+        GG.enabled = false; GG.log("global auto-sweep PAUSED (pause-all)"); GG.reply("auto-sweep paused server-wide")
+    elseif arg == "resume-all" then
+        GG.enabled = true; GG.log("global auto-sweep RESUMED (resume-all)"); GG.reply("auto-sweep resumed server-wide")
     elseif arg == "list" then
         GG.log("entitlement list (goober list)"); GG.cmdList()
     elseif arg == "status" then
@@ -868,10 +949,11 @@ end
 
 -- Called from main.lua's chat hook with the live RemoteUnrealParams for
 -- Chat_Server_BroadcastChatMessage(Message, Channel). If the message is one of
--- our commands ("goober ...") from an admin, handle it. We do NOT mutate the
--- message (live UFunction-arg mutation crashes — see gotchas), so it still shows
--- in chat. Normal chat has no privilege gate, so we require admin ourselves
--- (config.requireAdmin) — else any player could drive the sorter.
+-- our commands ("goober ..."), handle it. We do NOT mutate the message (live
+-- UFunction-arg mutation crashes — see gotchas), so it still shows in chat.
+-- Per-command access control happens in handleCommand: a few read-only commands
+-- (help/types/chests) are open to any player; the rest require admin (unless
+-- config.requireAdmin=false). We resolve the caller's admin status here.
 function GG.onChatMessage(self, messageParam)
     local msg = ""
     pcall(function() msg = messageParam:get():ToString() end)
@@ -881,15 +963,9 @@ function GG.onChatMessage(self, messageParam)
     if low ~= trig and low:sub(1, #trig + 1) ~= (trig .. " ") then return end -- not ours
     local chan = pcs(function() return self:get() end, nil)
     local ctrl = chan and pcs(function() return chan:GetOuter() end, nil) or nil
-    if not (GG.config and GG.config.requireAdmin == false) then
-        local isAdmin = ctrl and pcs(function() return ctrl:IsUserAdmin() end, nil)
-        if isAdmin ~= true then
-            GG.log("ignored '" .. msg .. "' — sender not admin (or admin check unavailable)")
-            return
-        end
-    end
     GG.channel = chan
     GG.controller = ctrl
+    GG.callerIsAdmin = (ctrl ~= nil) and (pcs(function() return ctrl:IsUserAdmin() end, false) == true)
     GG.handleCommand((#msg <= #trig) and "" or msg:sub(#trig + 2))
 end
 
