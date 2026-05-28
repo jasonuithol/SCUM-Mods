@@ -588,7 +588,7 @@ end
 -- silent (pretend the feature isn't there); off/none/silent = also silent; any
 -- other string/list = that custom message.
 local DEFAULT_NOT_ENABLED = "sorting isn't enabled for your base — ask an admin to enable it"
-local SILENT_TOKENS = { off = true, none = true, silent = true, [""] = true }
+local SILENT_TOKENS = { off = true, none = true, silent = true, ["nil"] = true, [""] = true }
 
 -- returns (value, source): value is string|table|nil; source is "command" or "config"
 local function accessSetting()
