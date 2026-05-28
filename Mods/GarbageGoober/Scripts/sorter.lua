@@ -73,28 +73,54 @@ end
 
 -- ---- world enumeration ---------------------------------------------------
 
--- All flags: { {actor=, x=, y=, radius=} }
+-- All flags: { {actor=, x=, y=, radius=, baseId=} }.
+-- baseId comes from ConZBaseManager._bases (the BaseId->flag map); that key
+-- equals SCUM.db base.id, so it's how the entitlement gate looks a flag up.
+-- The flag ACTOR has no readable id property (recon pass 21), so _bases is the
+-- only live source. Falls back to FindAllOf (baseId=nil) if the map is unreadable.
 local function collectFlags()
+    local mgr
+    local mgrs = findAllAny("BP_ConZBaseManager_C", "ConZBaseManager")
+    if mgrs then for i = 1, #mgrs do if isValid(mgrs[i]) then mgr = mgrs[i]; break end end end
+
     local radius = GG.config.flagRadiusOverride
-    if not radius then
-        local mgrs = findAllAny("BP_ConZBaseManager_C", "ConZBaseManager")
-        if mgrs then for i = 1, #mgrs do
-            local r = pcs(function() return mgrs[i]._flagInfluenceRadius end, nil)
-            if r and r > 0 then radius = r; break end
-        end end
+    if not radius and mgr then
+        local r = pcs(function() return mgr._flagInfluenceRadius end, nil)
+        if r and r > 0 then radius = r end
     end
     radius = radius or 5000
 
     local flags, seen = {}, {}
-    local list = findAllAny("BP_ConZBase_C", "ConZBase")
-    if list then for i = 1, #list do
-        local f = list[i]
-        if isValid(f) and not seen[f] then
-            seen[f] = true
-            local x, y = actorLoc(f)
-            if x then flags[#flags + 1] = { actor = f, x = x, y = y, radius = radius } end
-        end
-    end end
+    -- primary: ConZBaseManager._bases (BaseId -> flag actor)
+    local bases = mgr and pcs(function() return mgr._bases end, nil) or nil
+    if bases then
+        pcall(function()
+            bases:ForEach(function(k, v)
+                local id = pcs(function() return k:get() end, nil)
+                local f = pcs(function() return v:get() end, nil)
+                if isValid(f) and not seen[f] then
+                    seen[f] = true
+                    local x, y = actorLoc(f)
+                    if x then
+                        if id then id = math.tointeger(id) or id end
+                        flags[#flags + 1] = { actor = f, x = x, y = y, radius = radius, baseId = id }
+                    end
+                end
+            end)
+        end)
+    end
+    -- fallback: enumerate flag actors directly (no baseId -> can't gate by owner)
+    if #flags == 0 then
+        local list = findAllAny("BP_ConZBase_C", "ConZBase")
+        if list then for i = 1, #list do
+            local f = list[i]
+            if isValid(f) and not seen[f] then
+                seen[f] = true
+                local x, y = actorLoc(f)
+                if x then flags[#flags + 1] = { actor = f, x = x, y = y, radius = radius, baseId = nil } end
+            end
+        end end
+    end
     return flags, radius
 end
 
@@ -183,12 +209,129 @@ local function matchChest(path, candidates)
     return nil
 end
 
+-- ---- entitlement gate (per-player primary, per-flag fallback) ------------
+-- The flag owner isn't readable from the live actor, so an external Python
+-- resolver reads SCUM.db and writes goober_resolved.lua (an enabled-baseId set)
+-- + goober_reply.txt. We shell out to it (os.execute confirmed available).
+-- Untrusted text (a player name) is handed over via a file, never the command
+-- line, so there's no shell-injection surface; fixed verbs/numeric ids only.
+
+-- load goober_resolved.lua -> GG.resolved (table with .enabled[baseId]=true)
+function GG.loadResolvedFile()
+    local path = GG.resolvedFile
+    local f = path and io.open(path, "r") or nil
+    if not f then GG.resolved = nil; return false end
+    local src = f:read("*a"); f:close()
+    local chunk = load(src, "@goober_resolved.lua")
+    if not chunk then GG.resolved = nil; return false end
+    local ok, res = pcall(chunk)
+    if ok and type(res) == "table" then GG.resolved = res; GG.resolvedAt = os.time(); return true end
+    GG.resolved = nil; return false
+end
+
+-- run the resolver with a FIXED token string (validated by the caller); pass any
+-- untrusted free text via the arg file. Reloads resolved.lua + returns reply lines.
+function GG.runResolver(tokens, untrusted)
+    local cfg = GG.config or {}
+    if not (GG.resolverScript and GG.modDir and cfg.dbPath) then
+        GG.log("resolver paths not set — cannot run entitlement resolver")
+        return {}
+    end
+    local argPart = ""
+    if untrusted ~= nil then
+        local af = io.open(GG.argFile, "w")
+        if af then af:write(tostring(untrusted)); af:close() end
+        argPart = string.format(' --argfile "%s"', GG.argFile)
+    end
+    local cmd = string.format('cmd /c %s "%s" --db "%s" --dir "%s" %s%s',
+        cfg.pythonExe or "python", GG.resolverScript, cfg.dbPath, GG.modDir, tokens, argPart)
+    GG.log("resolver: " .. tokens)
+    pcall(os.execute, cmd)
+    GG.loadResolvedFile()
+    local lines = {}
+    local rf = io.open(GG.replyFile, "r")
+    if rf then for l in rf:lines() do lines[#lines + 1] = l end; rf:close() end
+    return lines
+end
+
+-- ensure GG.resolved is loaded & fresh. force=true re-syncs now; otherwise only
+-- if older than resyncIntervalMs. No-op (and clears) when the gate is disabled.
+function GG.ensureResolved(force)
+    local cfg = GG.config or {}
+    if not cfg.entitlementsEnabled then GG.resolved = nil; return true end
+    local intervalSec = (cfg.resyncIntervalMs or 300000) / 1000
+    if not force and GG.resolved and GG.resolvedAt and (os.time() - GG.resolvedAt) < intervalSec then
+        return true
+    end
+    GG.runResolver("sync", nil)
+    return GG.resolved ~= nil
+end
+
+-- is this flag's loot allowed to be sorted? Fail-closed: if the gate is on but
+-- we can't verify (no resolved set, or unknown baseId), do NOT sort.
+local function flagEnabled(flag)
+    if not (GG.config and GG.config.entitlementsEnabled) then return true end
+    local r = GG.resolved
+    if not r or not r.enabled then return false end
+    local bid = flag.baseId
+    if bid == nil then return false end
+    return r.enabled[bid] == true
+end
+
+-- baseId of the flag the issuing admin is standing in (for "goober flag" w/o id)
+local function currentFlagBaseId()
+    local ctrl = GG.controller
+    if not ctrl then return nil end
+    local pawn = pcs(function() return ctrl:K2_GetPawn() end, nil)
+    if not isValid(pawn) then pawn = pcs(function() return ctrl.Pawn end, nil) end
+    if not isValid(pawn) then return nil end
+    local ax, ay = actorLoc(pawn)
+    if not ax then return nil end
+    local flags = collectFlags()
+    local flag = flagFor(ax, ay, flags)
+    return flag and flag.baseId or nil
+end
+
+-- "goober flag on|off|clear [baseId]" — baseId optional (defaults to the flag
+-- the admin is standing in). Verb + numeric id validated here before shelling
+-- out, so only fixed/numeric tokens ever reach the command line.
+function GG.handleFlagCmd(rest)
+    local mode, idtok = (rest or ""):match("^(%S*)%s*(%S*)$")
+    mode = (mode or ""):lower()
+    if mode ~= "on" and mode ~= "off" and mode ~= "clear" then
+        GG.reply("usage: goober flag on|off|clear [baseId]  (no id = your current flag)")
+        return
+    end
+    local baseId
+    if idtok and idtok ~= "" then
+        local n = tonumber(idtok)
+        baseId = n and math.tointeger(n) or nil
+        if not baseId then GG.reply("baseId must be a whole number"); return end
+    else
+        baseId = currentFlagBaseId()
+        if not baseId then
+            GG.reply("stand in the flag you mean, or give its id: goober flag " .. mode .. " <baseId>")
+            return
+        end
+    end
+    for _, l in ipairs(GG.runResolver(string.format("flag %s %d", mode, baseId), nil)) do
+        GG.reply(l, true)
+    end
+end
+
 -- ---- the sweep -----------------------------------------------------------
 function GG.sweep()
     local iuc = findIUC()
     if not iuc then
         GG.log("sweep: no InventoryUserComponent (no player online / near) — nothing live to sort, skipping.")
         return "no player nearby — nothing to sort"
+    end
+
+    -- refresh the per-player/per-flag entitlement set (throttled; see Config)
+    GG.ensureResolved(false)
+    if GG.config.entitlementsEnabled and not GG.resolved then
+        GG.log("sweep: entitlement gate ON but resolver gave no result — NOT sorting " ..
+            "(fail-closed). Check pythonExe/dbPath; run 'goober status'.")
     end
 
     local flags, radius = collectFlags()
@@ -199,15 +342,19 @@ function GG.sweep()
     local chests = collectChests()
     local items = collectLooseLoot()
 
-    GG.log(string.format("sweep start: %d loose item(s), %d chest(s), %d flag(s), radius=%dcm",
-        #items, #chests, #flags, radius))
+    GG.log(string.format("sweep start: %d loose item(s), %d chest(s), %d flag(s), radius=%dcm%s",
+        #items, #chests, #flags, radius,
+        GG.config.entitlementsEnabled and (" | gate ON (" ..
+            (GG.resolved and GG.resolved.counts and GG.resolved.counts.enabled or 0) .. " base(s) entitled)") or " | gate OFF"))
 
-    local moved, noFlag, noChest, noMatch, errs = 0, 0, 0, 0, 0
+    local moved, noFlag, disabled, noChest, noMatch, errs = 0, 0, 0, 0, 0, 0
     local unmapped = {} -- distinct item classes that hit no rule (tree gaps)
     for _, it in ipairs(items) do
         local flag = flagFor(it.x, it.y, flags)
         if not flag then
             noFlag = noFlag + 1 -- POI / outside any flag — not ours to touch
+        elseif not flagEnabled(flag) then
+            disabled = disabled + 1 -- flag's owner not entitled (or per-flag override OFF)
         else
             -- candidate chests = those inside the SAME flag's influence
             local candidates = {}
@@ -242,15 +389,15 @@ function GG.sweep()
         end
     end
 
-    GG.log(string.format("sweep done: moved=%d  outside-flag=%d  no-chest-in-flag=%d  no-name-match=%d  errors=%d",
-        moved, noFlag, noChest, noMatch, errs))
+    GG.log(string.format("sweep done: moved=%d  disabled=%d  outside-flag=%d  no-chest-in-flag=%d  no-name-match=%d  errors=%d",
+        moved, disabled, noFlag, noChest, noMatch, errs))
     local gaps = {}
     for cls in pairs(unmapped) do gaps[#gaps + 1] = cls end
     if #gaps > 0 then
         table.sort(gaps)
         GG.log("  unmapped (no rule -> default): " .. table.concat(gaps, ", "))
     end
-    return string.format("moved %d  (%d no-chest, %d no-match)", moved, noChest, noMatch)
+    return string.format("moved %d  (%d disabled, %d no-chest, %d no-match)", moved, disabled, noChest, noMatch)
 end
 
 -- goober classes — dump every distinct item class currently in the world and
@@ -381,19 +528,29 @@ end
 -- and trigger word are accurate.
 local function helpLines()
     local sec = math.floor(((GG.config and GG.config.sweepIntervalMs) or 60000) / 1000)
-    return {
+    local h = {
         "GarbageGoober — auto-sorts loose ground loot inside a flag into chests",
         "named after each item's category (e.g. Ammo, Food, Feet, Armorer).",
         "Runs automatically every " .. sec .. "s. Commands (type in normal chat):",
         "  goober          — show this help",
         "  goober now      — sort the loose loot into chests right now",
-        "  goober classes  — list every live item class + its category (written to the log)",
-        "  goober chests   — audit chests in your flag: each chest's category, or [UNMATCHED]",
-        "  goober types    — list top-level categories ('goober types <name>' = its sub-types)",
+        "  goober classes  — list every live item class + its category (to the log)",
+        "  goober chests   — audit chests in your flag: each chest's category",
+        "  goober types    — list categories ('goober types <name>' = its sub-types)",
         "  goober reload   — reload Config.lua (categories/settings), then sort once",
         "  goober pause    — pause the automatic sweep",
         "  goober resume   — resume the automatic sweep",
     }
+    if GG.config and GG.config.entitlementsEnabled then
+        h[#h + 1] = "  -- access control (per player; per flag = fallback) --"
+        h[#h + 1] = "  goober list     — entitled players / flag overrides / result"
+        h[#h + 1] = "  goober status   — one-line entitlement summary"
+        h[#h + 1] = "  goober add <player>    — entitle a player (name or Steam64)"
+        h[#h + 1] = "  goober remove <player> — un-entitle a player"
+        h[#h + 1] = "  goober flag on|off|clear [baseId] — per-flag override (blank=your flag)"
+        h[#h + 1] = "  goober default on|off  — sort every flag by default, or none"
+    end
+    return h
 end
 local function printHelp() for _, l in ipairs(helpLines()) do GG.log(l) end end
 
@@ -452,6 +609,29 @@ function GG.handleCommand(arg)
         GG.enabled = false; GG.log("timer paused"); GG.reply("auto-sweep paused")
     elseif arg == "resume" then
         GG.enabled = true; GG.log("timer resumed"); GG.reply("auto-sweep resumed")
+    elseif arg == "list" then
+        GG.log("entitlement list (goober list)")
+        local lines = GG.runResolver("list", nil)
+        if #lines == 0 then GG.reply("list: resolver gave no output (see log)")
+        else for _, l in ipairs(lines) do GG.reply(l, true) end end
+    elseif arg == "status" then
+        local lines = GG.runResolver("status", nil)
+        if #lines == 0 then GG.reply("status: resolver gave no output (see log)")
+        else for _, l in ipairs(lines) do GG.reply(l, true) end end
+    elseif arg:sub(1, 4) == "add " then
+        local who = trim(arg:sub(5))
+        if who == "" then GG.reply("usage: goober add <player name or Steam64>")
+        else for _, l in ipairs(GG.runResolver("add", who)) do GG.reply(l, true) end end
+    elseif arg:sub(1, 7) == "remove " then
+        local who = trim(arg:sub(8))
+        if who == "" then GG.reply("usage: goober remove <player name or Steam64>")
+        else for _, l in ipairs(GG.runResolver("remove", who)) do GG.reply(l, true) end end
+    elseif arg == "flag" or arg:sub(1, 5) == "flag " then
+        GG.handleFlagCmd(trim(arg:sub(5)))
+    elseif arg:sub(1, 8) == "default " then
+        local m = trim(arg:sub(9)):lower()
+        if m ~= "on" and m ~= "off" then GG.reply("usage: goober default on|off")
+        else for _, l in ipairs(GG.runResolver("default " .. m, nil)) do GG.reply(l, true) end end
     else
         GG.log("unknown command 'goober " .. arg .. "'")
         GG.reply("unknown command 'goober " .. arg .. "'")

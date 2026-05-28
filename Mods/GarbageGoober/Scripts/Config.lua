@@ -48,6 +48,27 @@ return {
     -- true = require IsUserAdmin; false = anyone can type the command.
     requireAdmin = true,
 
+    -- ---- per-player / per-flag entitlement gate --------------------------
+    -- When ON, the sweep only sorts loot inside a flag whose owner has been
+    -- entitled by an admin (the donation/premium model), with a per-flag
+    -- override as the fallback. A flag's owner is NOT readable from the live
+    -- actor, so this shells out to goober_entitlements.py to read SCUM.db
+    -- read-only and resolve baseId -> owner Steam64 -> entitled?. Control it
+    -- in-game with:  goober add/remove <player> , goober list ,
+    -- goober flag on|off|clear [baseId] , goober default on|off .
+    --   true  = gate sorting by entitlement (per-player primary, per-flag fallback)
+    --   false = sort EVERY flag (the entitlement layer is disabled)
+    entitlementsEnabled = true,
+    -- Path to the server's save DB (read-only). owner_user_profile_id lives here.
+    dbPath = [[C:\scumserver\SCUM\Saved\SaveFiles\SCUM.db]],
+    -- Python launcher used to run the resolver (must be on PATH or absolute).
+    pythonExe = "python",
+    -- How often (ms) the sweep re-runs the resolver to refresh the enabled set.
+    -- Cheap (one read-only query). Lower = a donor's freshly built/rebuilt base
+    -- starts being sorted sooner; higher = fewer python spawns. add/remove/flag/
+    -- default commands always force an immediate refresh regardless of this.
+    resyncIntervalMs = 300000, -- 5 min
+
     -- ---- category rules (path = { Trader, Category }) --------------------
     -- First rule whose `match` substring (case-insensitive) is found in the
     -- item's class name wins. Order: specific/risky tokens BEFORE general ones.

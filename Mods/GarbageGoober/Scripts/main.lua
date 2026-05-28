@@ -28,6 +28,15 @@ local LOGFILE = MOD_DIR .. [[\GarbageGoober.log]]
 GarbageGoober = GarbageGoober or {}
 local GG = GarbageGoober
 
+-- Paths used by the entitlement layer (resolver + its hand-off files). The
+-- Python resolver reads SCUM.db and writes goober_resolved.lua / goober_reply.txt
+-- here; sorter.lua reads them back. See Scripts/Config.lua + goober_entitlements.py.
+GG.modDir = MOD_DIR
+GG.resolverScript = MOD_DIR .. [[\goober_entitlements.py]]
+GG.resolvedFile = MOD_DIR .. [[\goober_resolved.lua]]
+GG.replyFile = MOD_DIR .. [[\goober_reply.txt]]
+GG.argFile = MOD_DIR .. [[\goober_arg.txt]]
+
 local function ts() return os.date("%Y-%m-%d %H:%M:%S") end
 function GG.log(m)
     local line = "[GarbageGoober] " .. ts() .. " " .. tostring(m)
@@ -82,6 +91,10 @@ if not GG.reload() then
     GG.log("startup ABORTED: could not load config/engine.")
     return
 end
+
+-- Prime the entitlement set once at boot (so the first sweep already has it).
+if type(GG.ensureResolved) == "function" then pcall(GG.ensureResolved, true) end
+
 GG.armTimer()
 
 -- chat trigger: NORMAL chat (no "#") — type e.g.  goober now . Hooks the normal

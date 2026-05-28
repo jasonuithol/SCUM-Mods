@@ -1,101 +1,63 @@
--- live.lua PASS 20 — ADMIN-COMMAND REGISTRY recon (READ-ONLY).
+-- live.lua PASS 22 — os.execute / io.popen / Python availability probe.
 --
--- Goal: learn how SCUM stores/recognises "#" admin commands so we can assess
--- registering a custom "goober" command (to kill the "Unrecognized command"
--- reply WITHOUT mutating live UFunction args, which crashed the server).
---
--- Dumps, all read-only:
---   * sample UAdminCommand objects: _verb (name), _requiredExecutorLevel (tier),
---     _isEnabled, _shouldExecuteOnServer, owning class.
---   * UAdminCommandRegistry._commands (TArray<TSubclassOf<UAdminCommand>>): count
---     + whether iterable/readable.
---   * UAdminCommandCompletionManager._commands (TMap<FString,TSubclassOf>): count
---     + sample keys (this is the name->class map the dispatcher may use).
--- Nothing is mutated. Run #lsr, then share recon_admincmds.txt.
+-- The per-player loot-sorter gate needs SCUM.db (owner lives there, not on the
+-- flag actor). UE4SS Lua has no SQLite, so the mod will shell out to Python.
+-- This probe confirms the mod CAN shell out from this UE4SS build, and that the
+-- spawned Python can open the server DB read-only. If both work, the whole
+-- per-player architecture is unblocked. Read-only; touches nothing in-game.
 
-local OUT = [[C:\scumserver\SCUM\Binaries\Win64\ue4ss\Mods\LootSorterRecon\recon_admincmds.txt]]
+local DIR = [[C:\scumserver\SCUM\Binaries\Win64\ue4ss\Mods\LootSorterRecon]]
+local OUT = DIR .. [[\recon_osexec.txt]]
+local DB  = [[C:\scumserver\SCUM\Saved\SaveFiles\SCUM.db]]
 
 local function appendln(s) local g=io.open(OUT,"a"); if g then g:write(tostring(s).."\n"); g:close() end end
-local function pcs(fn, dflt) local ok, v = pcall(fn); if ok and v ~= nil then return v end; return dflt end
-local function isValid(o) return o ~= nil and pcs(function() return o:IsValid() end, false) end
-local function classOf(o) return pcs(function() return o:GetClass():GetFName():ToString() end, "?") end
-local function fstr(s)
-    if type(s) == "string" then return s end
-    if type(s) == "userdata" then return pcs(function() return s:ToString() end, "<ud>") end
-    if s == nil then return "<nil>" end
-    return tostring(s)
+local function readAll(p) local f=io.open(p,"r"); if not f then return nil end; local s=f:read("*a"); f:close(); return s end
+
+do local f=io.open(OUT,"w"); if f then f:write("===== PASS 22 os.execute / python probe :: "..os.date("%Y-%m-%d %H:%M:%S").." =====\n\n"); f:close() end end
+
+appendln("type(os.execute) = " .. type(os.execute))
+appendln("type(io.popen)   = " .. type(io.popen))
+appendln("type(os.getenv)  = " .. type(os.getenv))
+appendln("")
+
+-- 1) os.execute can run at all? -------------------------------------------
+if type(os.execute) == "function" then
+    local probePy = DIR .. [[\probe_py.txt]]
+    local cmd1 = string.format('cmd /c python --version > "%s" 2>&1', probePy)
+    appendln("os.execute #1: " .. cmd1)
+    local a, b, c = os.execute(cmd1)
+    appendln("  returned: a=" .. tostring(a) .. " b=" .. tostring(b) .. " c=" .. tostring(c))
+    appendln("  probe_py.txt = " .. (readAll(probePy) and ("[" .. (readAll(probePy):gsub("%s+$","")) .. "]") or "<not written>"))
+    appendln("")
+
+    -- 2) spawned python can import sqlite3 + open the server DB read-only? --
+    local probeDb = DIR .. [[\probe_sqlite.txt]]
+    local py = 'import sqlite3; c=sqlite3.connect(\'file:' .. DB:gsub('\\','/') .. '?mode=ro\', uri=True);'
+            .. ' print(\'sqlite\', sqlite3.sqlite_version);'
+            .. ' print(\'bases\', c.execute(\'SELECT COUNT(*) FROM base\').fetchone()[0])'
+    local cmd2 = string.format('cmd /c python -c "%s" > "%s" 2>&1', py, probeDb)
+    appendln("os.execute #2 (open DB ro + count bases):")
+    appendln("  " .. cmd2)
+    os.execute(cmd2)
+    appendln("  probe_sqlite.txt:")
+    local r = readAll(probeDb)
+    if r then for line in r:gmatch("[^\r\n]+") do appendln("    " .. line) end else appendln("    <not written>") end
+    appendln("")
+else
+    appendln("os.execute NOT available — will need an external resolver process instead.")
 end
 
-do local f=io.open(OUT,"w"); if f then f:write("===== PASS 20 ADMIN-CMD REGISTRY recon :: "..os.date("%Y-%m-%d %H:%M:%S").." =====\n\n"); f:close() end end
-
--- 1) sample UAdminCommand objects (CDOs or instances) -----------------------
-appendln("-- UAdminCommand objects (FindAllOf 'AdminCommand') --")
-local cmds = FindAllOf("AdminCommand")
-appendln("count = " .. (cmds and #cmds or 0))
-if cmds then
-    local shown = 0
-    for i = 1, #cmds do
-        local c = cmds[i]
-        if c ~= nil then
-            local verb = fstr(pcs(function() return c._verb end, nil))
-            local tier = pcs(function() return c._requiredExecutorLevel end, "?")
-            local en   = pcs(function() return c._isEnabled end, "?")
-            local srv  = pcs(function() return c._shouldExecuteOnServer end, "?")
-            local nreq = pcs(function() return c._numberOfRequiredArguments end, "?")
-            appendln(string.format("  [%s] verb='%s' tier=%s enabled=%s server=%s reqArgs=%s",
-                classOf(c), verb, tostring(tier), tostring(en), tostring(srv), tostring(nreq)))
-            shown = shown + 1
-            if shown >= 25 then appendln("  ...(truncated at 25)"); break end
-        end
-    end
-end
-
--- 2) UAdminCommandRegistry._commands (array of command classes) -------------
-appendln("\n-- UAdminCommandRegistry --")
-local regs = FindAllOf("AdminCommandRegistry")
-appendln("registry instances = " .. (regs and #regs or 0))
-if regs and #regs > 0 then
-    local reg = regs[1]
-    local arr = pcs(function() return reg._commands end, nil)
-    if arr == nil then
-        appendln("  _commands = <nil/unreadable>")
-    else
-        local n = pcs(function() return #arr end, nil)
-        appendln("  _commands #= " .. tostring(n))
-        if n and n > 0 then
-            for i = 1, math.min(n, 8) do
-                local entry = pcs(function() return arr[i] end, nil)
-                appendln(string.format("    [%d] %s (%s)", i, fstr(pcs(function() return entry:GetFName():ToString() end, nil)), type(entry)))
-            end
-        end
-    end
-end
-
--- 3) UAdminCommandCompletionManager._commands (name -> class TMap) ----------
-appendln("\n-- UAdminCommandCompletionManager --")
-local mans = FindAllOf("AdminCommandCompletionManager")
-appendln("completion-manager instances = " .. (mans and #mans or 0))
-if mans and #mans > 0 then
-    local man = mans[1]
-    local m = pcs(function() return man._commands end, nil)
-    if m == nil then
-        appendln("  _commands = <nil/unreadable>")
-    else
-        appendln("  _commands type=" .. type(m))
-        local cnt = 0
-        local ok = pcall(function()
-            m:ForEach(function(k, v)
-                cnt = cnt + 1
-                if cnt <= 12 then
-                    appendln(string.format("    '%s' -> %s",
-                        fstr(pcs(function() return k:get() end, k)),
-                        fstr(pcs(function() return v:get():GetFName():ToString() end, nil))))
-                end
-            end)
-        end)
-        appendln("  ForEach ok=" .. tostring(ok) .. " counted=" .. cnt)
-    end
+-- 3) io.popen (capture stdout directly, no temp file) ---------------------
+if type(io.popen) == "function" then
+    appendln("io.popen test: python --version")
+    local ok, out = pcall(function()
+        local h = io.popen("python --version 2>&1"); if not h then return "<popen returned nil>" end
+        local s = h:read("*a"); h:close(); return s
+    end)
+    appendln("  ok=" .. tostring(ok) .. " out=[" .. tostring(out and (tostring(out):gsub("%s+$","")) or "nil") .. "]")
+else
+    appendln("io.popen NOT available.")
 end
 
 appendln("\n-- done --")
-print("[lsr] PASS 20 admin-cmd recon written")
+print("[lsr] PASS 22 os.execute/python probe written")
