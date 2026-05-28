@@ -910,27 +910,24 @@ local function helpLines(includeAdmin)
         "GarbageGoober — auto-sorts loose ground loot inside a flag into chests",
         "named after each item's category (e.g. Ammo, Food, Feet, Armorer).",
         "Runs automatically every " .. sec .. "s. Commands (type in normal chat):",
-        "  goober          — show this help",
-        "  goober now      — sort the loose loot in your flag right now",
-        "  goober pause    — stop auto-sorting your flag",
-        "  goober resume   — resume auto-sorting your flag",
-        "  goober types    — list categories ('goober types <name>' = its sub-types)",
-        "  goober chests   — audit chests in your flag: each chest's category",
+        "  goober              — show this help",
+        "  goober now          — sort the loose loot in your flag right now",
+        "  goober pause/resume — stop / resume auto-sorting your flag",
+        "  goober types        — list categories ('goober types <name>' = its sub-types)",
+        "  goober chests       — audit chests in your flag: each chest's category",
     }
     if includeAdmin then
         h[#h + 1] = "  -- admin --"
-        h[#h + 1] = "  goober pause-all  — pause the automatic sweep server-wide"
-        h[#h + 1] = "  goober resume-all — resume the automatic sweep server-wide"
-        h[#h + 1] = "  goober classes    — list every live item class + its category (to the log)"
-        h[#h + 1] = "  goober reload     — reload Config.lua (categories/settings), then sort once"
+        h[#h + 1] = "  goober pause-all/resume-all — pause / resume the automatic sweep server-wide"
+        h[#h + 1] = "  goober classes      — list every live item class + its category (to the log)"
+        h[#h + 1] = "  goober reload       — reload Config.lua (categories/settings), then sort once"
         if GG.config and GG.config.entitlementsEnabled then
             h[#h + 1] = "  -- admin: access control (per player; per flag = fallback) --"
-            h[#h + 1] = "  goober list     — enabled players / flag overrides / result"
-            h[#h + 1] = "  goober status   — one-line access summary"
-            h[#h + 1] = "  goober add <player>    — enable the sorter for a player (name or Steam64)"
-            h[#h + 1] = "  goober remove <player> — disable the sorter for a player"
+            h[#h + 1] = "  goober list         — enabled players / flag overrides / result"
+            h[#h + 1] = "  goober status       — one-line access summary"
+            h[#h + 1] = "  goober add/remove <player> — enable / disable the sorter for a player (name or Steam64)"
             h[#h + 1] = "  goober flag on|off|clear [baseId] — per-flag override (blank=your flag)"
-            h[#h + 1] = "  goober default on|off  — sort every flag by default, or none"
+            h[#h + 1] = "  goober default on|off — sort every flag by default, or none"
             h[#h + 1] = "  goober get-access-msg / set-access-msg <text|default|off|reset>"
         end
     end
