@@ -24,6 +24,14 @@ return {
     flagRadiusOverride = nil, -- nil = live ConZBaseManager._flagInfluenceRadius (5000cm)
     nameContains = false,     -- false = exact chest-name match; true = substring
 
+    -- Empty containers: when a swept loose item CONTAINS other items (backpack,
+    -- clothing with pockets, etc.), first move its contents out into the matching
+    -- category chests, then put the emptied container away. Nested containers are
+    -- unpacked recursively in the same sweep. Contents with no matching chest stay
+    -- inside. (Guns/magazines are NOT unpacked here — attachments/ammo aren't
+    -- inventory items; that's a later phase.) false = sort containers whole.
+    emptyContainers = true,
+
     -- ---- category rules source -------------------------------------------
     -- The rules live in categories.yaml. Optionally pull them from a remote URL
     -- so you can update sorting WITHOUT touching the server. Behaviour:

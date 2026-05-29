@@ -11,6 +11,9 @@ local AUTOPLACE = 1073741824 -- FInventoryEntryLocation.Value: auto-place in fir
 local function pcs(fn, dflt) local ok, v = pcall(fn); if ok and v ~= nil then return v end; return dflt end
 local function isValid(o) return o ~= nil and pcs(function() return o:IsValid() end, false) end
 local function classOf(o) return pcs(function() return o:GetClass():GetFName():ToString() end, "?") end
+-- stable per-UObject identity (unique object path); userdata identity is NOT
+-- stable across separate FindAllOf passes, so use this to key/compare objects.
+local function fullName(o) return pcs(function() return o:GetFullName() end, nil) end
 
 local function presClass(it)
     local p = pcs(function() return it._serverPresence end, nil)
@@ -156,6 +159,32 @@ local function collectLooseLoot()
         end
     end end
     return out
+end
+
+-- Map each container to its contents: { [ownerFullName] = {ocls=, items={...}} }.
+-- Contents are tracked item-side (presence InTheInventory -> _inventory -> owner),
+-- so reverse it. Keyed by the owner's GetFullName() (stable across FindAllOf
+-- passes, unlike userdata). Used by the sweep to empty a loose container.
+local function collectContainerContents()
+    local map = {}
+    local items = FindAllOf("Item")
+    if items then for i = 1, #items do
+        local it = items[i]
+        if isValid(it) then
+            local pc = presClass(it)
+            if pc and pc:find("InTheInventory", 1, true) then
+                local inv = pcs(function() return it._serverPresence._inventory end, nil)
+                local owner = inv and pcs(function() return inv:GetOwner() end, nil) or nil
+                local key = isValid(owner) and fullName(owner) or nil
+                if key then
+                    local rec = map[key]
+                    if not rec then rec = { ocls = classOf(owner), items = {} }; map[key] = rec end
+                    rec.items[#rec.items + 1] = it
+                end
+            end
+        end
+    end end
+    return map
 end
 
 -- One InventoryUserComponent to drive the move RPC (any online player's works).
@@ -686,6 +715,43 @@ function GG.cmdSetAccessMsg(text)
     end
 end
 
+-- Recursively move a loose container's contents into matching category chests
+-- (candidates = chests in the same flag). Nested containers are unpacked first,
+-- then sorted themselves. Returns (moved, remaining): remaining = contents that
+-- matched no chest (left inside). Uses the same AddOrMoveEntry move as the sort.
+-- NOTE: drop-to-floor RPCs (DropItem/DropItemAt) no-op from a server mod, so we
+-- move contents straight to their destination instead of dropping them.
+local function emptyContainerInto(iuc, container, contentsMap, candidates, depth)
+    local key = fullName(container)
+    local rec = key and contentsMap[key]
+    if not rec then return 0, 0 end
+    local moved, remaining = 0, 0
+    for _, child in ipairs(rec.items) do
+        if depth < 6 then
+            local m = emptyContainerInto(iuc, child, contentsMap, candidates, depth + 1)
+            moved = moved + m
+        end
+        local cls = classOf(child)
+        local path = categoryPath(cls)
+        local chest = matchChest(path, candidates)
+        if chest then
+            local ok = pcall(function()
+                iuc:Server_InventoryComponent_AddOrMoveEntry(chest.inv, child, { Value = AUTOPLACE })
+            end)
+            if ok then
+                moved = moved + 1
+                GG.log(string.format("  emptied %s -> chest '%s'", cls, chest.name))
+            else
+                remaining = remaining + 1
+                GG.log(string.format("  ERROR emptying %s -> '%s'", cls, chest.name))
+            end
+        else
+            remaining = remaining + 1
+        end
+    end
+    return moved, remaining
+end
+
 -- ---- the sweep -----------------------------------------------------------
 -- onlyBaseId (optional): restrict the sweep to that one flag (for the user
 -- 'goober now', which sorts just the flag the issuer is standing in).
@@ -715,6 +781,7 @@ function GG.sweep(onlyBaseId)
     end
     local chests = collectChests()
     local items = collectLooseLoot()
+    local contentsMap = GG.config.emptyContainers and collectContainerContents() or {}
 
     GG.log(string.format("sweep start: %d loose item(s), %d chest(s), %d flag(s), radius=%dcm%s",
         #items, #chests, #flags, radius,
@@ -722,6 +789,7 @@ function GG.sweep(onlyBaseId)
             (GG.resolved and GG.resolved.counts and GG.resolved.counts.enabled or 0) .. " base(s) enabled)") or " | gate OFF"))
 
     local moved, noFlag, disabled, noChest, noMatch, errs = 0, 0, 0, 0, 0, 0
+    local emptied = 0 -- items pulled out of containers into chests
     local unmapped = {} -- distinct item classes that hit no rule (tree gaps)
     for _, it in ipairs(items) do
         local flag = flagFor(it.x, it.y, flags)
@@ -740,6 +808,15 @@ function GG.sweep(onlyBaseId)
             if #candidates == 0 then
                 noChest = noChest + 1
             else
+                -- if this loose item is itself a container, empty its contents
+                -- into the flag's chests first, then sort the emptied container.
+                if GG.config.emptyContainers then
+                    local rec = contentsMap[fullName(it.item)]
+                    if rec then
+                        GG.log(string.format("  unpacking %s (%d item(s) inside)", it.class, #rec.items))
+                        emptied = emptied + emptyContainerInto(iuc, it.item, contentsMap, candidates, 0)
+                    end
+                end
                 local path, isDefault = categoryPath(it.class)
                 if isDefault then unmapped[it.class] = true end
                 local chest, node = matchChest(path, candidates)
@@ -763,15 +840,15 @@ function GG.sweep(onlyBaseId)
         end
     end
 
-    GG.log(string.format("sweep done: moved=%d  disabled=%d  outside-flag=%d  no-chest-in-flag=%d  no-name-match=%d  errors=%d",
-        moved, disabled, noFlag, noChest, noMatch, errs))
+    GG.log(string.format("sweep done: moved=%d  emptied=%d  disabled=%d  outside-flag=%d  no-chest-in-flag=%d  no-name-match=%d  errors=%d",
+        moved, emptied, disabled, noFlag, noChest, noMatch, errs))
     local gaps = {}
     for cls in pairs(unmapped) do gaps[#gaps + 1] = cls end
     if #gaps > 0 then
         table.sort(gaps)
         GG.log("  unmapped (no rule -> default): " .. table.concat(gaps, ", "))
     end
-    return string.format("moved %d  (%d disabled, %d no-chest, %d no-match)", moved, disabled, noChest, noMatch)
+    return string.format("moved %d  emptied %d  (%d disabled, %d no-chest, %d no-match)", moved, emptied, disabled, noChest, noMatch)
 end
 
 -- goober classes — dump every distinct item class currently in the world and
