@@ -34,6 +34,18 @@
 -- names in the world and how each maps, and watch the sweep log's "unmapped"
 -- line — then add/fix rules below.
 
+-- Default save-DB path, derived from this mod's folder so it's portable across
+-- machines: from <root>\SCUM\Binaries\Win64\ue4ss\Mods\<mod>, strip 5 trailing
+-- segments to reach <root>\SCUM, then append the standard save-DB path. Falls
+-- back to a literal if modDir is unknown. dbPath below uses this; override it
+-- with a literal path only if your server layout is non-standard.
+local function defaultDbPath()
+    local d = GarbageGoober and GarbageGoober.modDir
+    if not d then return [[C:\scumserver\SCUM\Saved\SaveFiles\SCUM.db]] end
+    for _ = 1, 5 do d = d:gsub("[\\/][^\\/]+$", "") end
+    return d .. [[\Saved\SaveFiles\SCUM.db]]
+end
+
 return {
     -- ---- behaviour -------------------------------------------------------
     sweepIntervalMs = 60000,  -- sweep period (ms); restart to change; "goober now" = on demand
@@ -63,7 +75,8 @@ return {
     --   false = sort EVERY flag (the entitlement layer is disabled)
     entitlementsEnabled = true,
     -- Path to the server's save DB (read-only). owner_user_profile_id lives here.
-    dbPath = [[C:\scumserver\SCUM\Saved\SaveFiles\SCUM.db]],
+    -- Defaults to defaultDbPath() above (portable). Set a literal path to override.
+    dbPath = defaultDbPath(),
     -- sqlite3.exe used to read the DB. nil = use the copy in this mod's folder
     -- (run install-libraries.ps1 to fetch it). Set a path to use a different one.
     sqliteExe = nil,
