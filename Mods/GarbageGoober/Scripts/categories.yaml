@@ -1,0 +1,217 @@
+# GarbageGoober category rules. Edit this file, then run  goober reload
+# in chat (or restart) to apply. This is DATA, not code (no Lua here).
+#
+# HOW MATCHING WORKS
+#   For each loose item the sorter walks `rules` top-to-bottom. A rule
+#   matches when any token in its `match` list is found (case-insensitive,
+#   substring) in the item's class name. The FIRST matching rule wins and
+#   gives the item a category PATH (general -> specific). The sorter then
+#   looks for a chest IN THE SAME FLAG whose name matches a path node,
+#   most-specific node first, falling back toward the general end.
+#   No rule matches => `default` below (or left in place if default is nil).
+#
+#   ORDER MATTERS: specific/override tokens must come before general ones
+#   (e.g. _ammo before rifle so "rifle_ammo" sorts as Ammo). Rules are
+#   evaluated in the order written here.
+#
+# THE TREE = SCUM's vendor structure: TRADER TYPE > TRADE CATEGORY, e.g.
+#   Armorer > Ammo | RangedWeapon[ > sub-type] | RangedWeaponAccessories |
+#             MeleeWeapon | Explosives
+#   Bartender > Food | Drink | Alcohol      Doctor > FirstAid
+#   Mechanic > Vehicles | Crafting          Harbourmaster > WaterVehicles | Fishing
+#   GeneralGoods > Helmets Jackets Pants Tops Headwear Hands Face Feet
+#                  Backpacks Armour Neckwaist Underwear Cosmetics Misc
+#   Name a chest after a leaf ("Drink", "Ammo") for fine sorting, or after a
+#   trader ("Bartender") to catch a whole group. Run  goober classes  to see
+#   live class names + how each maps, and watch the sweep log's "unmapped".
+
+default: [GeneralGoods, Misc]
+
+rules:
+  - path: [Mechanic, Crafting]
+    match: [car_battery]
+  - path: [Bartender, Food]
+    match: [agaricus, bakingsoda]
+  - path: [Mechanic, Crafting]
+    match: [firecracker, double_bang]
+  - path: [GeneralGoods, Headwear]
+    match: [beanie, beenie, scarf, headband]
+  - path: [Doctor, FirstAid]
+    match: [activatedcharcoal, phoenix_tears]
+  - path: [Mechanic, Crafting]
+    match: [axe_head]
+  - path: [Harbourmaster, Fishing]
+    match: [fishingbait, fish_]
+  - path: [Armorer, MeleeWeapon]
+    match: [1h_, 2h_]
+  - path: [Armorer, Ammo]
+    match: [_slug, birdshot, buckshot, _ammo, cartridge, _rounds, magazine, _mag_,
+           _arrow, _bolt]
+  - path: [Armorer, RangedWeaponAccessories]
+    match: [scope, silencer, suppressor, _sight, foregrip]
+  - path: [Armorer, Explosives]
+    match: [grenade, explosive, _c4, claymore, molotov]
+  - path: [Armorer, MeleeWeapon]
+    match: [machete, knife, _axe, hatchet, cleaver, crowbar, sledgehammer, _bat,
+           spear, shovel, pickaxe, pitchfork, scythe, sickle, kukri, baton]
+  - path: [Armorer, RangedWeapon, Handguns]
+    match: [pistol, revolver, glock, makarov, deagle, _m1911, _m9]
+  - path: [Armorer, RangedWeapon, SubmachineGuns]
+    match: [submachine, _smg, mp5, mp7, mp40, _uzi, thompson, korpion, kriss]
+  - path: [Armorer, RangedWeapon, Shotguns]
+    match: [shotgun, spas, mossberg, sawed_off, saiga]
+  - path: [Armorer, RangedWeapon, SniperRifles]
+    match: [sniper, _svd, dragunov, kar98, _m24, barrett]
+  - path: [Armorer, RangedWeapon, AutomaticRifles]
+    match: [ak47, ak74, _akm, _m16, _m4a1, _m4_, _scar, _aug, _fal, _g36, famas,
+           hk416, automatic_rifle, assault_rifle]
+  - path: [Armorer, RangedWeapon, Bow]
+    match: [crossbow, longbow, recurve, compound_bow, bow_]
+  - path: [Armorer, RangedWeapon, ThrowingWeapons]
+    match: [throwing]
+  - path: [Armorer, RangedWeapon, Rifles]
+    match: [_sks, mosin, _m14, lever_action, rifle]
+  - path: [Armorer, RangedWeapon]
+    match: [weapon_]
+  - path: [Doctor, FirstAid]
+    match: [bandage, antibiotic, painkiller, antiseptic, suture, vitamin, morphine,
+           _pills, syringe, medkit, first_aid, gauze, splint, disinfect,
+           epinephrine, tourniquet, ointment, tetracycline]
+  - path: [Bartender, Alcohol]
+    match: [beer, whiskey, wine, vodka, _rum, moonshine]
+  - path: [Bartender, Drink]
+    match: [water, cola, juice, milk, soda, coffee, _tea, lemonade]
+  - path: [Bartender, Food]
+    match: [canned, meat, _egg, bread, cheese, apple, _pear, banana, corn, bean,
+           chocolate, cereal, _rice, carrot, potato, tomato, cabbage, mushroom,
+           onion, garlic, lettuce, pumpkin, cucumber, radish, zucchini, sausage,
+           bacon, steak, sardine, tuna, peach, plum, grape, melon, berry, pickle,
+           honey, peanut, walnut]
+  - path: [GeneralGoods, Backpacks]
+    match: [backpack, rucksack]
+  - path: [GeneralGoods, Helmets]
+    match: [helmet]
+  - path: [GeneralGoods, Jackets]
+    match: [jacket, coat, hoodie]
+  - path: [GeneralGoods, Pants]
+    match: [jeans, pants, trousers, shorts]
+  - path: [GeneralGoods, Tops]
+    match: [shirt, sweater, _top]
+  - path: [GeneralGoods, Feet]
+    match: [boots, shoes, sneakers, _socks]
+  - path: [GeneralGoods, Hands]
+    match: [gloves]
+  - path: [GeneralGoods, Face]
+    match: [mask, glasses, goggles]
+  - path: [GeneralGoods, Headwear]
+    match: [_hat, _cap, beanie, bandana]
+  - path: [GeneralGoods, Armour]
+    match: [vest, armor, armour]
+  - path: [Harbourmaster, Fishing]
+    match: [fishing, _lure, _bait]
+  - path: [Harbourmaster, WaterVehicles]
+    match: [boat, kayak, _paddle]
+  - path: [Mechanic, Vehicles]
+    match: [_wheel, _tire, jerry_can]
+  - path: [Mechanic, Crafting]
+    match: [nail, plank, rope, duct_tape, scrap, _wire, gunpowder, _rag, hammer,
+           wrench, screwdriver, screw, pliers, drill, glue, _log, charcoal,
+           cement, plastic, fertilizer]
+  - path: [Armorer, MeleeWeapon]
+    match: [brass_knuckles, knuckles]
+  - path: [Armorer, RangedWeaponAccessories]
+    match: [weaponsights, weaponflash, bowsight, flashhider, improvisedrail,
+           _rail_, improvisedflashlight, hand_fan]
+  - path: [Armorer, Explosives]
+    match: [flashbang, pipebomb, _bomb, mine_0, improvisedmine, pressurecooker]
+  - path: [Armorer, Ammo]
+    match: [cal_30, _clip, ammobox, flarecartridge, 12_gauge, cal22, cal30, cal45,
+           cal7_, cal_357, cal_50, cal_5_45, cal_5_56, cal_7_62, cal_7_92,
+           cal_9mm, cal_9x39, cal_762, cal_792, brokenarrow, _bullet, _pile,
+           _5pcs, _empty]
+  - path: [Bartender, Food]
+    match: [burger, cake, cantonese, sweet_and_sour, canningfood]
+  - path: [Mechanic, Crafting]
+    match: [canopener]
+  - path: [Doctor, FirstAid]
+    match: [adrenaline, antimalaria, antiparasitic, aspirin, atropine, crutch,
+           hemostatic, _dressing, penicillin, aseptic, pills, injection]
+  - path: [Harbourmaster, Fishing]
+    match: [fish_, boilie]
+  - path: [Bartender, Alcohol]
+    match: [absinthe, pelinkovac, tequila, reviver, slavic_gent, scum_sunrise,
+           island_special]
+  - path: [Bartender, Drink]
+    match: [canteen, latte, glassbottle, petbottle]
+  - path: [Bartender, Food]
+    match: [mushroom, agaricus, amanita, amantia, boletus, cantharellus, coprinus,
+           lepiota, lycoperdon, psilocybe, beet, broccoli, cauliflower, celery,
+           chilipeper, coconut, currant, date, _fig, kiwi, lemon, lime, mango,
+           orange, parsley, pear, ramsons, rice, salsify, blueberr, dog_rose,
+           olive, guava, almond, hazelnut, oak_nuts, pine_cone, sunflower_seed,
+           crow_, seagull, larve, animal_fat, animal_guts, ravioli, spam,
+           babyfood, butter, cream, chips, crackers, oatmeal, mre, fig]
+  - path: [Doctor, FirstAid]
+    match: [isopropyl]
+  - path: [Bartender, Food]
+    match: [armillaria, bakevegetable]
+  - path: [Doctor, FirstAid]
+    match: [aloe, _pils]
+  - path: [Bartender, Food]
+    match: [_torso, _back_leg, _front_leg, bird_brest, bird_leg, _skinned,
+           _antlers, hooves]
+  - path: [Mechanic, Crafting]
+    match: [bobby_pin, saftey_pin, _pins, anode]
+  - path: [GeneralGoods, Backpacks]
+    match: [emptybag]
+  - path: [Bartender, Food]
+    match: [_limb, chili_con, chow_mein, cooked_veg, cookvegetable, dandelion,
+           crab_, _pincer, cricket, earthworm, prisoner_left, prisoner_right,
+           human_ears]
+  - path: [Mechanic, Crafting]
+    match: [coal, feather, electrode, carbon, flint, lockpick, lock_item,
+           human_skin, human_teeth]
+  - path: [GeneralGoods, Misc]
+    match: [cigarette, copper_coin, diary]
+  - path: [GeneralGoods, Armour]
+    match: [arm_guard]
+  - path: [GeneralGoods, Underwear]
+    match: [boxer, briefs]
+  - path: [GeneralGoods, Misc]
+    match: [credit_card]
+  - path: [Bartender, Food]
+    match: [stew, pasta, toaster, pepper, seasalt, soysauce, spicesmix, sugar,
+           vegetableoil, vinegar, whiteflour, yeast, _egg, egg, can0, wild_cherry]
+  - path: [Mechanic, Vehicles]
+    match: [gasoline]
+  - path: [Mechanic, Crafting]
+    match: [banjo, guitar, harmonica, _radio, compass, binocular, flare, candle,
+           lighter, matches, sewing, tool_box, toolbox, repair_kit,
+           grinding_stone, electrician, firecracker, electrical_repair,
+           animal_skin, _head, _paws, bear_front, bone, stone, thread, paper, rag,
+           rubber, bolts, batter, break_oil, camera_lens, lead_plate, gun_powder,
+           tinder, _stick, _tips, christmas_tree, _wire, wire]
+  - path: [GeneralGoods, Cosmetics]
+    match: [necklace]
+  - path: [GeneralGoods, Headwear]
+    match: [beenie, headband]
+  - path: [GeneralGoods, Helmets]
+    match: [k6]
+  - path: [GeneralGoods, Face]
+    match: [respirator, breathing_tube, night_vision, googles]
+  - path: [GeneralGoods, Feet]
+    match: [_shoe, slipper, socks, tights, bear_pow]
+  - path: [GeneralGoods, Tops]
+    match: [jersey]
+  - path: [GeneralGoods, Jackets]
+    match: [spitfire, ma1_]
+  - path: [GeneralGoods, Underwear]
+    match: [bra, supporter, peniswarmer]
+  - path: [GeneralGoods, Hands]
+    match: [mma_glove, glove]
+  - path: [GeneralGoods, Backpacks]
+    match: [quiver, _bag_, sporran]
+  - path: [GeneralGoods, Armour]
+    match: [stabproof]
+  - path: [GeneralGoods, Cosmetics]
+    match: [christmas]

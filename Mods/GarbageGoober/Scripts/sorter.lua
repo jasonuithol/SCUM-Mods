@@ -1070,4 +1070,103 @@ function GG.onChatMessage(self, messageParam)
     GG.handleCommand((#msg <= #trig) and "" or msg:sub(#trig + 2))
 end
 
+-- ---- category rules: loaded from categories.yaml (data, not Lua) ----------
+-- Minimal YAML reader for the merged-run flat-list subset we ship/emit:
+--   default: [A, B]            -- a flow seq (or nil/~/none/empty => no default)
+--   rules:
+--     - path: [A, B]           -- flow seq
+--       match: [tok, tok, ...] -- flow seq; MAY wrap across lines
+-- Not a general YAML parser — just enough for this file. Returns (rules,
+-- defaultPath): rules is the FLAT, expanded shape the matcher already uses
+-- (array of { match = token, path = {...} }), one entry per token, in order.
+local function parseCategoriesYaml(text)
+    -- 1. split into physical lines; drop CRs, full-line comments, blanks, and
+    --    trailing inline comments (no rule token ever contains '#').
+    local raw = {}
+    for line in (tostring(text) .. "\n"):gmatch("(.-)\n") do
+        line = line:gsub("\r$", "")
+        local fns = line:match("^%s*(%S)")
+        if fns ~= nil and fns ~= "#" then
+            raw[#raw + 1] = line:gsub("%s+#.*$", "")
+        end
+    end
+    -- 2. merge continuation lines so each logical line has balanced [] brackets
+    --    (a flow seq may wrap over several physical lines).
+    local logical, buf = {}, nil
+    for _, line in ipairs(raw) do
+        buf = buf and (buf .. " " .. line:gsub("^%s+", "")) or line
+        local _, o = buf:gsub("%[", "")
+        local _, c = buf:gsub("%]", "")
+        if o <= c then logical[#logical + 1] = buf; buf = nil end
+    end
+    if buf then logical[#logical + 1] = buf end
+    -- 3. helpers
+    local function splitFlow(inside)
+        local out = {}
+        for tok in (inside .. ","):gmatch("(.-),") do
+            tok = tok:gsub("^%s+", ""):gsub("%s+$", "")
+            tok = tok:gsub('^"(.*)"$', "%1"):gsub("^'(.*)'$", "%1")
+            if tok ~= "" then out[#out + 1] = tok end
+        end
+        return out
+    end
+    -- value after `<key>:` on a (possibly dash-led) line -> (list, "list") or
+    -- (scalar, "scalar"); nil if the key isn't on this line.
+    local function valueAfter(line, key)
+        local v = line:match("^%s*%-?%s*" .. key .. "%s*:%s*(.*)$")
+        if not v then return nil end
+        local inside = v:match("^%[(.*)%]%s*$")
+        if inside then return splitFlow(inside), "list" end
+        return (v:gsub("%s+$", "")), "scalar"
+    end
+    -- 4. walk logical lines
+    local rules, defaultPath, curPath = {}, nil, nil
+    for _, line in ipairs(logical) do
+        local t = line:gsub("^%s+", "")
+        if t:match("^default%s*:") then
+            local v, kind = valueAfter(line, "default")
+            if kind == "list" and v and #v > 0 then defaultPath = v else defaultPath = nil end
+        elseif t:match("^rules%s*:") then
+            -- section header; nothing to capture
+        elseif t:match("^%-?%s*path%s*:") then
+            curPath = (valueAfter(line, "path"))
+        elseif t:match("^match%s*:") then
+            local toks = valueAfter(line, "match")
+            if curPath and toks then
+                for _, tok in ipairs(toks) do rules[#rules + 1] = { match = tok, path = curPath } end
+            end
+        end
+    end
+    return rules, defaultPath
+end
+
+-- Load category rules into GG.config.rules / GG.config.defaultPath. Source:
+-- GG.categoriesYaml if set (the eval build bakes the YAML in), else the on-disk
+-- <modDir>\Scripts\categories.yaml. Called at engine load and on 'goober reload'.
+function GG.loadCategories()
+    GG.config = GG.config or {}
+    local text, src = GG.categoriesYaml, "embedded"
+    if not text then
+        local p = GG.modDir and (GG.modDir .. [[\Scripts\categories.yaml]]) or nil
+        local f = p and io.open(p, "r") or nil
+        if not f then
+            GG.log("categories: cannot open " .. tostring(p) .. " (no embedded YAML) — keeping existing rules")
+            return false
+        end
+        text = f:read("*a"); f:close(); src = p
+    end
+    local ok, rules, defaultPath = pcall(parseCategoriesYaml, text)
+    if not ok or type(rules) ~= "table" then
+        GG.log("categories: parse FAILED (" .. tostring(rules) .. ") — keeping existing rules")
+        return false
+    end
+    GG.config.rules = rules
+    GG.config.defaultPath = defaultPath
+    GG.log(string.format("categories loaded from %s: %d rule(s), default=%s", src, #rules,
+        defaultPath and table.concat(defaultPath, ">") or "nil (leave unmatched in place)"))
+    return true
+end
+
+GG.loadCategories()
+
 GG.log("sorter.lua loaded (sweep engine ready).")

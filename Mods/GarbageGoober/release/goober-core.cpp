@@ -4,10 +4,11 @@
 // build-release.sh). Two modes:
 //
 //   goober-core pack <scriptsDir> <out.bin>
-//       DEV-SIDE. Reads <scriptsDir>/Config.lua + sorter.lua, wraps them into a
-//       single Lua chunk (sets GarbageGoober.config, then defines the engine),
-//       encrypts it, and writes <out.bin>. Run by build-release.sh only; never
-//       shipped to the third party.
+//       DEV-SIDE. Reads <scriptsDir>/Config.lua + categories.yaml + sorter.lua,
+//       wraps them into a single Lua chunk (sets GarbageGoober.config, bakes the
+//       category YAML into GarbageGoober.categoriesYaml, then defines the
+//       engine), encrypts it, and writes <out.bin>. Run by build-release.sh
+//       only; never shipped to the third party.
 //
 //   goober-core emit [payload.bin]
 //       RUNTIME. Locates payload.bin next to this exe (or the given path),
@@ -105,31 +106,45 @@ static bool exe_dir(char* out) {
 // Build the wrapped+encrypted engine blob (the bytes that follow MAGIC). Sets
 // *out/*outLen (caller frees). Returns 0, or non-zero on error.
 static int build_payload(const char* scriptsDir, unsigned char** out, size_t* outLen) {
-    char cfgPath[MAX_PATH], srtPath[MAX_PATH];
+    char cfgPath[MAX_PATH], srtPath[MAX_PATH], catPath[MAX_PATH];
     snprintf(cfgPath, sizeof(cfgPath), "%s/Config.lua", scriptsDir);
     snprintf(srtPath, sizeof(srtPath), "%s/sorter.lua", scriptsDir);
+    snprintf(catPath, sizeof(catPath), "%s/categories.yaml", scriptsDir);
 
-    unsigned char *cfg = nullptr, *srt = nullptr;
+    unsigned char *cfg = nullptr, *srt = nullptr, *cat = nullptr;
     long cfgLen = read_file(cfgPath, &cfg);
     long srtLen = read_file(srtPath, &srt);
-    if (cfgLen < 0) { fprintf(stderr, "pack: cannot read %s\n", cfgPath); free(cfg); free(srt); return 2; }
-    if (srtLen < 0) { fprintf(stderr, "pack: cannot read %s\n", srtPath); free(cfg); free(srt); return 2; }
+    long catLen = read_file(catPath, &cat);
+    if (cfgLen < 0) { fprintf(stderr, "pack: cannot read %s\n", cfgPath); free(cfg); free(srt); free(cat); return 2; }
+    if (srtLen < 0) { fprintf(stderr, "pack: cannot read %s\n", srtPath); free(cfg); free(srt); free(cat); return 2; }
+    if (catLen < 0) { fprintf(stderr, "pack: cannot read %s\n", catPath); free(cfg); free(srt); free(cat); return 2; }
 
+    // Bake the category YAML into the engine as a Lua long string so the engine
+    // is self-contained (no plaintext categories.yaml ships); sorter.lua's
+    // loadCategories() reads GarbageGoober.categoriesYaml ahead of any disk file.
+    // [==[ level avoids colliding with the [..]/].. that appears in the YAML.
     const char* PRE = "GarbageGoober = GarbageGoober or {}\nGarbageGoober.config = (function()\n";
     const char* MID = "\nend)()\n";
+    const char* CATPRE = "GarbageGoober.categoriesYaml = [==[\n";
+    const char* CATPOST = "\n]==]\n";
     size_t preLen = strlen(PRE), midLen = strlen(MID);
-    size_t total = preLen + (size_t)cfgLen + midLen + (size_t)srtLen;
+    size_t catPreLen = strlen(CATPRE), catPostLen = strlen(CATPOST);
+    size_t total = preLen + (size_t)cfgLen + midLen
+                 + catPreLen + (size_t)catLen + catPostLen + (size_t)srtLen;
 
     unsigned char* blob = (unsigned char*)malloc(total);
-    if (!blob) { fprintf(stderr, "pack: oom\n"); free(cfg); free(srt); return 2; }
+    if (!blob) { fprintf(stderr, "pack: oom\n"); free(cfg); free(srt); free(cat); return 2; }
     size_t off = 0;
-    memcpy(blob + off, PRE, preLen);          off += preLen;
-    memcpy(blob + off, cfg, (size_t)cfgLen);   off += (size_t)cfgLen;
-    memcpy(blob + off, MID, midLen);          off += midLen;
-    memcpy(blob + off, srt, (size_t)srtLen);   off += (size_t)srtLen;
+    memcpy(blob + off, PRE, preLen);            off += preLen;
+    memcpy(blob + off, cfg, (size_t)cfgLen);    off += (size_t)cfgLen;
+    memcpy(blob + off, MID, midLen);            off += midLen;
+    memcpy(blob + off, CATPRE, catPreLen);      off += catPreLen;
+    memcpy(blob + off, cat, (size_t)catLen);    off += (size_t)catLen;
+    memcpy(blob + off, CATPOST, catPostLen);    off += catPostLen;
+    memcpy(blob + off, srt, (size_t)srtLen);    off += (size_t)srtLen;
     rc4(blob, total);
 
-    free(cfg); free(srt);
+    free(cfg); free(srt); free(cat);
     *out = blob; *outLen = total;
     return 0;
 }

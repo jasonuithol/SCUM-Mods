@@ -58,7 +58,7 @@ function GG.reload()
     if ok and type(res) == "table" then
         GG.config = res
         GG.log("config loaded (interval=" .. tostring(res.sweepIntervalMs) ..
-            "ms, rules=" .. tostring(#(res.rules or {})) .. ")")
+            "ms; categories load next from categories.yaml)")
     else
         GG.log("CONFIG load FAILED: " .. tostring(res) .. " — keeping previous config")
         if not GG.config then return false end
