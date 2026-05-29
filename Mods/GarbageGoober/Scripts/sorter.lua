@@ -752,6 +752,50 @@ local function emptyContainerInto(iuc, container, contentsMap, candidates, depth
     return moved, remaining
 end
 
+-- Collect a weapon's socketed attachments (scope/suppressor/grip/magazine/...).
+-- These live in _attachmentSockets[].Items[].MountedItem, NOT in an inventory, so
+-- they don't appear in the InTheInventory scan. Only valid actors are returned —
+-- a gun's integral (non-removable) mounts read back as invalid and are skipped.
+local function collectMounts(item)
+    local out = {}
+    local socks = pcs(function() return item._attachmentSockets end, nil)
+    local ns = socks and pcs(function() return #socks end, nil) or 0
+    for s = 1, ns do
+        local sock = pcs(function() return socks[s] end, nil)
+        local sitems = sock and pcs(function() return sock.Items end, nil) or nil
+        local ni = sitems and pcs(function() return #sitems end, nil) or 0
+        for j = 1, ni do
+            local di = pcs(function() return sitems[j] end, nil)
+            local m = di and pcs(function() return di.MountedItem end, nil) or nil
+            if isValid(m) then out[#out + 1] = m end
+        end
+    end
+    return out
+end
+
+-- Move a weapon's removable attachments into matching category chests (same
+-- AddOrMoveEntry move the client uses to drag an attachment off a gun — captured
+-- in recon). Magazines go to the Ammo chest still loaded. Returns count moved.
+local function stripMountsInto(iuc, item, candidates)
+    local moved = 0
+    for _, m in ipairs(collectMounts(item)) do
+        local cls = classOf(m)
+        local chest = matchChest(categoryPath(cls), candidates)
+        if chest then
+            local ok = pcall(function()
+                iuc:Server_InventoryComponent_AddOrMoveEntry(chest.inv, m, { Value = AUTOPLACE })
+            end)
+            if ok then
+                moved = moved + 1
+                GG.log(string.format("  stripped %s -> chest '%s'", cls, chest.name))
+            else
+                GG.log(string.format("  ERROR stripping %s -> '%s'", cls, chest.name))
+            end
+        end
+    end
+    return moved
+end
+
 -- ---- the sweep -----------------------------------------------------------
 -- onlyBaseId (optional): restrict the sweep to that one flag (for the user
 -- 'goober now', which sorts just the flag the issuer is standing in).
@@ -790,6 +834,7 @@ function GG.sweep(onlyBaseId)
 
     local moved, noFlag, disabled, noChest, noMatch, errs = 0, 0, 0, 0, 0, 0
     local emptied = 0 -- items pulled out of containers into chests
+    local stripped = 0 -- attachments pulled off weapons into chests
     local unmapped = {} -- distinct item classes that hit no rule (tree gaps)
     for _, it in ipairs(items) do
         local flag = flagFor(it.x, it.y, flags)
@@ -817,6 +862,10 @@ function GG.sweep(onlyBaseId)
                         emptied = emptied + emptyContainerInto(iuc, it.item, contentsMap, candidates, 0)
                     end
                 end
+                -- if it's a weapon with attachments, strip them into chests first
+                if GG.config.stripAttachments then
+                    stripped = stripped + stripMountsInto(iuc, it.item, candidates)
+                end
                 local path, isDefault = categoryPath(it.class)
                 if isDefault then unmapped[it.class] = true end
                 local chest, node = matchChest(path, candidates)
@@ -840,15 +889,15 @@ function GG.sweep(onlyBaseId)
         end
     end
 
-    GG.log(string.format("sweep done: moved=%d  emptied=%d  disabled=%d  outside-flag=%d  no-chest-in-flag=%d  no-name-match=%d  errors=%d",
-        moved, emptied, disabled, noFlag, noChest, noMatch, errs))
+    GG.log(string.format("sweep done: moved=%d  emptied=%d  stripped=%d  disabled=%d  outside-flag=%d  no-chest-in-flag=%d  no-name-match=%d  errors=%d",
+        moved, emptied, stripped, disabled, noFlag, noChest, noMatch, errs))
     local gaps = {}
     for cls in pairs(unmapped) do gaps[#gaps + 1] = cls end
     if #gaps > 0 then
         table.sort(gaps)
         GG.log("  unmapped (no rule -> default): " .. table.concat(gaps, ", "))
     end
-    return string.format("moved %d  emptied %d  (%d disabled, %d no-chest, %d no-match)", moved, emptied, disabled, noChest, noMatch)
+    return string.format("moved %d  emptied %d  stripped %d  (%d disabled, %d no-chest, %d no-match)", moved, emptied, stripped, disabled, noChest, noMatch)
 end
 
 -- goober classes — dump every distinct item class currently in the world and

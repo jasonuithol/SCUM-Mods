@@ -32,6 +32,15 @@ return {
     -- inventory items; that's a later phase.) false = sort containers whole.
     emptyContainers = true,
 
+    -- Strip weapon attachments: when a swept loose weapon has socketed
+    -- attachments (scope, suppressor, grip, MAGAZINE, etc.), move each into its
+    -- matching category chest (scope -> RangedWeaponAccessories, magazine ->
+    -- Ammo, ...), then put the stripped weapon away. The magazine goes to the
+    -- Ammo chest still LOADED — its rounds are ammo-data, not items, and SCUM's
+    -- unload doesn't yield sortable rounds, so we don't try to empty it.
+    -- false = sort weapons whole, attachments left on.
+    stripAttachments = true,
+
     -- ---- category rules source -------------------------------------------
     -- The rules live in categories.yaml. Optionally pull them from a remote URL
     -- so you can update sorting WITHOUT touching the server. Behaviour:
