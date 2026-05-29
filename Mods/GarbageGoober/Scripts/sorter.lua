@@ -1008,9 +1008,15 @@ function GG.handleCommand(arg)
         if type(GG.dumpTypes) == "function" then pcall(GG.dumpTypes, arg:sub(7)) end
     elseif arg == "reload" then
         if GG.reload and GG.reload() then
+            -- GG.reload re-ran Config + engine (local categories); now pull the
+            -- latest rules from the remote URL (if configured) on top.
+            GG.loadCategories(true)
+            local s2 = tostring(GG.categoriesSource or "")
+            local where = s2:find("^remote") and "pulled remote rules"
+                or (s2:find("^cache") and "used cached rules" or "used local rules")
             GG.log("reloaded; running one sweep")
             local ok, s = pcall(GG.sweep)
-            GG.reply("reloaded — " .. (ok and (s or "swept") or "sweep error"))
+            GG.reply("reloaded (" .. where .. ") — " .. (ok and (s or "swept") or "sweep error"))
         else
             GG.reply("reload FAILED (see log)")
         end
@@ -1140,33 +1146,78 @@ local function parseCategoriesYaml(text)
     return rules, defaultPath
 end
 
--- Load category rules into GG.config.rules / GG.config.defaultPath. Source:
--- GG.categoriesYaml if set (the eval build bakes the YAML in), else the on-disk
--- <modDir>\Scripts\categories.yaml. Called at engine load and on 'goober reload'.
-function GG.loadCategories()
+-- Fetch a URL to a string via curl (the Lua VM has no HTTP, so we shell out the
+-- same way the DB reader calls sqlite3). Best-effort: returns (body) or
+-- (nil, err). Appends a cache-buster because gist/raw CDN caches a few minutes.
+function GG.fetchUrl(url)
+    local exe = (GG.config and GG.config.curlExe) or "curl"
+    local bust = (url:find("?", 1, true) and "&" or "?") .. "cb=" .. tostring(os.time())
+    local inner = string.format("%s -fsSL --max-time 15 %s", dq(exe), dq(url .. bust))
+    local h = io.popen('"' .. inner .. '"', "r")
+    if not h then return nil, "io.popen failed" end
+    local body = h:read("*a")
+    h:close()
+    if not body or body == "" then return nil, "empty response (offline / 404 / no curl?)" end
+    return body
+end
+
+-- Load category rules into GG.config.rules / GG.config.defaultPath.
+--   remote=true  (only 'goober reload'): fetch config.remoteCategoriesUrl first;
+--                on success cache it to <modDir>\categories.cache.yaml.
+--   remote=false (boot / engine load): never touch the network — use the cache
+--                from the last successful pull, then embedded, then bundled.
+-- Full source order: [remote if asked] -> disk cache -> embedded GG.categoriesYaml
+-- (eval build) -> bundled <modDir>\Scripts\categories.yaml (dev). A parse that
+-- yields zero rules is rejected (keeps current rules) so a bad/truncated fetch
+-- never wipes sorting. Boot stays offline-safe and instant; 'goober reload' is
+-- the explicit "pull the latest rules" action.
+function GG.loadCategories(remote)
     GG.config = GG.config or {}
-    local text, src = GG.categoriesYaml, "embedded"
+    local cacheFile = GG.modDir and (GG.modDir .. [[\categories.cache.yaml]]) or nil
+    local text, src
+
+    local url = GG.config.remoteCategoriesUrl
+    if remote and type(url) == "string" and url ~= "" then
+        local body, err = GG.fetchUrl(url)
+        if body then
+            text, src = body, "remote " .. url
+            if cacheFile then
+                local f = io.open(cacheFile, "w")
+                if f then f:write(body); f:close() end
+            end
+        else
+            GG.log("categories: remote fetch failed (" .. tostring(err) .. ") — trying cache/local")
+        end
+    end
+
+    if not text and cacheFile then
+        local f = io.open(cacheFile, "r")
+        if f then local c = f:read("*a"); f:close(); if c and c ~= "" then text, src = c, "cache " .. cacheFile end end
+    end
+
+    if not text and GG.categoriesYaml then text, src = GG.categoriesYaml, "embedded" end
+
     if not text then
         local p = GG.modDir and (GG.modDir .. [[\Scripts\categories.yaml]]) or nil
         local f = p and io.open(p, "r") or nil
-        if not f then
-            GG.log("categories: cannot open " .. tostring(p) .. " (no embedded YAML) — keeping existing rules")
-            return false
-        end
-        text = f:read("*a"); f:close(); src = p
+        if f then text = f:read("*a"); f:close(); src = p end
     end
+
+    if not text then GG.log("categories: no source available — keeping existing rules"); return false end
+
     local ok, rules, defaultPath = pcall(parseCategoriesYaml, text)
-    if not ok or type(rules) ~= "table" then
-        GG.log("categories: parse FAILED (" .. tostring(rules) .. ") — keeping existing rules")
+    if not ok or type(rules) ~= "table" or #rules == 0 then
+        GG.log("categories: parse failed/empty from " .. tostring(src) .. " (" .. tostring(rules) .. ") — keeping existing rules")
         return false
     end
     GG.config.rules = rules
     GG.config.defaultPath = defaultPath
+    GG.categoriesSource = src
     GG.log(string.format("categories loaded from %s: %d rule(s), default=%s", src, #rules,
         defaultPath and table.concat(defaultPath, ">") or "nil (leave unmatched in place)"))
     return true
 end
 
-GG.loadCategories()
+GG.loadCategories(false)   -- boot/reload load: local/cache only; 'goober reload' pulls remote
 
 GG.log("sorter.lua loaded (sweep engine ready).")

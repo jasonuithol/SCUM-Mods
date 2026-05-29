@@ -50,6 +50,10 @@ matching chest; unmatched items are left in place.
 
 ## Notes
 
+- **Category rules update remotely.** The author can push new sorting rules; an
+  admin running `goober reload` fetches the latest set live (no restart needed).
+  Server start uses the last pulled copy (or the bundled one), so it never waits
+  on the network. Needs `curl` (built into Windows 10+).
 - Sorting is gated per base by default — use `goober add <player>` (admin) to
   enable a base, or `goober default on` to sort every flag.
 - SCUM only keeps loot/chests live within ~200m of a player, so a base with

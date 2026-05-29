@@ -24,6 +24,23 @@ return {
     flagRadiusOverride = nil, -- nil = live ConZBaseManager._flagInfluenceRadius (5000cm)
     nameContains = false,     -- false = exact chest-name match; true = substring
 
+    -- ---- category rules source -------------------------------------------
+    -- The rules live in categories.yaml. Optionally pull them from a remote URL
+    -- so you can update sorting WITHOUT touching the server. Behaviour:
+    --   * boot / server start: NEVER hits the network — uses the last good copy
+    --     cached on disk (from a previous pull), else the bundled categories.yaml.
+    --   * 'goober reload': fetches this URL (via curl), applies it, and caches it.
+    --     This is the ONLY time the URL is fetched. On failure it falls back to
+    --     cache -> bundled; a fetch that parses to zero rules is rejected (keeps
+    --     the current rules), so a truncated download never wipes sorting.
+    -- Set nil to disable remote entirely and always use the local categories.yaml.
+    --   Use a Gist RAW url with NO commit hash (= always latest). It's CDN-cached
+    --   ~5 min, so edits aren't instant; reload appends a cache-buster to help.
+    remoteCategoriesUrl = "https://gist.githubusercontent.com/jasonuithol/c08848f5a4ef9cc07b8ac4596b24838f/raw/categories.yaml",
+    -- curl for the fetch. nil = "curl" on PATH (built into Windows 10+ at
+    -- System32\curl.exe). Set a path to override.
+    curlExe = nil,
+
     -- Commands are typed in NORMAL chat starting with this word, e.g. "goober now".
     -- (No "#" — that goes through SCUM's admin processor and replies "Unrecognized
     -- command".) The trigger word still appears in chat to whoever shares the channel.

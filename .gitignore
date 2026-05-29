@@ -19,6 +19,7 @@ __pycache__/
 # of truth there and must never be overwritten by a repo copy or committed).
 Mods/GarbageGoober/entitlements.lua
 Mods/GarbageGoober/GarbageGoober.log
+Mods/GarbageGoober/categories.cache.yaml
 
 # SCUM save data + DB backups
 *.db
