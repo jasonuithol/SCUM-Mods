@@ -23,6 +23,14 @@
 #include <cstdio>
 #include <cstring>
 #include <cstdarg>
+#include <ctime>
+
+// Compile-time evaluation expiry (unix epoch). 0 = permanent build, no
+// time-bomb — build.sh leaves it 0. build-demo.sh sets a real epoch so the
+// demo stops patching the dev gate after that date.
+#ifndef DM_EXPIRY
+#define DM_EXPIRY 0
+#endif
 
 static HMODULE g_self = nullptr;
 
@@ -129,6 +137,12 @@ static void do_patch() {
 // `if (m_mod)`, so returning nullptr is safe: the patch is already applied.
 extern "C" __declspec(dllexport) void* start_mod() {
     log_line("==== DeveloperMode start_mod ====");
+#if DM_EXPIRY
+    if ((long long)time(nullptr) > (long long)DM_EXPIRY) {
+        log_line("evaluation build EXPIRED -- dev gate NOT patched.");
+        return nullptr;
+    }
+#endif
     do_patch();
     return nullptr;
 }
