@@ -20,6 +20,9 @@ __pycache__/
 Mods/GarbageGoober/entitlements.lua
 Mods/GarbageGoober/GarbageGoober.log
 Mods/GarbageGoober/categories.cache.yaml
+# FlagUpkeep runtime state (same rule: generated on the server, never committed)
+Mods/FlagUpkeep/entitlements.lua
+Mods/FlagUpkeep/FlagUpkeep.log
 
 # SCUM save data + DB backups
 *.db
