@@ -1,21 +1,14 @@
 -- FlagUpkeep — server-side UE4SS mod.
 --
--- Periodically keeps a flag's base elements repaired to full health by consuming
--- toolkits stored in a designated "FlagUpkeep" container (chest/wardrobe) inside
--- that flag. Access is gated EXACTLY like GarbageGoober (per-player primary,
--- per-flag fallback, global default), driven by the same SCUM.db owner lookup.
--- Server-side only — coexists with client BattlEye.
+-- Periodically keeps a flag's base elements repaired to full health, spending
+-- REPAIR POINTS banked (via 'upkeep deposit', chest OPEN) from toolboxes in a
+-- designated "FlagUpkeep" container. Access is gated per-player / per-flag /
+-- default. Server-side only — coexists with client BattlEye.
 --
--- Shared lineage: the access-control / flag-scoping / chat-command / timer layer
--- is copy-adapted from GarbageGoober (proven in production). Once both mods are
--- stable, the identical parts are the candidate for a shared lib/ (see README).
---
--- THE REPAIR PRIMITIVE ITSELF is pending recon — SCUM exposes no per-element
--- BaseElementId via reflection and the interaction-RPC route no-op'd for upgrade
--- (see memory reference-scum-base-building-architecture). We're capturing the
--- real repair call path first (LootSorterRecon PASS 33). Until that's wired,
--- FlagUpkeep.config.repairEnabled stays false and the engine only REPORTS what
--- it would repair (non-destructive) — it never touches elements or toolkits.
+-- The access-control / flag-scoping / SCUM.db / chat-command framework lives in
+-- the shared library  ..\shared\Scripts\gating.lua  (also used by GarbageGoober's
+-- lineage). This file loads it and calls Gating.attach(FU, opts); the mod-specific
+-- engine (the repair action, deposit, trigger, help, dispatch) is in upkeep.lua.
 --
 -- Enable by adding   FlagUpkeep : 1   to UE4SS Mods/mods.txt  (NEVER enabled.txt —
 -- it silently overrides mods.txt). Requires HookProcessInternal=1 &
@@ -25,13 +18,12 @@
 local MOD_DIR = [[C:\scumserver\SCUM\Binaries\Win64\ue4ss\Mods\FlagUpkeep]]
 local SCRIPTS = MOD_DIR .. [[\Scripts]]
 local LOGFILE = MOD_DIR .. [[\FlagUpkeep.log]]
+-- shared gating library (sibling 'shared' folder; NOT a mod, so UE4SS ignores it)
+local LIB = MOD_DIR .. [[\..\shared\Scripts\gating.lua]]
 
 FlagUpkeep = FlagUpkeep or {}
 local FU = FlagUpkeep
 
--- Paths for the entitlement layer. The mod reads SCUM.db via the bundled
--- sqlite3.exe (fetched by install-libraries.ps1) and keeps its own store in
--- entitlements.lua. See Scripts/upkeep.lua + Scripts/Config.lua.
 FU.modDir = MOD_DIR
 FU.sqliteExe = MOD_DIR .. [[\sqlite3.exe]]
 FU.storeFile = MOD_DIR .. [[\entitlements.lua]]
@@ -53,7 +45,7 @@ local function runFile(path)
     return pcall(chunk)
 end
 
--- (re)load config + upkeep engine. Safe to call any time (e.g. after editing Config.lua).
+-- (re)load config + shared gating lib + upkeep engine. Safe to call any time.
 function FU.reload()
     local ok, res = runFile(SCRIPTS .. [[\Config.lua]])
     if ok and type(res) == "table" then
@@ -64,6 +56,27 @@ function FU.reload()
         FU.log("CONFIG load FAILED: " .. tostring(res) .. " — keeping previous config")
         if not FU.config then return false end
     end
+
+    -- shared gating layer: install the access/flag/DB/chat building blocks onto FU
+    FU.trigger = (FU.config and FU.config.chatTrigger) or "upkeep"
+    FU.tag = "FlagUpkeep"
+    local okL, G = runFile(LIB)
+    if not okL or type(G) ~= "table" or type(G.attach) ~= "function" then
+        FU.log("gating lib load FAILED (" .. tostring(G) .. ") — expected " .. LIB)
+        return false
+    end
+    G.attach(FU, {
+        storeExtra = { triggerOverrides = "floatmap", repairPoints = "intmap" },
+        defaultNotEnabled = "upkeep isn't enabled for your base — ask an admin to enable it",
+        statusExtra = function(M)
+            if not M.config.repairEnabled then
+                M.reply("NOTE: repair is DISABLED in config (report-only mode)", true)
+            elseif not M.config.requireRepairPoints then
+                M.reply("NOTE: requireRepairPoints=false — repairing for free (no points consumed)", true)
+            end
+        end,
+    })
+
     local ok2, e2 = runFile(SCRIPTS .. [[\upkeep.lua]])
     if not ok2 then FU.log("upkeep.lua load FAILED: " .. tostring(e2)); return false end
     return true
@@ -75,9 +88,7 @@ function FU.armTimer()
     FU.timerArmed = true
     local interval = (FU.config and FU.config.upkeepIntervalMs) or 3600000
     LoopAsync(interval, function()
-        if FU.enabled ~= false and type(FU.upkeep) == "function" then
-            pcall(FU.upkeep)
-        end
+        if FU.enabled ~= false and type(FU.upkeep) == "function" then pcall(FU.upkeep) end
         return false -- keep looping
     end)
     FU.log("upkeep timer armed @ " .. interval .. "ms (set FlagUpkeep.enabled=false to pause).")
@@ -87,20 +98,17 @@ end
 do local f = io.open(LOGFILE, "w"); if f then f:write("===== FlagUpkeep started :: " .. ts() .. " =====\n"); f:close() end end
 
 if not FU.reload() then
-    FU.log("startup ABORTED: could not load config/engine.")
+    FU.log("startup ABORTED: could not load config/lib/engine.")
     return
 end
 
--- Prime the entitlement store + set once at boot (so the first cycle has them).
 if type(FU.loadStore) == "function" then pcall(FU.loadStore) end
 if type(FU.ensureResolved) == "function" then pcall(FU.ensureResolved, true) end
 
 FU.armTimer()
 
--- chat trigger: NORMAL chat (no "#") — type e.g.  upkeep now . Hooks the normal
--- chat-send RPC so SCUM never sees an admin command (no "Unrecognized command").
--- Thin delegator to the reloadable FU.onChatMessage in upkeep.lua, so command
--- tweaks apply via "upkeep reload" (no restart). Admin-gated in onChatMessage.
+-- chat trigger: NORMAL chat (no "#"). Thin delegator to the lib's FU.onChatMessage
+-- (installed by attach), which resolves the caller then calls FU.handleCommand.
 local TARGET = "/Script/SCUM.PlayerRpcChannel:Chat_Server_BroadcastChatMessage"
 local okHook, errHook = pcall(function()
     RegisterHook(TARGET, function(self, message, channel)
@@ -109,7 +117,6 @@ local okHook, errHook = pcall(function()
 end)
 FU.log(okHook and "ready: 'upkeep' chat trigger installed (normal chat, admin-gated)." or ("chat trigger FAILED: " .. tostring(errHook)))
 
--- final load banner
 FU.log("=====================================================")
 FU.log("FlagUpkeep is loaded. Type 'upkeep' in chat to see the available commands.")
 FU.log("=====================================================")
