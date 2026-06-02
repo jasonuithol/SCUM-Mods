@@ -1,141 +1,144 @@
-# SCUM Base-Building Tier Tool & Modding Research
+# SCUM Server-Side Mods
 
-Tools and reverse-engineering notes for modding **SCUM** (UE 4.27.2, build 1.2.3.2 CL-115523).
+Server-side mods and reverse-engineering notes for **SCUM** dedicated servers
+(UE 4.27.2, build 1.3.x).
 
-The headline deliverable is **`db_tier`** — an offline tool that bulk **upgrades/downgrades every base-building element's tier** (Twig → Wood → Metal → Brick → Cement) by editing SCUM's local SQLite save database. The change is a *real, persistent* tier change (correct mesh, HP, raid-resistance), because SCUM rebuilds each element from the DB on world load.
+Everything here is **server-side**: the mods run inside `SCUMServer.exe` via UE4SS
+and require nothing on players' machines, so **client BattlEye can stay on**. They
+only affect a server you run/administer.
 
-> **Scope / ethics:** this only works where you have the save file — **single-player sandbox and your own dedicated server**. It is impossible on someone else's server (no DB access), which is exactly the intended boundary. Use it only on bases/servers you own.
-
----
-
-## `db_tier` — the tier editor
-
-`tools/db_tier.py` (also buildable to a standalone `db_tier.exe`, see below).
-
-```
-python db_tier.py (--tier NAME | --levels N) [--playerid ID] [--apply] [--db PATH]
-```
-
-| Parameter | Meaning |
-| :--- | :--- |
-| `--tier NAME` | **Absolute** target tier: `twig`/`wood`/`metal`/`brick`/`cement`. Clamped to each shape's cap (e.g. doors stop at Metal). Best when the base is a mix of tiers. |
-| `--levels N` | **Relative**: raise N tiers; **negative downgrades** (`-5` → Twig). Clamped per shape. |
-| `--playerid ID` | **Server mode** — target bases where `owner_user_profile_id = ID`. Omit → **sandbox mode** (your `is_owned_by_player` flag). |
-| `--apply` | Actually write. **Without it, it's a dry-run** (preview only; read-only, safe even while SCUM runs). |
-| `--db PATH` | Use a different `SCUM.db` (e.g. a server's). Default: your local save. |
-
-Run with **no arguments** to print this help.
-
-### Workflow
-
-1. **Quit SCUM to desktop** (releases the DB; the tool refuses to write while the game holds it).
-2. Preview, then apply:
-   ```
-   python db_tier.py --tier cement            # dry-run: see the plan
-   python db_tier.py --tier cement --apply    # do it (backs up the DB first)
-   ```
-3. **Relaunch and load** — SCUM rebuilds the elements at the new tier.
-
-`--apply` always writes a timestamped backup (`SCUM.db.bak-<ts>`) next to the save first.
-
-### Build a standalone binary
-
-```
-pip install pyinstaller
-pyinstaller --onefile --console tools/db_tier.py
-# -> dist/db_tier.exe  (no Python needed to run)
-```
+> **Scope / ethics:** these patch or script a dedicated-server process you own.
+> They do nothing on a client and cannot affect a server you don't control. Use
+> them only on your own / authorised servers.
 
 ---
 
-## How it works (and why it's a DB edit, not a live mod)
+## Headline mods
 
-SCUM persists the whole world — including every base element — to a local SQLite DB:
+### DeveloperMode — unlock the developer-tier admin commands
+
+`Mods/DeveloperMode/` (native C++ UE4SS mod, `dlls/main.dll`)
+
+Unlocks SCUM's built-in **developer-tier** admin commands — the ones GamePires
+gated above the normal admin/elevated tiers, which return *"Player must be
+developer."* on a retail server. The headline command:
 
 ```
-%LOCALAPPDATA%\SCUM\Saved\SaveFiles\SCUM.db
+#UpgradeBaseBuildingElementsWithinRadius <radius>
 ```
 
-In the `base_element` table, the **`asset` column is the element's class path, which *is* its tier**:
+upgrades every base-building element within `<radius>` cm of you to its max tier —
+**online, no restart, persistent** — via SCUM's own native code.
 
-```
-Twig:          /Game/ConZ_Files/.../Modular/BP_Base_Modular_<Shape>_Twig...
-Wood/.../Cement: /Game/ConZ_Files/.../Modular/BPC_Base_Modular_<Shape>_<Tier>...   (note the BPC_ prefix)
-```
+It AOB-scans for the developer-check predicate at boot and patches its first 3
+bytes to `mov al,1 ; ret` so it always returns true, opening the whole developer
+tier. The patch is applied **in memory each boot** — nothing on disk is modified,
+no save/game state is reconstructed. If a future SCUM patch moves the gate, it
+logs *"dev gate not located"* and writes nothing (never a blind write).
 
-Rewriting that string to a higher/lower tier, then reloading, makes SCUM reconstruct the element at the new tier via its normal, fully-supported load path. `element_health` is a 0–1 fraction, so the new tier loads at full HP automatically.
+See `Mods/DeveloperMode/README.md` for install/usage.
 
-**Why not do it live from the UE4SS mod?** The in-game upgrade is `EInteractionType::UpgradeBaseElement` (value `180`), sent via `PlayerRpcChannel.InteractWithObjectOnServer(...)`. But it needs the element's `BaseElementId`, which is only resolved natively from the player's aim-trace — not reachable through UE reflection. Feeding a real ID (read from the DB) into the RPC **hangs the game** (the native upgrade handler called without its interaction context). The DB edit sidesteps all of that.
+### GarbageGoober — auto-sort loose loot into category chests
 
-`db_tier` learns which (shape, tier) classes are valid from the live DB **plus every `SCUM*.db` backup** in the save folder — so it still knows the full tier chain even after a downgrade has wiped the higher-tier strings out of the live DB. Per-shape caps (e.g. doors → Metal) and non-upgradeable pieces (ladders, camo nets, the flag) are handled automatically.
+`Mods/GarbageGoober/` (UE4SS Lua mod)
+
+On a timer it sweeps loose, on-the-floor loot inside a flag's influence and moves
+each item into a chest **in that same flag** whose custom name matches the item's
+category (built from SCUM's real vendor categories). Flag-scoped and
+**entitlement-gated** (per-player primary, per-flag fallback, global default), so
+sorting can be sold or granted as a perk. Owner→base links and entitlements are
+read from `SCUM.db` read-only via a bundled public-domain `sqlite3.exe`.
+Configured and driven entirely from in-game **normal chat** (`goober …`).
+
+See `Mods/GarbageGoober/README.md` for install/usage and the full command list.
+
+### FlagUpkeep — auto-repair a base from banked "repair points"
+
+`Mods/FlagUpkeep/` (UE4SS Lua mod)
+
+On a timer it repairs the base elements in an enabled flag back to full health,
+spending **repair points** that owners bank by depositing **toolboxes** into a
+chest in that flag. Repair drives the game's own
+`NetMulticast_InteractWithElement(170 RepairBaseElement)` per element (ids read
+from `SCUM.db`), which clamps to full HP. Reuses GarbageGoober's gating layer:
+flag-scoped, entitlement-gated, driven from normal chat (`upkeep …`).
+
+The repair-points economy exists because a placed chest's contents virtualize out
+of view, so the mod banks a persistent per-flag balance on **deposit** (chest
+open) instead of reading live toolboxes at repair time — letting upkeep run
+unattended.
+
+See `Mods/FlagUpkeep/README.md` (and `release/README-eval.md` for the eval build).
+
+The shared entitlement / chat-command / DB-reader layer that GarbageGoober and
+FlagUpkeep both build on lives at `Mods/shared/Scripts/gating.lua` (a library, not
+a mod — each mod's `main.lua` loads and runs it).
 
 ---
 
-## `FlagUpgrade` — the UE4SS research harness
+## Tools
 
-`Mods/FlagUpgrade/Scripts/main.lua` is a tiny **bootstrap** that, on **F11**, executes `.staging/live.lua` fresh each press — a hot-reload loop so the actual logic can be iterated without restarting SCUM. This is how the base-building system was reverse-engineered (HISM layout, the interaction RPCs, the `EInteractionType` enum, struct layouts). It is **not** required for `db_tier`.
+Offline helpers for the developer-command workflow (edit a stopped server's
+`SCUM.db`; dry-run by default, `--apply` required, backs up first, refuses to run
+while the server holds the DB):
 
-It runs under UE4SS (Experimental v3.0.1, from the `herbie96x/SCUM-AllowMods` bundle), which is unpacked into the game's `Win64` folder. Launch by running `SCUM.exe` directly with `-nobattleye`; leave the BattlEye service at its default `Manual` (don't disable it), and never create an `enabled.txt` (it overrides `mods.txt`).
+- **`tools/elevate.py`** — grant/revoke SCUM **Elevated User** status by editing
+  the `elevated_users` table. `python tools/elevate.py --list` /
+  `… <steam64> --apply`.
+- **`tools/devgate_patch.py`** — the standalone runtime version of the dev-gate
+  unlock that **DeveloperMode** now ships as a DLL; kept as the reference
+  implementation of the AOB scan + patch.
 
 ---
 
-## Server-side / online upgrade — investigated (blocked)
+## Research harnesses
 
-The admin use case wanted to bulk-upgrade a player's base **online, with no
-restart**. That was investigated thoroughly and is currently blocked: SCUM's
-native `#UpgradeBaseBuildingElementsWithinRadius` is gated as an *internal*
-command that neither `elevated_users` developer access nor server-side
-invocation can satisfy, and the upgrade can't be driven via reflection (no
-callable function, no element registry — element IDs are native-only). Full
-write-up: [`docs/server-side-upgrade-findings.md`](docs/server-side-upgrade-findings.md).
+These reverse-engineered the base-building / inventory systems the mods rely on.
+Not needed to run the mods:
 
-Two reusable artifacts came out of it:
+- `Mods/FlagUpgrade/Scripts/main.lua` — client-side UE4SS hot-reload harness (F11
+  re-runs a `live.lua`); how the base-building system, interaction RPCs, and
+  struct layouts were RE'd.
+- `Mods/BulkUpgrade/Scripts/main.lua` — server-side hot-reload harness (`#bu` in
+  chat re-runs an external `live.lua` with the caller's player context).
+- `Mods/LootSorterRecon/` — inventory/item-model recon scratch for GarbageGoober.
+- `Mods/HelloScum/Scripts/main.lua` — minimal UE4SS sanity mod.
 
-- **`tools/elevate.py`** — grant/revoke SCUM "Elevated User" (developer-command)
-  status by editing the `elevated_users` table in a server's `SCUM.db`. Same
-  safety pattern as `db_tier` (dry-run default, refuses while the server holds
-  the DB, timestamped backup). `python tools/elevate.py --list` / `... <steam64> --apply`.
-- **`Mods/BulkUpgrade/Scripts/main.lua`** — a **server-side** UE4SS hot-reload
-  harness. A headless server has no F11, so it hooks the admin-command RPC; typing
-  `#bu` in chat re-runs an external `live.lua` with the caller's player context.
-  Reusable for any future server-side modding.
-
-The working upgrade method remains the offline DB edit (`db_tier`, above).
+---
 
 ## Repo layout
 
 ```
-tools/
-  db_tier.py                          # the tier tool (main deliverable)
-  elevate.py                          # grant/revoke elevated-user (dev cmds) via SCUM.db
 Mods/
-  FlagUpgrade/Scripts/main.lua        # client-side UE4SS hot-reload harness
-  BulkUpgrade/Scripts/main.lua        # server-side UE4SS harness (#bu -> live.lua)
-  HelloScum/Scripts/main.lua          # minimal UE4SS sanity mod
+  DeveloperMode/      # native dev-tier unlock (main.dll) — HEADLINE
+  GarbageGoober/      # loot auto-sorter (Lua)            — HEADLINE
+  FlagUpkeep/         # auto-repair from repair points    — HEADLINE
+  shared/Scripts/gating.lua   # shared entitlement/chat/DB lib used by the Lua mods
+  FlagUpgrade/        # client-side RE harness
+  BulkUpgrade/        # server-side RE harness (#bu -> live.lua)
+  LootSorterRecon/    # inventory recon scratch
+  HelloScum/          # sanity mod
+tools/
+  elevate.py          # grant/revoke elevated-user (dev cmds) via SCUM.db
+  devgate_patch.py    # standalone runtime dev-gate patch (DeveloperMode = the DLL)
 docs/
-  server-side-upgrade-findings.md     # online-upgrade investigation + conclusions
-  recon/                              # research archive (lab notebook + probe scripts)
-.staging/                             # git-ignored scratch
+  *.md                # investigation write-ups + solved findings
+  recon/              # research archive (lab notebook + probe scripts)
 ```
 
-Everything in `.staging/` is **git-ignored**: the SCUM-AllowMods bundle, build
-outputs, `db_tier.exe`, DB backups (save data), the `live.lua` hot-reload buffer,
-and raw recon output dumps — all large, binary, third-party, or personal.
-
-### Research notes (`docs/recon/`)
-
-Key references produced during the reverse-engineering:
-
-- `recon_enum.txt` — the full `EInteractionType` enum (incl. `UpgradeBaseElement = 180`).
-- `recon_structs.txt` — interaction struct field layouts.
-- `recon_params.txt` / `recon_funcs.txt` — interaction-function signatures.
-- `recon_v26_catalog.txt` — every base-element mesh/tier in a built base.
-- `recon_bases.txt`, `recon_custom.txt`, `recon_elemprops.txt`, `recon_interact.txt` — the dead-ends that proved the DB route was necessary.
+Build outputs, the SCUM-AllowMods bundle, DB backups, downloaded `sqlite3.exe`,
+the `live.lua` hot-reload buffer, and per-mod runtime state (`entitlements.lua`,
+logs) are git-ignored.
 
 ---
 
-## Safety
+## Setup notes
 
-- Dry-run is the default; `--apply` is required to write.
-- Every `--apply` backs up `SCUM.db` first, and refuses to run while SCUM is open.
-- Scope is always a single player's own flag(s) — sandbox auto-detects you, server uses `--playerid`.
+- UE4SS must be injected **server-side** (the "scum-allow-mods" bundle), able to
+  load into `SCUMServer.exe`.
+- Enable a mod in `…\ue4ss\Mods\mods.txt` (`ModName : 1`). **Never** create an
+  `enabled.txt` — it silently overrides `mods.txt`.
+- The Lua mods' chat triggers need `HookProcessInternal = 1` and
+  `HookProcessLocalScriptFunction = 1` in `ue4ss\UE4SS-settings.ini`.
+- Self-hosted servers: BattlEye is client-side and not involved server-side. On a
+  rented host, server-side mod/DLL injection must be permitted.

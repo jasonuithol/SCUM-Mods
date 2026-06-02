@@ -8,7 +8,7 @@ An elevated user gets ALL developer commands AND admin commands in-game
 unlock for the dev-gated commands. (Connection/whitelist priority still comes
 from AdminUser.ini; this only handles the dev-command grant.)
 
-SAFETY (same pattern as tools/db_tier.py):
+SAFETY (dry-run-first offline DB edit):
   - Dry-run by default; --apply is required to write.
   - Refuses to write if the DB is locked (i.e. the server is still running).
     ALWAYS stop the server first and wait for SCUM.db-wal / SCUM.db-shm to vanish.
