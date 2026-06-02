@@ -36,6 +36,16 @@ local function triggerFor(baseId)
     return FU.config.repairBelowFraction or 0.90
 end
 
+-- format a health fraction as a clean percent string WITHOUT misleading rounding:
+-- 0.995 -> "99.5" (not "100"), 0.90 -> "90", 0.99955 -> "99.96". (%.0f rounds 99.5
+-- up to 100, which made a 99.5% trigger look like 100% — confusing.)
+local function pctStr(frac)
+    local p = (tonumber(frac) or 0) * 100
+    local r = math.floor(p + 0.5)
+    if math.abs(p - r) < 1e-9 then return string.format("%d", r) end
+    return (string.format("%.2f", p):gsub("0+$", ""):gsub("%.$", ""))
+end
+
 -- the FlagUpkeep container(s) inside one flag (chests named config.containerName)
 local function upkeepContainersIn(flag, chests)
     local out = {}
@@ -105,24 +115,57 @@ local function findManager()
     return nil
 end
 
-local function findPawn()
+-- the live player pawn NEAREST to (x,y); returns pawn, distCm (nil,nil if none live).
+-- A repair multicast only lands when the base's elements are streamed in, which in
+-- SCUM happens only with a player within range — so the nearest pawn doubles as the
+-- "is this base loaded?" probe AND the interaction User.
+local function nearestPawn(x, y)
+    local best, bestd
     local l = FindAllOf("BP_Prisoner_C")
-    if l then for i = 1, #l do if isValid(l[i]) then return l[i] end end end
-    return nil
+    if l then for i = 1, #l do
+        local p = l[i]
+        if isValid(p) then
+            local px, py = actorLoc(p)
+            if px then
+                local d = hdist(px, py, x, y)
+                if not bestd or d < bestd then best, bestd = p, d end
+            end
+        end
+    end end
+    return best, bestd
 end
 
--- damaged elements grouped by base_id (each base filtered to below ITS trigger,
--- weakest first), read from the save DB once per cycle.
+-- Elements the TEST damage tool hit but the DB hasn't flushed yet. Multicast HP
+-- changes (our damage AND repair) only reach SCUM.db on a full/shutdown save — a
+-- just-damaged element still reads full in the DB — so 'check'/'now' driven off the
+-- DB alone would see nothing right after 'upkeep damage'. We track the damaged set
+-- in memory so the test loop is immediate; each is cleared when repaired.
+-- Keyed [baseId][elementId] = { id, x, y, z }.
+FU.testDamaged = FU.testDamaged or {}
+
+-- damaged elements grouped by base_id (below ITS trigger, weakest first) from the
+-- save DB, PLUS any in-memory test-damaged elements (treated as fully damaged so
+-- they always qualify, flagged .test). Used by both the cycle and 'upkeep check'.
 local function fetchDamagedByBase()
     local rows, err = FU.dbRows(DAMAGED_SQL)
     if not rows then FU.log("upkeep: damaged-element DB read failed: " .. tostring(err)); return nil end
-    local map = {}
+    local map, seen = {}, {}
     for _, r in ipairs(rows) do
         local bid = math.tointeger(tonumber(r[1]))
         local hp = tonumber(r[6]) or 1.0
         if bid and hp < triggerFor(bid) then
+            local id = math.tointeger(tonumber(r[2]))
             local rec = map[bid]; if not rec then rec = {}; map[bid] = rec end
-            rec[#rec + 1] = { id = math.tointeger(tonumber(r[2])), x = tonumber(r[3]), y = tonumber(r[4]), z = tonumber(r[5]), hp = hp }
+            rec[#rec + 1] = { id = id, x = tonumber(r[3]), y = tonumber(r[4]), z = tonumber(r[5]), hp = hp }
+            seen[bid] = seen[bid] or {}; if id then seen[bid][id] = true end
+        end
+    end
+    for bid, els in pairs(FU.testDamaged) do
+        for id, e in pairs(els) do
+            if not (seen[bid] and seen[bid][id]) then
+                local rec = map[bid]; if not rec then rec = {}; map[bid] = rec end
+                rec[#rec + 1] = { id = id, x = e.x, y = e.y, z = e.z, hp = 0.0, test = true }
+            end
         end
     end
     for _, rec in pairs(map) do table.sort(rec, function(a, b) return (a.hp or 1) < (b.hp or 1) end) end
@@ -156,13 +199,26 @@ local function pointsOf(baseId)
 end
 
 -- Repair a flag's damaged elements, spending repair points (1 point = 1 element).
--- Returns (repaired, pointsSpent).
+-- Returns (repaired, pointsSpent, status) — status "notloaded" when skipped because
+-- no player is within range (base not streamed in), else nil.
 function FU.repairFlag(flag, damaged)
     if not FU.config.repairEnabled then return 0, 0 end
     if not damaged or #damaged == 0 then return 0, 0 end
     local mgr = findManager()
     if not mgr then FU.log("  repairFlag: no ConZBaseManager — skipping"); return 0, 0 end
-    local user = findPawn() -- may be nil
+
+    -- POINT-ACCOUNTING GUARD: a repair multicast only takes effect on a LOADED base
+    -- (elements streamed in), which needs a player within range. With nobody near,
+    -- the call no-ops and we'd burn points for an invisible non-repair. So require a
+    -- nearby pawn — it's our best confirmable proxy for "the repair can land" — and
+    -- pass it as the interaction User. No pawn in range => skip, spend nothing.
+    local user, dist = nearestPawn(flag.x, flag.y)
+    local range = FU.config.repairLoadedRangeCm or 20000
+    if not user or (dist and dist > range) then
+        FU.log(string.format("  base %s: no player within %dcm (base not loaded) — skipping, 0 points spent",
+            tostring(flag.baseId), range))
+        return 0, 0, "notloaded"
+    end
 
     local needPts = FU.config.requireRepairPoints
     local bal = pointsOf(flag.baseId)
@@ -180,15 +236,18 @@ function FU.repairFlag(flag, damaged)
     for _, el in ipairs(damaged) do
         if cap and repaired >= cap then break end
         if needPts and (bal - spent) <= 0 then break end
-        if el.id and FU.repairedAt[el.id] and (now - FU.repairedAt[el.id]) < cd then
-            skipped = skipped + 1 -- repaired recently; DB health still catching up
+        if el.id and not el.test and FU.repairedAt[el.id] and (now - FU.repairedAt[el.id]) < cd then
+            skipped = skipped + 1 -- repaired recently; DB health still catching up (test damage bypasses)
         else
             if repairElement(mgr, flag.baseId, el, user) then
                 repaired = repaired + 1
-                if el.id then FU.repairedAt[el.id] = now end
+                if el.id then
+                    FU.repairedAt[el.id] = now
+                    if FU.testDamaged[flag.baseId] then FU.testDamaged[flag.baseId][el.id] = nil end
+                end
                 if needPts then spent = spent + 1 end
-                FU.log(string.format("  repaired element %s (was %.0f%%) in base %s",
-                    tostring(el.id), (el.hp or 0) * 100, tostring(flag.baseId)))
+                FU.log(string.format("  repaired element %s (was %s%%) in base %s",
+                    tostring(el.id), pctStr(el.hp or 0), tostring(flag.baseId)))
             else
                 FU.log(string.format("  ERROR repairing element %s in base %s", tostring(el.id), tostring(flag.baseId)))
             end
@@ -231,7 +290,7 @@ function FU.upkeep(onlyBaseId)
             (FU.resolved and FU.resolved.counts and FU.resolved.counts.enabled or 0) .. " base(s) enabled)") or " | gate OFF",
         FU.config.repairEnabled and "" or " | REPAIR DISABLED (report-only)"))
 
-    local repaired, spent, kept, noPoints, disabled, clean = 0, 0, 0, 0, 0, 0
+    local repaired, spent, kept, noPoints, disabled, clean, notLoaded = 0, 0, 0, 0, 0, 0, 0
     for _, flag in ipairs(flags) do
         if not flagEnabled(flag) then
             disabled = disabled + 1
@@ -239,8 +298,8 @@ function FU.upkeep(onlyBaseId)
             local damaged = damagedByBase[flag.baseId] or {}
             if not FU.config.repairEnabled then
                 if #damaged == 0 then clean = clean + 1 else
-                    FU.log(string.format("  base %s: %d element(s) below %.0f%% (repair disabled)",
-                        tostring(flag.baseId), #damaged, triggerFor(flag.baseId) * 100))
+                    FU.log(string.format("  base %s: %d element(s) below %s%% (repair disabled)",
+                        tostring(flag.baseId), #damaged, pctStr(triggerFor(flag.baseId))))
                 end
             elseif #damaged == 0 then
                 clean = clean + 1
@@ -251,17 +310,22 @@ function FU.upkeep(onlyBaseId)
             else
                 FU.log(string.format("  base %s: %d damaged element(s); %d repair point(s) available",
                     tostring(flag.baseId), #damaged, pointsOf(flag.baseId)))
-                local r, c = FU.repairFlag(flag, damaged)
+                local r, c, st = FU.repairFlag(flag, damaged)
                 repaired = repaired + (r or 0); spent = spent + (c or 0)
                 if (r or 0) > 0 then kept = kept + 1 end
+                if st == "notloaded" then notLoaded = notLoaded + 1 end
             end
         end
     end
 
-    FU.log(string.format("upkeep done: serviced=%d  repaired=%d  points-spent=%d  | disabled=%d  no-points=%d  already-ok=%d",
-        kept, repaired, spent, disabled, noPoints, clean))
+    FU.log(string.format("upkeep done: serviced=%d  repaired=%d  points-spent=%d  | disabled=%d  no-points=%d  already-ok=%d  not-loaded=%d",
+        kept, repaired, spent, disabled, noPoints, clean, notLoaded))
+    local extra = FU.config.repairEnabled and "" or " [repair disabled]"
+    if notLoaded > 0 then
+        extra = extra .. string.format(" — %d base(s) skipped: not loaded (no one near; repair runs when someone's at the base, 0 points spent)", notLoaded)
+    end
     return string.format("serviced %d base(s); repaired %d element(s); spent %d repair point(s)%s",
-        kept, repaired, spent, FU.config.repairEnabled and "" or " [repair disabled]")
+        kept, repaired, spent, extra)
 end
 
 -- ---- user commands: check, deposit, trigger, (admin) damage --------------
@@ -299,13 +363,16 @@ function FU.cmdCheck()
         if #tks > 0 and depositable == 0 then say("  (these read 0 pts — already deposited, or open the chest to read them)") end
     end
 
-    local dmg = FU.dbRows(DAMAGED_SQL)
-    if dmg then
-        local n = 0
-        for _, r in ipairs(dmg) do
-            if math.tointeger(tonumber(r[1])) == flag.baseId and (tonumber(r[6]) or 1) < frac then n = n + 1 end
+    local map = fetchDamagedByBase()
+    if map then
+        local dmg = map[flag.baseId] or {}
+        local n, nTest = #dmg, 0
+        for _, e in ipairs(dmg) do if e.test then nTest = nTest + 1 end end
+        if nTest > 0 then
+            say(string.format("trigger=%s%% — %d element(s) below it (need %d point(s) to repair; %d test-damaged, not yet in DB)", pctStr(frac), n, n, nTest))
+        else
+            say(string.format("trigger=%s%% — %d element(s) below it (need %d point(s) to repair)", pctStr(frac), n, n))
         end
-        say(string.format("trigger=%.0f%% — %d element(s) below it (need %d point(s) to repair)", frac * 100, n, n))
     end
     if not FU.config.repairEnabled then say("(repair is DISABLED in config — this is a report only)") end
 end
@@ -361,12 +428,12 @@ function FU.cmdTrigger(arg)
     if arg == "" then
         local cur = triggerFor(baseId)
         local src = FU.store.triggerOverrides[baseId] and "your setting" or "server default"
-        FU.reply(string.format("base %d repair trigger = %.0f%% (%s). Set with 'upkeep trigger <1-100>' or 'clear'", baseId, cur * 100, src), true)
+        FU.reply(string.format("base %d repair trigger = %s%% (%s). Set with 'upkeep trigger <1-100>' or 'clear'", baseId, pctStr(cur), src), true)
         return
     end
     if arg == "clear" then
         FU.store.triggerOverrides[baseId] = nil; FU.saveStore()
-        FU.reply(string.format("base %d trigger cleared — using server default %.0f%%", baseId, (FU.config.repairBelowFraction or 0.90) * 100))
+        FU.reply(string.format("base %d trigger cleared — using server default %s%%", baseId, pctStr(FU.config.repairBelowFraction or 0.90)))
         return
     end
     local pct = tonumber(arg:match("^(%d+%.?%d*)"))
@@ -389,16 +456,20 @@ function FU.cmdDamage(arg)
     if not mgr then FU.reply("no ConZBaseManager found"); return end
     local rows = FU.dbRows(ALL_ELEMENTS_SQL)
     if not rows then FU.reply("element DB read failed (see log)"); return end
+    FU.testDamaged[baseId] = FU.testDamaged[baseId] or {}
     local n = 0
     for _, r in ipairs(rows) do
         if math.tointeger(tonumber(r[1])) == baseId then
             local el = { id = math.tointeger(tonumber(r[2])), x = tonumber(r[3]), y = tonumber(r[4]), z = tonumber(r[5]) }
-            if el.id and damageElement(mgr, baseId, el, amount) then n = n + 1 end
+            if el.id and damageElement(mgr, baseId, el, amount) then
+                n = n + 1
+                FU.testDamaged[baseId][el.id] = el -- track: multicast damage won't hit the DB until a full save
+            end
         end
     end
-    FU.log(string.format("TEST damage: base %d — %d element(s) by %.0f HP", baseId, n, amount))
-    FU.reply(string.format("TEST: damaged %d element(s) by %.0f HP. Health shows in the DB after the", n, amount), true)
-    FU.reply("server's next save (~mins), THEN 'upkeep now'. Use 'upkeep trigger 99' so light damage qualifies.", true)
+    FU.log(string.format("TEST damage: base %d — %d element(s) by %.0f HP (tracked in-memory; DB lags until full save)", baseId, n, amount))
+    FU.reply(string.format("TEST: damaged %d element(s) by %.0f HP — they now count as repairable immediately.", n, amount), true)
+    FU.reply("Run 'upkeep check' to see them, then 'upkeep now' to repair (each clears as it's repaired).", true)
 end
 
 -- ---- help + command dispatch ---------------------------------------------

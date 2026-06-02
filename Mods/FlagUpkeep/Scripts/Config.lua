@@ -61,6 +61,15 @@ return {
     -- only by points banked and elements damaged). A cap smooths consumption so a
     -- big raid doesn't drain the balance in a single cycle.
     maxPointsPerCycle = nil,
+    -- A repair only takes effect when the base's elements are LOADED, which in SCUM
+    -- needs a player within streaming range (~200m). With nobody nearby the repair
+    -- multicast silently no-ops — so the cycle SKIPS a flag (and spends NO points)
+    -- unless a player pawn is within this many cm of the flag. This is what stops an
+    -- unattended base from burning points on repairs that never land. Default 20000
+    -- (200m) ≈ SCUM's base-stream range; lower it to be stricter (e.g. 5000 = only
+    -- when someone's inside the flag). 'upkeep now' from inside your flag is always
+    -- well within range, so the manual command is unaffected.
+    repairLoadedRangeCm = 20000,
 
     -- Admin TEST tool: enable the 'upkeep damage [amount]' command, which damages
     -- every base element in your flag by <amount> HP (default 200) so there's
