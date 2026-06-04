@@ -279,12 +279,18 @@ function CD.cmdScan()
 end
 
 -- 'dryer check' — show your flag's wardrobes, recipe status, activation state.
+-- Reports TOTAL clothing items seen + each one's water value (not just a wet
+-- count) so "0 wet" caused by DRYING is distinguishable from "0 wet" caused by
+-- the contents being invisible (0 clothing found). Also written to check.txt.
 function CD.cmdCheck()
-    local say = function(s) CD.reply(s, true) end
+    local checkFile = CD.modDir and (CD.modDir .. [[\check.txt]]) or nil
+    local cf = checkFile and io.open(checkFile, "w") or nil
+    local say = function(s) CD.reply(s, true); if cf then cf:write(tostring(s) .. "\n") end end
+    local function finish() if cf then cf:close() end end
     local baseId = currentFlagBaseId()
-    if not baseId then say("stand in your flag to check its dryers"); return end
+    if not baseId then say("stand in your flag to check its dryers"); finish(); return end
     local flag; for _, f in ipairs(collectFlags()) do if f.baseId == baseId then flag = f; break end end
-    if not flag then say("couldn't resolve your flag"); return end
+    if not flag then say("couldn't resolve your flag"); finish(); return end
     local wardrobes = collectWardrobes()
     local n = 0
     for _, w in pairs(wardrobes) do
@@ -292,9 +298,16 @@ function CD.cmdCheck()
             n = n + 1
             local lk = locKey(w.x, w.y, w.z)
             local activeStr = CD.dryers[lk] and "ACTIVE dryer" or "inactive wardrobe"
-            local wet = 0
-            for _, it in ipairs(w.items) do if isClothing(it) and waterOf(it) > (cfg().dryThreshold or 1) then wet = wet + 1 end end
-            say(string.format("wardrobe @%s — %s, %d wet garment(s)", lk, activeStr, wet))
+            local clothes, wet = 0, 0
+            for _, it in ipairs(w.items) do
+                if isClothing(it) then
+                    clothes = clothes + 1
+                    local wv = waterOf(it)
+                    if wv > (cfg().dryThreshold or 1) then wet = wet + 1 end
+                    say(string.format("   garment %s: water=%.0f %s", classOf(it) or "?", wv, wv > (cfg().dryThreshold or 1) and "WET" or "dry"))
+                end
+            end
+            say(string.format("wardrobe @%s — %s, %d clothing item(s) seen, %d WET", lk, activeStr, clothes, wet))
             if not CD.dryers[lk] then
                 local c, m = recipeMatch(w.items)
                 if c then say("   recipe COMPLETE — 'dryer activate' to turn it on")
@@ -303,6 +316,7 @@ function CD.cmdCheck()
         end
     end
     if n == 0 then say("no '" .. tostring(cfg().dryerClass) .. "' with items in your flag") end
+    finish()
 end
 
 -- 'dryer activate' — consume the recipe from a wardrobe in your flag, mark it active.
