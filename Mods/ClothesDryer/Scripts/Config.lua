@@ -53,13 +53,13 @@ return {
     -- When true, admin-only for the non-user commands (reload, pause-all, access
     -- control). User commands (help/check/scan/activate/now/pause/resume) stay open
     -- but are still entitlement-gated per flag. false = no admin gate (test servers).
-    requireAdmin = false,
+    requireAdmin = true,
 
     -- ---- per-player / per-flag entitlement gate (same model as FlagUpkeep) ---
     -- true  = a wardrobe only dries inside a flag whose owner is entitled (needs
     --         SCUM.db read via sqlite3.exe + an owner map). The donation model.
     -- false = drying works in ANY flag (entitlement layer off). Good for first test.
-    entitlementsEnabled = false,
+    entitlementsEnabled = true,
     dbPath = defaultDbPath(),
     sqliteExe = nil,            -- nil = the sqlite3.exe in this mod's folder
     resyncIntervalMs = 300000,  -- 5 min owner-map refresh
