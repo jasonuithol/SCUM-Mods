@@ -68,7 +68,7 @@ of view, so the mod banks a persistent per-flag balance on **deposit** (chest
 open) instead of reading live toolboxes at repair time — letting upkeep run
 unattended.
 
-See `Mods/FlagUpkeep/README.md` (and `release/README-eval.md` for the eval build).
+See `Mods/FlagUpkeep/README.md`.
 
 The shared entitlement / chat-command / DB-reader layer that GarbageGoober and
 FlagUpkeep both build on lives at `Mods/shared/Scripts/gating.lua` (a library, not
