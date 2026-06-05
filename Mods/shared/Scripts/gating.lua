@@ -221,7 +221,12 @@ function Gating.attach(M, opts)
     -- ===== entitlement store (core fields + opts.storeExtra) ===========
     local extra = opts.storeExtra or {}
     local function defaultStore()
-        local s = { defaultEnabled = false, players = {}, flagOverrides = {}, pausedFlags = {} }
+        -- defaultEnabled = true: a FRESH install (no entitlements.lua yet) is ON
+        -- for every flag, so the mod works out of the box. Shared by all gatable
+        -- mods, so they all default the same way. Admins can still restrict via
+        -- '<trigger> default off' + per-player/per-flag grants (the donation model),
+        -- and an existing server's saved store keeps whatever it had.
+        local s = { defaultEnabled = true, players = {}, flagOverrides = {}, pausedFlags = {} }
         for name in pairs(extra) do s[name] = {} end
         return s
     end
