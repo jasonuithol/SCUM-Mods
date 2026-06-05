@@ -19,6 +19,10 @@ local collectFlags, collectChests, collectContainerContents = GG.collectFlags, G
 local findIUC, flagFor, currentFlagBaseId = GG.findIUC, GG.flagFor, GG.currentFlagBaseId
 local flagEnabled, replyNotEnabled = GG.flagEnabled, GG.replyNotEnabled
 
+-- double-quote a shell arg (used by GG.fetchUrl). The shared lib has its own copy
+-- for dbRows; fetchUrl lives here, so keep a local one.
+local function dq(s) return '"' .. tostring(s) .. '"' end
+
 -- ---- deployable exclusion (placed structures are NOT loose loot) ---------
 local chestItemClass = pcs(function() return StaticFindObject("/Script/SCUM.ChestItem") end, nil)
 local DEPLOYABLE_KW = { "chest", "bonfire", "campfire", "fireplace", "trap", "shelter",
