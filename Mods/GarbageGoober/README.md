@@ -27,9 +27,8 @@ On a timer (default 60s) the mod:
 
 ## Install
 
-1. Copy the `GarbageGoober` folder to your server's
-   `SCUM/Binaries/Win64/ue4ss/Mods/`. (GarbageGoober is self-contained — no
-   separate shared library needed.)
+1. Copy the `GarbageGoober` and `shared` folders to your server's
+   `SCUM/Binaries/Win64/ue4ss/Mods/`.
 2. Edit `Scripts/main.lua` → `MOD_DIR` if your path differs from the default.
 3. *(Optional — only for the per-player donation model.)* Sorting works out of the
    box with no database. If you want to grant access to **specific players**
@@ -142,8 +141,10 @@ output also goes to the UE4SS console.
 
 ## Files
 
-- `Scripts/main.lua` — bootstrap, sweep timer, `goober` chat trigger.
-- `Scripts/sorter.lua` — sweep engine + command handling (enumerate → gate → match → move).
+- `Scripts/main.lua` — bootstrap, sweep timer, `goober` chat trigger, loads the shared gating lib.
+- `Scripts/sorter.lua` — sweep engine + goober commands (enumerate → gate → match → move).
 - `Scripts/Config.lua` — operator-editable settings + category rules.
+- `../shared/Scripts/gating.lua` — shared entitlement/flag-scope/SCUM.db/chat library
+  (also used by ClothesDryer / WashingMachine / FlagUpkeep). Ship the `shared` folder too.
 - `entitlements.lua` — runtime access state (generated on the server; not in git).
 - `sqlite3.exe` — only needed for per-player grants; user-supplied (not in git).

@@ -24,6 +24,7 @@
 local MOD_DIR = [[C:\scumserver\SCUM\Binaries\Win64\ue4ss\Mods\GarbageGoober]]
 local SCRIPTS = MOD_DIR .. [[\Scripts]]
 local LOGFILE = MOD_DIR .. [[\GarbageGoober.log]]
+local LIB     = MOD_DIR .. [[\..\shared\Scripts\gating.lua]]
 
 GarbageGoober = GarbageGoober or {}
 local GG = GarbageGoober
@@ -63,6 +64,20 @@ function GG.reload()
         GG.log("CONFIG load FAILED: " .. tostring(res) .. " — keeping previous config")
         if not GG.config then return false end
     end
+
+    -- install the shared gating layer (helpers, world enum, SCUM.db, entitlement
+    -- store/resolution, access commands, chat reply/onChatMessage) onto GG before
+    -- the engine loads — same lib ClothesDryer / WashingMachine / FlagUpkeep use.
+    GG.trigger = (GG.config and GG.config.chatTrigger) or "goober"
+    GG.tag = "GarbageGoober"
+    local okL, Glib = runFile(LIB)
+    if not okL or type(Glib) ~= "table" or type(Glib.attach) ~= "function" then
+        GG.log("gating lib load FAILED (" .. tostring(Glib) .. ") — expected " .. LIB); return false
+    end
+    Glib.attach(GG, {
+        defaultNotEnabled = "sorting isn't enabled for your base — ask an admin to enable it",
+    })
+
     local ok2, e2 = runFile(SCRIPTS .. [[\sorter.lua]])
     if not ok2 then GG.log("sorter.lua load FAILED: " .. tostring(e2)); return false end
     return true

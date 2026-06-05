@@ -3,8 +3,9 @@
 # Produces  <repo>/dist/GarbageGoober-<VERSION>.zip  with this layout:
 #   README.md
 #   LICENSE
-#   GarbageGoober/Scripts/...          (the mod — self-contained, no shared lib)
-# Users extract and copy the GarbageGoober/ folder into their
+#   GarbageGoober/Scripts/...          (the mod)
+#   shared/Scripts/gating.lua          (the shared lib the mod loads)
+# Users extract and copy BOTH the GarbageGoober/ and shared/ folders into their
 #   ...\SCUM\Binaries\Win64\ue4ss\Mods\
 #
 #   ./package.sh            # version 1.0.0
@@ -14,10 +15,13 @@ MOD="GarbageGoober"
 VERSION="${1:-1.0.0}"
 here="$(cd "$(dirname "$0")" && pwd)"      # Mods/<MOD>
 repo="$(cd "$here/../.." && pwd)"
+shared="$repo/Mods/shared/Scripts/gating.lua"
+
+[ -f "$shared" ] || { echo "missing shared gating lib: $shared" >&2; exit 1; }
 
 stage="$repo/dist/$MOD-$VERSION"
 rm -rf "$stage"
-mkdir -p "$stage/$MOD/Scripts"
+mkdir -p "$stage/$MOD/Scripts" "$stage/shared/Scripts"
 
 # the mod: Lua scripts (+ any data files) — Scripts/ holds no runtime state
 cp "$here"/Scripts/*.lua "$stage/$MOD/Scripts/"
@@ -26,6 +30,7 @@ for extra in "$here"/Scripts/*.yaml "$here"/Scripts/*.yml "$here"/Scripts/*.json
 done
 cp "$here/README.md" "$stage/README.md"
 cp "$here/LICENSE"   "$stage/LICENSE"
+cp "$shared"         "$stage/shared/Scripts/gating.lua"
 
 # zip via python (portable; no `zip` dependency on Windows git-bash)
 python - "$stage" "$repo/dist/$MOD-$VERSION.zip" <<'PY'
