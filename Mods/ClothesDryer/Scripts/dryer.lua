@@ -70,10 +70,18 @@ local function collectWardrobes()
                         local rec = map[key]
                         if not rec then
                             local x, y, z = actorLoc(owner)
-                            rec = { owner = owner, x = x, y = y, z = z, items = {} }
+                            rec = { owner = owner, x = x, y = y, z = z, items = {}, seen = {} }
                             map[key] = rec
                         end
-                        rec.items[#rec.items + 1] = it
+                        -- DEDUPE by item fullName: FindAllOf("Item") can return ghost
+                        -- duplicates of the same item, which over-consume the recipe
+                        -- on activation (a ghost's DestroyInternal pcall-succeeds but
+                        -- no-ops, leaving a real item). Keep one ref per fullName.
+                        local ifn = fullName(it)
+                        if ifn and not rec.seen[ifn] then
+                            rec.seen[ifn] = true
+                            rec.items[#rec.items + 1] = it
+                        end
                     end
                 end
             end
@@ -353,21 +361,20 @@ function CD.cmdActivate()
 end
 
 -- 'dryer deactivate' — turn off the active dryer(s) in your flag (no refund).
+-- Works off the persisted store (locKey -> baseId), NOT the world: an active
+-- dryer that's empty or unloaded won't appear in collectWardrobes() but is still
+-- in CD.dryers, so match by your current flag's baseId.
 function CD.cmdDeactivate()
     local baseId = currentFlagBaseId()
     if not baseId then CD.reply("stand in your flag, then 'dryer deactivate'"); return end
     CD.ensureResolved(false)
     if not flagEnabledForIssuer(baseId) then replyNotEnabled(); return end
-    local flag; for _, f in ipairs(collectFlags()) do if f.baseId == baseId then flag = f; break end end
     local off = 0
-    for _, w in pairs(collectWardrobes()) do
-        if flag and w.x and hdist(w.x, w.y, flag.x, flag.y) <= flag.radius then
-            local lk = locKey(w.x, w.y, w.z)
-            if CD.dryers[lk] then CD.dryers[lk] = nil; off = off + 1 end
-        end
+    for lk, bid in pairs(CD.dryers) do
+        if bid == baseId then CD.dryers[lk] = nil; off = off + 1 end
     end
     if off > 0 then CD.saveDryers(); CD.reply(string.format("deactivated %d dryer(s) in your flag (ingredients NOT refunded)", off))
-    else CD.reply("no active dryer found in your flag") end
+    else CD.reply("no active dryer found in your flag (it must be in the flag you're standing in)") end
 end
 
 -- ---- help + dispatch ---------------------------------------------------------
