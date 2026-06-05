@@ -394,7 +394,7 @@ function Gating.attach(M, opts)
         arg = trim(arg or "")
         if arg == "" then return { status = "notfound" } end
         local rows, err = M.dbRows(USERS_SQL)
-        if not rows then M.log("resolvePlayer DB read failed: " .. tostring(err)); return { status = "dberror" } end
+        if not rows then M.log("resolvePlayer DB read failed: " .. tostring(err)); return { status = "dberror", err = err } end
         if arg:match(STEAM64_PAT) then
             for _, r in ipairs(rows) do
                 if r[1] == arg then return { status = "ok", id = r[1], name = (r[2] ~= "" and r[2] or r[3]) } end
@@ -522,7 +522,7 @@ function Gating.attach(M, opts)
     function M.cmdAdd(who)
         if not M.store then M.loadStore() end
         local r = M.resolvePlayer(who)
-        if r.status == "dberror" then M.reply("DB read failed (see log)"); return end
+        if r.status == "dberror" then M.reply(r.err or "DB read failed (see log)"); return end
         if r.status == "notfound" then M.reply("no player matched '" .. who .. "' (try their Steam64 ID)"); return end
         if r.status == "ambiguous" then
             M.reply("'" .. who .. "' matches several players - add by Steam64:", true)
@@ -550,6 +550,7 @@ function Gating.attach(M, opts)
         for _, p in ipairs(M.store.players) do if p == who then target = who; break end end
         if not target then
             local r = M.resolvePlayer(who)
+            if r.status == "dberror" then M.reply(r.err or "DB read failed (see log)"); return end
             if r.status == "ambiguous" then
                 M.reply("'" .. who .. "' matches several players - remove by Steam64:", true)
                 for sid, nm in pairs(r.matches) do M.reply("  " .. sid .. "  " .. tostring(nm), true) end
