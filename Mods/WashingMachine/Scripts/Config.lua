@@ -65,7 +65,7 @@ return {
     -- true  = a wardrobe only washes inside a flag whose owner is entitled (needs
     --         SCUM.db read via sqlite3.exe + an owner map). The donation model.
     -- false = washing works in ANY flag (entitlement layer off). Good for first test.
-    entitlementsEnabled = false,
+    entitlementsEnabled = true,
     dbPath = defaultDbPath(),
     sqliteExe = nil,            -- nil = the sqlite3.exe in this mod's folder
     resyncIntervalMs = 300000,  -- 5 min owner-map refresh

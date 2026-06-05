@@ -1,0 +1,43 @@
+[size=5][b]GarbageGoober — auto-sort loose loot into category chests[/b][/size]
+
+A server-side mod for [b]SCUM dedicated servers[/b]. On a timer it sweeps loose, on-the-floor loot inside a flag's influence and moves each item into a chest [b]in that same flag[/b] whose custom name matches the item's category — built from SCUM's real vendor categories. Drop your haul on the floor, walk away, come back to a sorted base.
+
+Everything is driven from [b]normal in-game chat[/b] (type [b]goober[/b] for the command list). No client mod — players need nothing installed, so [b]client BattlEye stays on[/b].
+
+[size=4][b]⚠ Server operators only[/b][/size]
+This runs inside your dedicated-server process via UE4SS. Installing it requires file-system access to the server. It does nothing on a game client and cannot affect a server you don't control. Use it on your own / authorised servers only.
+
+[size=4][b]Features[/b][/size]
+[list]
+[*][b]Category sorting[/b] — loose floor loot in a flag is moved into the name-matched category chest in that flag.
+[*][b]Flag-scoped[/b] — only sorts within a flag's influence, into chests in that flag.
+[*][b]Configurable categories[/b] — categories live in an editable [b]categories.yaml[/b] (optionally pulled from a Gist on [b]goober reload[/b]).
+[*][b]Empty-containers[/b] — bags/clothing can be emptied and their contents sorted.
+[*][b]Entitlement gate[/b] — per-player (primary), per-flag (fallback), or global default, so sorting can be granted as a perk. Owner→base links are read [i]read-only[/i] from SCUM.db.
+[/list]
+
+[size=4][b]Requirements[/b][/size]
+[list]
+[*]A SCUM [b]dedicated server[/b] you administer (SteamCMD app 3792580).
+[*][b]UE4SS injected server-side[/b] (the setup other SCUM server mods use), able to load into SCUMServer.exe.
+[*]In [b]ue4ss\UE4SS-settings.ini[/b]: [b]HookProcessInternal = 1[/b] and [b]HookProcessLocalScriptFunction = 1[/b] (needed for the chat trigger).
+[/list]
+
+[size=4][b]Installation[/b][/size]
+[list=1]
+[*]Copy the [b]GarbageGoober[/b] folder AND the [b]shared[/b] folder into your server's UE4SS mods directory:
+[code]<server>\SCUM\Binaries\Win64\ue4ss\Mods\GarbageGoober\
+<server>\SCUM\Binaries\Win64\ue4ss\Mods\shared\Scripts\gating.lua[/code]
+[*]Open [b]GarbageGoober\Scripts\main.lua[/b] and set [b]MOD_DIR[/b] to that folder's full path.
+[*][i](Only if you turn the entitlement gate on.)[/i] Run [b]install-libraries.ps1[/b] (or double-click [b]install-libraries.cmd[/b]) to fetch the public-domain [b]sqlite3.exe[/b] used to read the save DB read-only.
+[*]Enable it in [b]...\ue4ss\Mods\mods.txt[/b]:
+[code]GarbageGoober : 1[/code]
+Do [b]not[/b] create [b]enabled.txt[/b] — it silently overrides mods.txt.
+[*]Start the server and type [b]goober[/b] in chat for the full command list.
+[/list]
+
+[size=4][b]Notes[/b][/size]
+[list]
+[*]The [b]shared[/b] folder is a small library shared by my SCUM mods — if you already have it from another of my mods, the copy is identical.
+[*]All rights reserved. Personal use on servers you administer; please don't re-upload or repackage.
+[/list]
