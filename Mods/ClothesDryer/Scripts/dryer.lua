@@ -402,6 +402,7 @@ local function helpLines(includeAdmin)
             h[#h + 1] = "  dryer flag on|off|clear [baseId] — per-flag override"
             h[#h + 1] = "  dryer default on|off — default-enable every flag, or none"
             h[#h + 1] = "  dryer get-access-msg / set-access-msg <text|default|off|reset>"
+            h[#h + 1] = "  dryer set-sqlite <path to sqlite3.exe | sqlite3.exe | off> — location of sqlite3.exe (for add/remove)"
         end
     end
     return h
@@ -436,6 +437,8 @@ function CD.handleCommand(arg)
     elseif arg:sub(1, 8) == "default " then local m = trim(arg:sub(9)):lower(); if m ~= "on" and m ~= "off" then CD.reply("usage: dryer default on|off") else CD.cmdDefault(m) end
     elseif arg == "get-access-msg" then CD.cmdGetAccessMsg()
     elseif arg == "set-access-msg" or arg:sub(1, 15) == "set-access-msg " then CD.cmdSetAccessMsg(arg:sub(16))
+    elseif arg == "get-sqlite" then CD.cmdGetSqlite()
+    elseif arg == "set-sqlite" or arg:sub(1, 11) == "set-sqlite " then CD.cmdSetSqlite(arg:sub(12))
     else CD.reply("Command unrecognised: '" .. arg .. "'  — type 'dryer' for the list") end
 end
 

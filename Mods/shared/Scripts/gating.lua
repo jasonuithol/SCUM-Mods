@@ -197,12 +197,17 @@ function Gating.attach(M, opts)
     local function dq(s) return '"' .. tostring(s) .. '"' end
 
     function M.dbRows(sql)
-        -- sqlite is OFF unless Config.sqliteExe is explicitly set (a path, or a bare
-        -- name like "sqlite3.exe" to use one on PATH). nil = disabled => no DB reads,
-        -- so per-player grants are unavailable (default/per-flag still work).
-        local exe = cfg().sqliteExe
+        -- sqlite location: a runtime override set via '<trigger> set-sqlite' (stored
+        -- in entitlements.lua) takes priority, else Config.sqliteExe. nil/unset =>
+        -- OFF: no DB reads, so per-player grants are unavailable (default/per-flag
+        -- still work). Value is a full path, or a bare name ("sqlite3.exe") to use PATH.
+        local exe = (M.store and M.store.sqliteExe) or cfg().sqliteExe
         local db = cfg().dbPath
-        if not exe or not db then return nil, "sqlite3.exe not configured (set Config.sqliteExe to enable per-player grants)" end
+        local trig = M.trigger or "mod"
+        if not exe then return nil, ("the location of sqlite3.exe is not set (per-player grants need it). "
+            .. "Set the 'sqliteExe' variable in this mod's Scripts\\Config.lua, OR run  "
+            .. trig .. " set-sqlite <full path to sqlite3.exe>  (or  " .. trig .. " set-sqlite sqlite3.exe  if it is on your PATH).") end
+        if not db then return nil, "the location of SCUM.db is not set (set the 'dbPath' variable in this mod's Scripts\\Config.lua)" end
         local inner = string.format('%s -readonly -batch -noheader -separator "|" %s %s 2>&1', dq(exe), dq(db), dq(sql))
         local h = io.popen('"' .. inner .. '"', "r")
         if not h then return nil, "io.popen failed" end
@@ -276,6 +281,7 @@ function Gating.attach(M, opts)
                 end
             end
             if type(t.accessMessage) == "string" then M.store.accessMessage = t.accessMessage end
+            if type(t.sqliteExe) == "string" then M.store.sqliteExe = t.sqliteExe end
         end
     end
 
@@ -317,6 +323,7 @@ function Gating.attach(M, opts)
             out[#out + 1] = "  },"
         end
         if s.accessMessage ~= nil then out[#out + 1] = string.format("  accessMessage = %q,", tostring(s.accessMessage)) end
+        if s.sqliteExe ~= nil then out[#out + 1] = string.format("  sqliteExe = %q,", tostring(s.sqliteExe)) end
         out[#out + 1] = "}"
         return table.concat(out, "\n") .. "\n"
     end
@@ -641,6 +648,45 @@ function Gating.attach(M, opts)
         if SILENT_TOKENS[low] then M.reply("access-msg set to SILENT — non-enabled players will see nothing")
         elseif low == "default" then M.reply("access-msg set to the built-in default")
         else M.reply("access-msg set to: " .. text) end
+    end
+
+    -- ----- sqlite3.exe location (for per-player grants) -----------------
+    -- Show the current location of sqlite3.exe (runtime override > Config.sqliteExe).
+    function M.cmdGetSqlite()
+        if not M.store then M.loadStore() end
+        local ov = M.store and M.store.sqliteExe
+        local v = ov or cfg().sqliteExe
+        if v == nil then
+            M.reply("location of sqlite3.exe: NOT SET — per-player grants are OFF.", true)
+            M.reply("set it with:  " .. M.trigger .. " set-sqlite <full path to sqlite3.exe>  (or  " .. M.trigger .. " set-sqlite sqlite3.exe  for PATH)", true)
+        else
+            M.reply("location of sqlite3.exe [" .. (ov and "set-sqlite command" or "Config.lua") .. "]: " .. tostring(v), true)
+        end
+    end
+
+    -- Set/clear the location of sqlite3.exe at runtime (persisted in the store, so
+    -- no file editing). <text> = a full path, "sqlite3.exe" (use PATH), or off/none
+    -- /reset to clear (back to Config.sqliteExe).
+    function M.cmdSetSqlite(text)
+        if not M.store then M.loadStore() end
+        text = trim(text or "")
+        if text == "" then
+            M.reply("usage:  " .. M.trigger .. " set-sqlite <full path to sqlite3.exe> | sqlite3.exe | off")
+            return
+        end
+        local low = text:lower()
+        if low == "off" or low == "none" or low == "nil" or low == "reset" or low == "clear" then
+            M.store.sqliteExe = nil; M.saveStore(); M.ensureResolved(true)
+            M.reply("location of sqlite3.exe CLEARED — per-player grants OFF (default/per-flag sorting still works).")
+            return
+        end
+        -- light sanity: if it looks like a path (has a separator), warn if missing.
+        if text:find("[\\/]") then
+            local f = io.open(text, "r")
+            if f then f:close() else M.reply("note: no file found at that path right now — saved anyway; fix it if per-player grants fail.", true) end
+        end
+        M.store.sqliteExe = text; M.saveStore(); M.ensureResolved(true)
+        M.reply("location of sqlite3.exe SET to:  " .. text .. "   — per-player grants enabled.")
     end
 
     -- ===== chat reply + onChatMessage entry ============================

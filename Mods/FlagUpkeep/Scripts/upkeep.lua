@@ -500,6 +500,7 @@ local function helpLines(includeAdmin)
             h[#h + 1] = "  upkeep flag on|off|clear [baseId] — per-flag override (blank=your flag)"
             h[#h + 1] = "  upkeep default on|off — keep up every flag by default, or none"
             h[#h + 1] = "  upkeep get-access-msg / set-access-msg <text|default|off|reset>"
+            h[#h + 1] = "  upkeep set-sqlite <path to sqlite3.exe | sqlite3.exe | off> — location of sqlite3.exe (for add/remove)"
         end
     end
     return h
@@ -585,6 +586,10 @@ function FU.handleCommand(arg)
         FU.cmdGetAccessMsg()
     elseif arg == "set-access-msg" or arg:sub(1, 15) == "set-access-msg " then
         FU.cmdSetAccessMsg(arg:sub(16))
+    elseif arg == "get-sqlite" then
+        FU.cmdGetSqlite()
+    elseif arg == "set-sqlite" or arg:sub(1, 11) == "set-sqlite " then
+        FU.cmdSetSqlite(arg:sub(12))
     else
         FU.log("unrecognised command 'upkeep " .. arg .. "'")
         FU.reply("Command unrecognised: '" .. arg .. "'")

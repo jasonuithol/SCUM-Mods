@@ -411,6 +411,7 @@ local function helpLines(includeAdmin)
             h[#h + 1] = "  goober flag on|off|clear [baseId] — per-flag override (blank=your flag)"
             h[#h + 1] = "  goober default on|off — sort every flag by default, or none"
             h[#h + 1] = "  goober get-access-msg / set-access-msg <text|default|off|reset>"
+            h[#h + 1] = "  goober set-sqlite <path to sqlite3.exe | sqlite3.exe | off> — location of sqlite3.exe (for add/remove)"
         end
     end
     return h
@@ -512,6 +513,10 @@ function GG.handleCommand(arg)
         GG.cmdGetAccessMsg()
     elseif arg == "set-access-msg" or arg:sub(1, 15) == "set-access-msg " then
         GG.cmdSetAccessMsg(arg:sub(16))
+    elseif arg == "get-sqlite" then
+        GG.cmdGetSqlite()
+    elseif arg == "set-sqlite" or arg:sub(1, 11) == "set-sqlite " then
+        GG.cmdSetSqlite(arg:sub(12))
     else
         GG.log("unrecognised command 'goober " .. arg .. "'")
         GG.reply("Command unrecognised: '" .. arg .. "'")

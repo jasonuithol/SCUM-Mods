@@ -91,6 +91,7 @@ return {
     -- To enable, point this at a sqlite3.exe — an absolute path (keep ONE copy on
     -- the server, e.g. ...\ue4ss\Mods\shared\sqlite3.exe) or "sqlite3.exe" to use
     -- one on PATH. (CLI tools: https://sqlite.org/download.html.)
+    -- Or set it live in chat (no file edit): goober set-sqlite <path to sqlite3.exe>
     sqliteExe = nil,
     -- How often (ms) the sweep re-reads the DB to refresh the owner map. Cheap
     -- (one read-only query). Lower = a donor's freshly built/rebuilt base starts

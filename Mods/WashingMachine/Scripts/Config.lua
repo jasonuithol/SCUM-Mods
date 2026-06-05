@@ -73,6 +73,7 @@ return {
     -- work. To enable, set an absolute path (keep ONE copy on the server, e.g.
     -- ...\ue4ss\Mods\shared\sqlite3.exe) or "sqlite3.exe" to use one on PATH.
     -- (CLI tools: https://sqlite.org/download.html.)
+    -- Or set it live in chat (no file edit): washer set-sqlite <path to sqlite3.exe>
     sqliteExe = nil,
     resyncIntervalMs = 300000,  -- 5 min owner-map refresh
 

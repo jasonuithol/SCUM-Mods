@@ -37,8 +37,10 @@ On a timer (default 60s) the mod:
    <https://sqlite.org/download.html>, keep **one** `sqlite3.exe` on the server
    (e.g. `…\ue4ss\Mods\shared\sqlite3.exe`), and in `Scripts/Config.lua` set
    `sqliteExe` to that path (or `"sqlite3.exe"` to use one on your PATH) and
-   `dbPath` to your `SCUM.db`. With `sqliteExe = nil` (default) no DB is read at
-   all. Default-on and per-flag overrides never need it.
+   `dbPath` to your `SCUM.db`. **Or skip the file edit** and set it from chat:
+   `goober set-sqlite <path-to-sqlite3.exe>` (persists; `goober set-sqlite off` to
+   clear). With `sqliteExe = nil` (default) no DB is read at all. Default-on and
+   per-flag overrides never need it.
 4. Enable it in `ue4ss/Mods/mods.txt`:
    ```
    GarbageGoober : 1

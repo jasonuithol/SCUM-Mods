@@ -483,6 +483,7 @@ local function helpLines(includeAdmin)
             h[#h + 1] = "  washer flag on|off|clear [baseId] — per-flag override"
             h[#h + 1] = "  washer default on|off — default-enable every flag, or none"
             h[#h + 1] = "  washer get-access-msg / set-access-msg <text|default|off|reset>"
+            h[#h + 1] = "  washer set-sqlite <path to sqlite3.exe | sqlite3.exe | off> — location of sqlite3.exe (for add/remove)"
         end
     end
     return h
@@ -513,6 +514,8 @@ function WM.handleCommand(arg)
     elseif arg:sub(1, 8) == "default " then local m = trim(arg:sub(9)):lower(); if m ~= "on" and m ~= "off" then WM.reply("usage: washer default on|off") else WM.cmdDefault(m) end
     elseif arg == "get-access-msg" then WM.cmdGetAccessMsg()
     elseif arg == "set-access-msg" or arg:sub(1, 15) == "set-access-msg " then WM.cmdSetAccessMsg(arg:sub(16))
+    elseif arg == "get-sqlite" then WM.cmdGetSqlite()
+    elseif arg == "set-sqlite" or arg:sub(1, 11) == "set-sqlite " then WM.cmdSetSqlite(arg:sub(12))
     else WM.reply("Command unrecognised: '" .. arg .. "'  — type 'washer' for the list") end
 end
 

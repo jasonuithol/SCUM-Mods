@@ -22,8 +22,10 @@ nothing runs on players' PCs.
    <player>`) reads `SCUM.db` via `sqlite3.exe` and is **off by default**. To
    enable: download the command-line tools from <https://sqlite.org/download.html>,
    keep **one** `sqlite3.exe` on the server (e.g. `…\ue4ss\Mods\shared\`), and set
-   `Config.lua` → `sqliteExe` to that path (or `"sqlite3.exe"` for PATH). With
-   `sqliteExe = nil` (default) no DB is read. Default-on/per-flag never need it.
+   `Config.lua` → `sqliteExe` to that path (or `"sqlite3.exe"` for PATH). **Or skip
+   the file edit** and set it from chat: `washer set-sqlite <path-to-sqlite3.exe>`
+   (`washer set-sqlite off` to clear). With `sqliteExe = nil` (default) no DB is
+   read. Default-on/per-flag never need it.
 4. The shared gating library is expected at `ue4ss\Mods\shared\Scripts\gating.lua`
    (shipped with ClothesDryer / FlagUpkeep / GarbageGoober). Keep the `shared`
    folder alongside this one.

@@ -97,8 +97,9 @@ Each flag sets its own trigger with `upkeep trigger <percent>`.
    <player>`) reads `SCUM.db` via `sqlite3.exe` and is **off by default**. To
    enable: download the command-line tools from <https://sqlite.org/download.html>,
    keep **one** `sqlite3.exe` on the server (e.g. `…\ue4ss\Mods\shared\`), and set
-   `Config.lua` → `sqliteExe` to that path (or `"sqlite3.exe"` for PATH). With
-   `sqliteExe = nil` (default) no DB is read.
+   `Config.lua` → `sqliteExe` to that path (or `"sqlite3.exe"` for PATH). **Or skip
+   the file edit** and set it from chat: `upkeep set-sqlite <path-to-sqlite3.exe>`
+   (`upkeep set-sqlite off` to clear). With `sqliteExe = nil` (default) no DB is read.
 
 ## Shared lineage / future library
 
