@@ -28,13 +28,15 @@ On a timer (default 60s) the mod:
 ## Install
 
 1. Copy the `GarbageGoober` folder to your server's
-   `SCUM/Binaries/Win64/ue4ss/Mods/`.
-2. Run **`install-libraries.ps1`** (or double-click `install-libraries.cmd`) in
-   the mod folder. It downloads the official public-domain `sqlite3.exe` from
-   sqlite.org (verified against a pinned SHA-256); the mod uses it to read the
-   save DB read-only. The binary is intentionally not committed to git.
-3. Edit `Scripts/main.lua` → `MOD_DIR` if your path differs from the default, and
-   `Scripts/Config.lua` → `dbPath` to point at your server's `SCUM.db`.
+   `SCUM/Binaries/Win64/ue4ss/Mods/`. (GarbageGoober is self-contained — no
+   separate shared library needed.)
+2. Edit `Scripts/main.lua` → `MOD_DIR` if your path differs from the default.
+3. *(Optional — only for the per-player donation model.)* Sorting works out of the
+   box with no database. If you want to grant access to **specific players**
+   (`goober add <player>`), the mod reads `SCUM.db` read-only via `sqlite3.exe`:
+   download the command-line tools from <https://sqlite.org/download.html>, put
+   `sqlite3.exe` in this mod folder, and set `Scripts/Config.lua` → `dbPath` to
+   your server's `SCUM.db`. Default-on and per-flag overrides need none of this.
 4. Enable it in `ue4ss/Mods/mods.txt`:
    ```
    GarbageGoober : 1
@@ -48,22 +50,26 @@ On a timer (default 60s) the mod:
 
 ## Access control (who gets sorted)
 
-With `entitlementsEnabled = true` (default), a flag is only swept if it's
-**enabled** — so sorting can be sold or granted as a perk:
+With `entitlementsEnabled = true` (default) the gate is active. Out of the box the
+**global default is ON**, so every flag is sorted — the mod just works. The gate
+lets you restrict or sell access:
 
 - **Per player (primary):** an admin runs `goober add <player>` to enable that
-  player's base(s). The owner→base link is read from `SCUM.db` read-only (via the
-  bundled `sqlite3.exe`); entitlements are stored as stable Steam64 IDs, so they
-  survive name changes and base rebuilds.
+  player's base(s). This is the only feature that needs a database: the owner→base
+  link is read from `SCUM.db` read-only via a **user-supplied `sqlite3.exe`** (see
+  Install step 3). Entitlements are stored as stable Steam64 IDs, so they survive
+  name changes and base rebuilds.
 - **Per flag (fallback):** `goober flag on|off|clear` forces a specific base
-  on/off, overriding the per-player decision.
-- **Global default:** `goober default on|off` sets what un-granted bases do.
+  on/off, overriding the per-player decision. **No database needed.**
+- **Global default:** `goober default on|off` sets what un-granted bases do
+  (ships ON). **No database needed.**
 - **Player opt-out:** a player can `goober pause` / `resume` sorting for their own
   flag.
 
 Precedence: per-flag override > player-enabled > global default, and a player
-pause suppresses sorting on top of that. Set `entitlementsEnabled = false` to drop
-the gate entirely and sort every flag.
+pause suppresses sorting on top of that. The DB / `sqlite3.exe` is read **only**
+once at least one player has been granted; default-on and per-flag use need none.
+Set `entitlementsEnabled = false` to drop the gate entirely and sort every flag.
 
 Enabled players, flag overrides, pauses, and the custom access message all persist
 in `entitlements.lua` in the mod folder, surviving reloads **and** server restarts.
@@ -80,8 +86,9 @@ Operator-facing settings live in `Scripts/Config.lua`:
 - `requireAdmin` — `true` (default) gates the **admin** commands behind
   `IsUserAdmin`; the player commands stay open. `false` lets anyone run everything.
 - `entitlementsEnabled` / `dbPath` / `sqliteExe` / `resyncIntervalMs` — the access
-  gate (above), the path to `SCUM.db`, the sqlite binary (`nil` = the bundled
-  copy), and how often the owner map is refreshed from the DB.
+  gate (above), the path to `SCUM.db`, the sqlite binary (`nil` = a `sqlite3.exe`
+  in this folder; used only for per-player grants), and how often the owner map is
+  refreshed from the DB.
 - `notEnabledMessage` — what a non-enabled player sees on a user command
   (`"default"`, `nil`/`off` = silent, or a custom string/list). Override it live
   with `goober set-access-msg`.
@@ -138,6 +145,5 @@ output also goes to the UE4SS console.
 - `Scripts/main.lua` — bootstrap, sweep timer, `goober` chat trigger.
 - `Scripts/sorter.lua` — sweep engine + command handling (enumerate → gate → match → move).
 - `Scripts/Config.lua` — operator-editable settings + category rules.
-- `install-libraries.ps1` / `.cmd` — fetch the bundled `sqlite3.exe`.
 - `entitlements.lua` — runtime access state (generated on the server; not in git).
-- `sqlite3.exe` — downloaded by the install script (not in git).
+- `sqlite3.exe` — only needed for per-player grants; user-supplied (not in git).

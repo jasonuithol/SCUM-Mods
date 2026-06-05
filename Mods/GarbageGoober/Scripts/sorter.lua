@@ -245,11 +245,11 @@ end
 -- All SQL is constant; the only untrusted input (a player name) is matched in
 -- Lua against the user list, so there's no SQL/shell-injection surface.
 
--- ---- DB access via the bundled sqlite3.exe (read-only) -------------------
--- Every query below is a FIXED constant: no untrusted input is interpolated
--- into SQL or the command line. Player-name matching for add/remove is done
--- in Lua against the full user list, so there is zero SQL/shell-injection
--- surface. sqlite3.exe is fetched by install-libraries.ps1.
+-- ---- DB access via a user-supplied sqlite3.exe (read-only) ----------------
+-- Only used for PER-PLAYER entitlement grants (see ensureResolved). Every query
+-- below is a FIXED constant: no untrusted input is interpolated into SQL or the
+-- command line. Player-name matching for add/remove is done in Lua against the
+-- full user list, so there is zero SQL/shell-injection surface.
 local OWNER_SQL = "SELECT b.id, up.user_id FROM base b JOIN user_profile up ON up.id=b.owner_user_profile_id WHERE b.is_owned_by_player=1;"
 local USERS_SQL = "SELECT u.id, COALESCE(up.name,''), COALESCE(u.name,'') FROM user u LEFT JOIN user_profile up ON up.user_id=u.id;"
 local STEAM64_PAT = "^%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d$" -- 17 digits
@@ -288,7 +288,10 @@ end
 -- ---- entitlement store (entitlements.lua in this mod's folder) ------------
 -- pausedFlags = baseIds a player has paused (user 'goober pause'); a per-flag
 -- opt-out applied on top of the admin entitlement (suppresses sorting there).
-local function defaultStore() return { defaultEnabled = false, players = {}, flagOverrides = {}, pausedFlags = {} } end
+-- defaultEnabled = true: a FRESH install (no entitlements.lua yet) sorts every
+-- flag out of the box, matching the other gatable mods. Admins can restrict via
+-- 'goober default off' + per-player/per-flag grants (the donation model).
+local function defaultStore() return { defaultEnabled = true, players = {}, flagOverrides = {}, pausedFlags = {} } end
 
 function GG.loadStore()
     GG.store = defaultStore()
@@ -389,6 +392,7 @@ local function recomputeEnabled()
         enabled = enabled,
         enabledBases = enabledBases,
         defaultEnabled = s.defaultEnabled,
+        overrides = s.flagOverrides, paused = paused,   -- for the default-fallback below
         counts = { enabled = n, bases = tcount(owners), players = #s.players,
                    overrides = tcount(s.flagOverrides), paused = tcount(paused) },
     }
@@ -400,24 +404,29 @@ function GG.ensureResolved(force)
     local cfg = GG.config or {}
     if not cfg.entitlementsEnabled then GG.resolved = nil; return true end
     if not GG.store then GG.loadStore() end
-    local intervalSec = (cfg.resyncIntervalMs or 300000) / 1000
-    local fresh = GG.ownerMap and GG.ownerMapAt and (os.time() - GG.ownerMapAt) < intervalSec
-    if force or not fresh then
-        local rows, err = GG.dbRows(OWNER_SQL)
-        if rows then
-            local m = {}
-            for _, r in ipairs(rows) do
-                local id = math.tointeger(tonumber(r[1]))
-                if id ~= nil then m[id] = r[2] end
+    -- The SCUM.db owner map is needed ONLY to resolve per-player entitlements
+    -- (the donation model). With none granted, skip the DB entirely — so no
+    -- sqlite3.exe is required for default/per-flag operation. Read it (and only
+    -- then) when at least one player has been granted.
+    if #GG.store.players > 0 then
+        local intervalSec = (cfg.resyncIntervalMs or 300000) / 1000
+        local fresh = GG.ownerMap and GG.ownerMapAt and (os.time() - GG.ownerMapAt) < intervalSec
+        if force or not fresh then
+            local rows, err = GG.dbRows(OWNER_SQL)
+            if rows then
+                local m = {}
+                for _, r in ipairs(rows) do
+                    local id = math.tointeger(tonumber(r[1]))
+                    if id ~= nil then m[id] = r[2] end
+                end
+                GG.ownerMap = m
+                GG.ownerMapAt = os.time()
+            else
+                GG.log("entitlement DB read failed (per-player grants need sqlite3.exe): " .. tostring(err))
             end
-            GG.ownerMap = m
-            GG.ownerMapAt = os.time()
-        else
-            GG.log("entitlement DB read failed: " .. tostring(err))
         end
     end
-    if not GG.ownerMap then GG.resolved = nil; return false end
-    recomputeEnabled()
+    recomputeEnabled()   -- always resolve; owner map may be empty (default still applies)
     return true
 end
 
@@ -453,10 +462,13 @@ end
 local function flagEnabled(flag)
     if not (GG.config and GG.config.entitlementsEnabled) then return true end
     local r = GG.resolved
-    if not r or not r.enabled then return false end
+    if not r then return false end
     local bid = flag.baseId
     if bid == nil then return false end
-    return r.enabled[bid] == true
+    if r.enabled[bid] then return true end            -- explicitly on (override-on / player-entitled)
+    if r.overrides[bid] ~= nil then return false end  -- an override exists (it was off)
+    if r.paused[bid] then return false end            -- paused beats the global default
+    return r.defaultEnabled == true                   -- fall back to the global default
 end
 
 -- baseId of the flag the issuing admin is standing in (for "goober flag" w/o id)
@@ -642,7 +654,11 @@ end
 -- pause)? nil baseId = not in a flag. Used to gate the user action commands.
 local function flagEnabledForIssuer(baseId)
     if not (GG.config and GG.config.entitlementsEnabled) then return true end
-    return (GG.resolved and GG.resolved.enabledBases and GG.resolved.enabledBases[baseId]) == true
+    local r = GG.resolved
+    if not r or baseId == nil then return false end
+    if r.enabledBases[baseId] then return true end    -- access ignores pause
+    if r.overrides[baseId] ~= nil then return false end
+    return r.defaultEnabled == true
 end
 
 -- user 'goober pause'/'goober resume' — toggle a per-flag sorting opt-out for the

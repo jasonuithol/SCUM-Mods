@@ -13,7 +13,7 @@ This runs inside your dedicated-server process via UE4SS. Installing it requires
 [*][b]Flag-scoped[/b] — only sorts within a flag's influence, into chests in that flag.
 [*][b]Configurable categories[/b] — categories live in an editable [b]categories.yaml[/b] (optionally pulled from a Gist on [b]goober reload[/b]).
 [*][b]Empty-containers[/b] — bags/clothing can be emptied and their contents sorted.
-[*][b]Entitlement gate[/b] — per-player (primary), per-flag (fallback), or global default, so sorting can be granted as a perk. Owner→base links are read [i]read-only[/i] from SCUM.db.
+[*][b]Entitlement gate[/b] — ships [b]default-on[/b] (works for everyone out of the box); restrict or sell access via per-player grants, per-flag overrides, or the global default. Only per-player grants touch the DB (read-only, user-supplied sqlite3.exe).
 [/list]
 
 [size=4][b]Requirements[/b][/size]
@@ -25,11 +25,10 @@ This runs inside your dedicated-server process via UE4SS. Installing it requires
 
 [size=4][b]Installation[/b][/size]
 [list=1]
-[*]Copy the [b]GarbageGoober[/b] folder AND the [b]shared[/b] folder into your server's UE4SS mods directory:
-[code]<server>\SCUM\Binaries\Win64\ue4ss\Mods\GarbageGoober\
-<server>\SCUM\Binaries\Win64\ue4ss\Mods\shared\Scripts\gating.lua[/code]
+[*]Copy the [b]GarbageGoober[/b] folder into your server's UE4SS mods directory (it is self-contained — no separate shared library needed):
+[code]<server>\SCUM\Binaries\Win64\ue4ss\Mods\GarbageGoober\[/code]
 [*]Open [b]GarbageGoober\Scripts\main.lua[/b] and set [b]MOD_DIR[/b] to that folder's full path.
-[*][i](Only if you turn the entitlement gate on.)[/i] Run [b]install-libraries.ps1[/b] (or double-click [b]install-libraries.cmd[/b]) to fetch the public-domain [b]sqlite3.exe[/b] used to read the save DB read-only.
+[*][i](Optional — only for the per-player donation model.)[/i] Sorting works out of the box with no database. To grant access to specific players ([b]goober add <player>[/b]), download the [b]sqlite3.exe[/b] command-line tool from [url=https://sqlite.org/download.html]sqlite.org[/url], drop it in the mod folder, and point [b]dbPath[/b] at your [b]SCUM.db[/b]. Default-on and per-flag overrides need none of this.
 [*]Enable it in [b]...\ue4ss\Mods\mods.txt[/b]:
 [code]GarbageGoober : 1[/code]
 Do [b]not[/b] create [b]enabled.txt[/b] — it silently overrides mods.txt.
@@ -38,6 +37,5 @@ Do [b]not[/b] create [b]enabled.txt[/b] — it silently overrides mods.txt.
 
 [size=4][b]Notes[/b][/size]
 [list]
-[*]The [b]shared[/b] folder is a small library shared by my SCUM mods — if you already have it from another of my mods, the copy is identical.
 [*]All rights reserved. Personal use on servers you administer; please don't re-upload or repackage.
 [/list]

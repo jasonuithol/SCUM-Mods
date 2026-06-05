@@ -28,8 +28,8 @@ local LOGFILE = MOD_DIR .. [[\GarbageGoober.log]]
 GarbageGoober = GarbageGoober or {}
 local GG = GarbageGoober
 
--- Paths for the entitlement layer. The mod reads SCUM.db via the bundled
--- sqlite3.exe (fetched by install-libraries.ps1) and keeps its own store in
+-- Paths for the entitlement layer. For PER-PLAYER grants the mod reads SCUM.db
+-- via a user-supplied sqlite3.exe in this folder; it keeps its own store in
 -- entitlements.lua. See Scripts/sorter.lua + Scripts/Config.lua.
 GG.modDir = MOD_DIR
 GG.sqliteExe = MOD_DIR .. [[\sqlite3.exe]]

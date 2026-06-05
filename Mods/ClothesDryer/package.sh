@@ -4,7 +4,6 @@
 #   README.md
 #   LICENSE
 #   ClothesDryer/Scripts/...          (the mod)
-#   ClothesDryer/install-libraries.*  (fetches sqlite3.exe when the gate is on)
 #   shared/Scripts/gating.lua          (the shared lib the mod loads)
 # Users extract and copy BOTH the ClothesDryer/ and shared/ folders into their
 #   ...\SCUM\Binaries\Win64\ue4ss\Mods\
@@ -29,8 +28,6 @@ cp "$here"/Scripts/*.lua "$stage/$MOD/Scripts/"
 for extra in "$here"/Scripts/*.yaml "$here"/Scripts/*.yml "$here"/Scripts/*.json; do
     [ -f "$extra" ] && cp "$extra" "$stage/$MOD/Scripts/"
 done
-[ -f "$here/install-libraries.ps1" ] && cp "$here/install-libraries.ps1" "$stage/$MOD/"
-[ -f "$here/install-libraries.cmd" ] && cp "$here/install-libraries.cmd" "$stage/$MOD/"
 cp "$here/README.md" "$stage/README.md"
 cp "$here/LICENSE"   "$stage/LICENSE"
 cp "$shared"         "$stage/shared/Scripts/gating.lua"

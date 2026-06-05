@@ -17,11 +17,11 @@ nothing runs on players' PCs.
    `SCUM\Binaries\Win64\ue4ss\Mods\`.
 2. Open `Scripts\main.lua` and set **`MOD_DIR`** (near the top) to the full path
    of this folder.
-3. *(Only if you turn the entitlement gate on — see below.)* Run
-   **`install-libraries.ps1`** (or double-click `install-libraries.cmd`) in this
-   folder. It downloads the public-domain `sqlite3.exe` used to read the save DB
-   read-only. The save-DB path auto-derives from `MOD_DIR` for a standard server
-   layout — no extra config needed.
+3. *(Optional — only for the per-player donation model.)* Washing works out of the
+   box with no database. If you want to grant access to **specific players**
+   (`washer add <player>`), the mod reads `SCUM.db` read-only via `sqlite3.exe`:
+   download the command-line tools from <https://sqlite.org/download.html> and put
+   `sqlite3.exe` in this folder. Default-on and per-flag overrides need none of this.
 4. The shared gating library is expected at `ue4ss\Mods\shared\Scripts\gating.lua`
    (shipped with ClothesDryer / FlagUpkeep / GarbageGoober). Keep the `shared`
    folder alongside this one.
@@ -97,7 +97,9 @@ Handy commands:
 - `bucketClass` / `bucketFullAmount` — what counts as a full water bucket to empty.
 - `dirtThreshold` — minimum dirtiness for a garment to be considered "dirty".
 - `requireAdmin` — gate admin commands behind SCUM admin status (default true).
-- `entitlementsEnabled` — when **true**, a wardrobe only washes inside a flag
-  whose owner is an entitled player (the donation model; needs `sqlite3.exe`,
-  step 3). When **false**, washing works in any flag and no DB is read. Edit, then
+- `entitlementsEnabled` — when **true** the gate is active but ships **default-on**,
+  so every flag washes out of the box. Restrict/sell access with `washer default off`
+  + per-player grants (`washer add <player>`, the donation model — that's the only
+  part that needs `sqlite3.exe`, install step 3) or per-flag overrides (no DB).
+  When **false**, washing works in any flag and no DB is ever read. Edit, then
   `washer reload` in chat (or restart).

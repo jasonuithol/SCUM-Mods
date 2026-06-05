@@ -73,8 +73,10 @@ return {
     -- When ON, the sweep only sorts loot inside a flag whose owner has been
     -- entitled by an admin (the donation/premium model), with a per-flag
     -- override as the fallback. A flag's owner is NOT readable from the live
-    -- actor, so the mod reads SCUM.db read-only via the bundled sqlite3.exe to
-    -- map baseId -> owner Steam64 -> entitled?. Control it in-game with:
+    -- actor, so for PER-PLAYER grants the mod reads SCUM.db read-only via a
+    -- user-supplied sqlite3.exe to map baseId -> owner Steam64 -> entitled?.
+    -- (Default-on and per-flag overrides need NO DB / sqlite3.exe — the DB is
+    -- only read once at least one player has been granted.) Control it in-game:
     -- goober add/remove <player> , goober list , goober status ,
     -- goober flag on|off|clear [baseId] , goober default on|off .
     --   true  = gate sorting by entitlement (per-player primary, per-flag fallback)
@@ -83,8 +85,10 @@ return {
     -- Path to the server's save DB (read-only). owner_user_profile_id lives here.
     -- Defaults to defaultDbPath() above (portable). Set a literal path to override.
     dbPath = defaultDbPath(),
-    -- sqlite3.exe used to read the DB. nil = use the copy in this mod's folder
-    -- (run install-libraries.ps1 to fetch it). Set a path to use a different one.
+    -- sqlite3.exe used to read the DB. ONLY needed if you grant PER-PLAYER
+    -- entitlements (goober add <player>); default/per-flag operation needs no DB.
+    -- nil = use a sqlite3.exe in this mod's folder (download the command-line
+    -- tools from https://sqlite.org/download.html and drop sqlite3.exe here).
     sqliteExe = nil,
     -- How often (ms) the sweep re-reads the DB to refresh the owner map. Cheap
     -- (one read-only query). Lower = a donor's freshly built/rebuilt base starts

@@ -351,6 +351,7 @@ function Gating.attach(M, opts)
         end
         M.resolved = {
             enabled = enabled, enabledBases = enabledBases, defaultEnabled = s.defaultEnabled,
+            overrides = s.flagOverrides, paused = paused,   -- for the default-fallback below
             counts = { enabled = n, bases = tcount(owners), players = #s.players,
                        overrides = tcount(s.flagOverrides), paused = tcount(paused) },
         }
@@ -360,23 +361,28 @@ function Gating.attach(M, opts)
         local c = cfg()
         if not c.entitlementsEnabled then M.resolved = nil; return true end
         if not M.store then M.loadStore() end
-        local intervalSec = (c.resyncIntervalMs or 300000) / 1000
-        local fresh = M.ownerMap and M.ownerMapAt and (os.time() - M.ownerMapAt) < intervalSec
-        if force or not fresh then
-            local rows, err = M.dbRows(OWNER_SQL)
-            if rows then
-                local m = {}
-                for _, r in ipairs(rows) do
-                    local id = math.tointeger(tonumber(r[1]))
-                    if id ~= nil then m[id] = r[2] end
+        -- The SCUM.db owner map is needed ONLY to resolve per-player entitlements
+        -- (the donation model). With none granted, skip the DB entirely — so no
+        -- sqlite3.exe is required for default/per-flag operation. Read it (and only
+        -- then) when at least one player has been granted.
+        if #M.store.players > 0 then
+            local intervalSec = (c.resyncIntervalMs or 300000) / 1000
+            local fresh = M.ownerMap and M.ownerMapAt and (os.time() - M.ownerMapAt) < intervalSec
+            if force or not fresh then
+                local rows, err = M.dbRows(OWNER_SQL)
+                if rows then
+                    local m = {}
+                    for _, r in ipairs(rows) do
+                        local id = math.tointeger(tonumber(r[1]))
+                        if id ~= nil then m[id] = r[2] end
+                    end
+                    M.ownerMap = m; M.ownerMapAt = os.time()
+                else
+                    M.log("entitlement DB read failed (per-player grants need sqlite3.exe): " .. tostring(err))
                 end
-                M.ownerMap = m; M.ownerMapAt = os.time()
-            else
-                M.log("entitlement DB read failed: " .. tostring(err))
             end
         end
-        if not M.ownerMap then M.resolved = nil; return false end
-        recomputeEnabled()
+        recomputeEnabled()   -- always resolve; owner map may be empty (default still applies)
         return true
     end
 
@@ -408,15 +414,22 @@ function Gating.attach(M, opts)
     function M.flagEnabled(flag)
         if not cfg().entitlementsEnabled then return true end
         local r = M.resolved
-        if not r or not r.enabled then return false end
+        if not r then return false end
         local bid = flag.baseId
         if bid == nil then return false end
-        return r.enabled[bid] == true
+        if r.enabled[bid] then return true end            -- explicitly on (override-on / player-entitled)
+        if r.overrides[bid] ~= nil then return false end  -- an override exists (it was off)
+        if r.paused[bid] then return false end            -- paused beats the global default
+        return r.defaultEnabled == true                   -- fall back to the global default
     end
 
     function M.flagEnabledForIssuer(baseId)
         if not cfg().entitlementsEnabled then return true end
-        return (M.resolved and M.resolved.enabledBases and M.resolved.enabledBases[baseId]) == true
+        local r = M.resolved
+        if not r or baseId == nil then return false end
+        if r.enabledBases[baseId] then return true end    -- access ignores pause
+        if r.overrides[baseId] ~= nil then return false end
+        return r.defaultEnabled == true
     end
 
     function M.currentFlagBaseId()

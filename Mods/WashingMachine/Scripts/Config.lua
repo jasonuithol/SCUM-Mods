@@ -62,12 +62,15 @@ return {
     requireAdmin = true,
 
     -- ---- per-player / per-flag entitlement gate (same model as ClothesDryer) ---
-    -- true  = a wardrobe only washes inside a flag whose owner is entitled (needs
-    --         SCUM.db read via sqlite3.exe + an owner map). The donation model.
-    -- false = washing works in ANY flag (entitlement layer off). Good for first test.
+    -- true  = the gate is active. Default-on (out of the box) + per-flag overrides
+    --         need NO DB. Granting a specific player (washer add <player>) reads
+    --         SCUM.db via a user-supplied sqlite3.exe — that's the donation model.
+    -- false = washing works in ANY flag (entitlement layer off).
     entitlementsEnabled = true,
     dbPath = defaultDbPath(),
-    sqliteExe = nil,            -- nil = the sqlite3.exe in this mod's folder
+    -- ONLY needed for per-player grants. nil = a sqlite3.exe in this mod's folder
+    -- (download the CLI tools from https://sqlite.org/download.html, drop it here).
+    sqliteExe = nil,
     resyncIntervalMs = 300000,  -- 5 min owner-map refresh
 
     -- What a non-entitled player sees on a gated command: "default" | nil | string | list.
