@@ -17,7 +17,7 @@ local xyz, presLoc, actorLoc, hdist = GG.xyz, GG.presLoc, GG.actorLoc, GG.hdist
 local findAllAny, trim, fstr, nameMatches = GG.findAllAny, GG.trim, GG.fstr, GG.nameMatches
 local collectFlags, collectChests, collectContainerContents = GG.collectFlags, GG.collectChests, GG.collectContainerContents
 local findIUC, flagFor, currentFlagBaseId = GG.findIUC, GG.flagFor, GG.currentFlagBaseId
-local flagEnabled, replyNotEnabled = GG.flagEnabled, GG.replyNotEnabled
+local flagEnabled, flagEnabledForIssuer, replyNotEnabled = GG.flagEnabled, GG.flagEnabledForIssuer, GG.replyNotEnabled
 
 -- double-quote a shell arg (used by GG.fetchUrl). The shared lib has its own copy
 -- for dbRows; fetchUrl lives here, so keep a local one.
@@ -450,15 +450,18 @@ function GG.handleCommand(arg)
             GG.reply("stand in your flag, then 'goober now' to sort it")
         else
             GG.ensureResolved(false)
-            local r = GG.resolved
             local gateOn = GG.config.entitlementsEnabled
-            local sortable = (not gateOn) or (r and r.enabled and r.enabled[baseId] == true)
-            if sortable then
+            -- access via the gate function (honours override > player > GLOBAL DEFAULT),
+            -- NOT the resolved owner set directly — default-on bases aren't in that set
+            -- when sqlite is off (empty owner map). Same decision the auto-sweep uses.
+            local access = (not gateOn) or flagEnabledForIssuer(baseId)
+            local paused = GG.resolved and GG.resolved.paused and GG.resolved.paused[baseId]
+            if access and not paused then
                 GG.log("manual sweep of base " .. baseId .. " (goober now)")
                 local ok, s = pcall(GG.sweep, baseId)
                 GG.reply(ok and (s or "swept") or "sweep error (see log)")
-            elseif r and r.enabledBases and r.enabledBases[baseId] then
-                -- enabled, but the owner paused it (not-enabled would take precedence above)
+            elseif access and paused then
+                -- enabled, but the owner paused it
                 GG.reply("sorting is paused for your base — 'goober resume' to turn it back on")
             else
                 replyNotEnabled()

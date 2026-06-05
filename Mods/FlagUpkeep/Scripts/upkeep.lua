@@ -528,14 +528,17 @@ function FU.handleCommand(arg)
             FU.reply("stand in your flag, then 'upkeep now' to run it")
         else
             FU.ensureResolved(false)
-            local r = FU.resolved
             local gateOn = FU.config.entitlementsEnabled
-            local serviceable = (not gateOn) or (r and r.enabled and r.enabled[baseId] == true)
-            if serviceable then
+            -- access via the gate function (honours override > player > GLOBAL DEFAULT),
+            -- NOT the resolved owner set directly — default-on bases aren't in that set
+            -- when sqlite is off (empty owner map). Same decision the timer uses.
+            local access = (not gateOn) or flagEnabledForIssuer(baseId)
+            local paused = FU.resolved and FU.resolved.paused and FU.resolved.paused[baseId]
+            if access and not paused then
                 FU.log("manual upkeep of base " .. baseId .. " (upkeep now)")
                 local ok, s = pcall(FU.upkeep, baseId)
                 FU.reply(ok and (s or "done") or "upkeep error (see log)")
-            elseif r and r.enabledBases and r.enabledBases[baseId] then
+            elseif access and paused then
                 FU.reply("upkeep is paused for your base — 'upkeep resume' to turn it back on")
             else
                 replyNotEnabled()
