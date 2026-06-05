@@ -87,11 +87,13 @@ return {
     requireAdmin = true,
 
     -- ---- per-player / per-flag entitlement gate --------------------------
-    -- Identical model to GarbageGoober. When ON, upkeep only runs inside a flag
-    -- whose owner has been entitled by an admin (the donation/premium model),
-    -- with a per-flag override as the fallback. A flag's owner is NOT readable
-    -- from the live actor, so the mod reads SCUM.db read-only via the bundled
-    -- sqlite3.exe to map baseId -> owner Steam64 -> entitled?. Control it in-game:
+    -- Identical model to GarbageGoober. When ON, the gate is active but ships
+    -- default-on (every flag is upkept out of the box). Granting a specific player
+    -- (the donation/premium model) is the only feature that needs a database: a
+    -- flag's owner is NOT readable from the live actor, so for PER-PLAYER grants
+    -- the mod reads SCUM.db read-only via a user-supplied sqlite3.exe to map
+    -- baseId -> owner Steam64 -> entitled?. (Default-on + per-flag overrides need
+    -- NO DB.) Control it in-game:
     -- upkeep add/remove <player> , upkeep list , upkeep status ,
     -- upkeep flag on|off|clear [baseId] , upkeep default on|off .
     --   true  = gate upkeep by entitlement (per-player primary, per-flag fallback)
@@ -99,8 +101,9 @@ return {
     entitlementsEnabled = true,
     -- Path to the server's save DB (read-only). owner_user_profile_id lives here.
     dbPath = defaultDbPath(),
-    -- sqlite3.exe used to read the DB. nil = use the copy in this mod's folder
-    -- (run install-libraries.ps1 to fetch it). Set a path to use a different one.
+    -- sqlite3.exe used to read the DB. ONLY needed for per-player grants. nil = a
+    -- sqlite3.exe in this mod's folder (download the CLI tools from
+    -- https://sqlite.org/download.html and drop it here). Set a path to use another.
     sqliteExe = nil,
     -- How often (ms) the cycle re-reads the DB to refresh the owner map. Cheap
     -- (one read-only query). add/remove/flag/default always force a refresh.

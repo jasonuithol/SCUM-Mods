@@ -84,15 +84,19 @@ Each flag sets its own trigger with `upkeep trigger <percent>`.
 
 ## Install
 
-1. `install-libraries.cmd` (fetches `sqlite3.exe`, SHA-256-verified, into this
-   folder — it is **not** committed to git).
-2. Copy this folder to `…\SCUM\Binaries\Win64\ue4ss\Mods\FlagUpkeep`.
-3. Add `FlagUpkeep : 1` to `…\ue4ss\Mods\mods.txt`
+1. Copy this folder (and the `shared` folder) to
+   `…\SCUM\Binaries\Win64\ue4ss\Mods\`.
+2. Add `FlagUpkeep : 1` to `…\ue4ss\Mods\mods.txt`
    (**never** create `enabled.txt` — it silently overrides `mods.txt`).
-4. Ensure `UE4SS-settings.ini` has `HookProcessInternal=1` and
+3. Ensure `UE4SS-settings.ini` has `HookProcessInternal=1` and
    `HookProcessLocalScriptFunction=1` (needed for the chat trigger).
-5. Edit `Scripts/main.lua`'s `MOD_DIR` and `Scripts/Config.lua` to taste
+4. Edit `Scripts/main.lua`'s `MOD_DIR` and `Scripts/Config.lua` to taste
    (keep `allowTestDamage = false` on a real server), then start the server.
+5. *(Optional — only for the per-player donation model.)* Upkeep works out of
+   the box with no database. To grant access to **specific players**
+   (`upkeep add <player>`), the mod reads `SCUM.db` read-only via `sqlite3.exe`:
+   download the command-line tools from <https://sqlite.org/download.html> and
+   put `sqlite3.exe` in this folder.
 
 ## Shared lineage / future library
 
