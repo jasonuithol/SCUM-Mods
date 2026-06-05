@@ -101,9 +101,11 @@ return {
     entitlementsEnabled = true,
     -- Path to the server's save DB (read-only). owner_user_profile_id lives here.
     dbPath = defaultDbPath(),
-    -- sqlite3.exe used to read the DB. ONLY needed for per-player grants. nil = a
-    -- sqlite3.exe in this mod's folder (download the CLI tools from
-    -- https://sqlite.org/download.html and drop it here). Set a path to use another.
+    -- sqlite3.exe — ONLY needed to grant PER-PLAYER entitlements (upkeep add
+    -- <player>). nil = DISABLED (default): no DB read; default-on + per-flag still
+    -- work. To enable, set an absolute path (keep ONE copy on the server, e.g.
+    -- ...\ue4ss\Mods\shared\sqlite3.exe) or "sqlite3.exe" to use one on PATH.
+    -- (CLI tools: https://sqlite.org/download.html.)
     sqliteExe = nil,
     -- How often (ms) the cycle re-reads the DB to refresh the owner map. Cheap
     -- (one read-only query). add/remove/flag/default always force a refresh.

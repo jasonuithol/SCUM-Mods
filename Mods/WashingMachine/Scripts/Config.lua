@@ -68,8 +68,11 @@ return {
     -- false = washing works in ANY flag (entitlement layer off).
     entitlementsEnabled = true,
     dbPath = defaultDbPath(),
-    -- ONLY needed for per-player grants. nil = a sqlite3.exe in this mod's folder
-    -- (download the CLI tools from https://sqlite.org/download.html, drop it here).
+    -- sqlite3.exe — ONLY needed to grant PER-PLAYER entitlements (washer add
+    -- <player>). nil = DISABLED (default): no DB read; default-on + per-flag still
+    -- work. To enable, set an absolute path (keep ONE copy on the server, e.g.
+    -- ...\ue4ss\Mods\shared\sqlite3.exe) or "sqlite3.exe" to use one on PATH.
+    -- (CLI tools: https://sqlite.org/download.html.)
     sqliteExe = nil,
     resyncIntervalMs = 300000,  -- 5 min owner-map refresh
 

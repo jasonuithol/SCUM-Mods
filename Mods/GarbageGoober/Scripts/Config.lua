@@ -85,10 +85,12 @@ return {
     -- Path to the server's save DB (read-only). owner_user_profile_id lives here.
     -- Defaults to defaultDbPath() above (portable). Set a literal path to override.
     dbPath = defaultDbPath(),
-    -- sqlite3.exe used to read the DB. ONLY needed if you grant PER-PLAYER
-    -- entitlements (goober add <player>); default/per-flag operation needs no DB.
-    -- nil = use a sqlite3.exe in this mod's folder (download the command-line
-    -- tools from https://sqlite.org/download.html and drop sqlite3.exe here).
+    -- sqlite3.exe — ONLY needed to grant PER-PLAYER entitlements (goober add
+    -- <player>). nil = DISABLED (the default): no DB is read, so per-player grants
+    -- are off; default-on + per-flag overrides still work with no sqlite at all.
+    -- To enable, point this at a sqlite3.exe — an absolute path (keep ONE copy on
+    -- the server, e.g. ...\ue4ss\Mods\shared\sqlite3.exe) or "sqlite3.exe" to use
+    -- one on PATH. (CLI tools: https://sqlite.org/download.html.)
     sqliteExe = nil,
     -- How often (ms) the sweep re-reads the DB to refresh the owner map. Cheap
     -- (one read-only query). Lower = a donor's freshly built/rebuilt base starts

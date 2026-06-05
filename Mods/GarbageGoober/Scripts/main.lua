@@ -29,11 +29,10 @@ local LIB     = MOD_DIR .. [[\..\shared\Scripts\gating.lua]]
 GarbageGoober = GarbageGoober or {}
 local GG = GarbageGoober
 
--- Paths for the entitlement layer. For PER-PLAYER grants the mod reads SCUM.db
--- via a user-supplied sqlite3.exe in this folder; it keeps its own store in
--- entitlements.lua. See Scripts/sorter.lua + Scripts/Config.lua.
+-- Paths for the entitlement layer. The store lives in entitlements.lua here. The
+-- SCUM.db read for PER-PLAYER grants is optional + OFF by default — enable it by
+-- setting Config.sqliteExe (a path or "sqlite3.exe" on PATH). See Config.lua.
 GG.modDir = MOD_DIR
-GG.sqliteExe = MOD_DIR .. [[\sqlite3.exe]]
 GG.storeFile = MOD_DIR .. [[\entitlements.lua]]
 
 local function ts() return os.date("%Y-%m-%d %H:%M:%S") end

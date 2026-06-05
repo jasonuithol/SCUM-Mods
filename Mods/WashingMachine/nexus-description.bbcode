@@ -27,7 +27,7 @@ This runs inside your dedicated-server process via UE4SS. Installing it requires
 [code]<server>\SCUM\Binaries\Win64\ue4ss\Mods\WashingMachine\
 <server>\SCUM\Binaries\Win64\ue4ss\Mods\shared\Scripts\gating.lua[/code]
 [*]Open [b]WashingMachine\Scripts\main.lua[/b] and set [b]MOD_DIR[/b] to that folder's full path.
-[*][i](Optional — only for the per-player donation model.)[/i] Washing works out of the box with no database. To grant access to specific players ([b]washer add <player>[/b]), download the [b]sqlite3.exe[/b] command-line tool from [url=https://sqlite.org/download.html]sqlite.org[/url] and drop it in the mod folder. Default-on and per-flag overrides need none of this.
+[*][i](Optional — only for the per-player donation model.)[/i] Washing works out of the box with no database. Granting access to specific players ([b]washer add <player>[/b]) reads SCUM.db via [b]sqlite3.exe[/b] and is [b]off by default[/b]. To enable: download the [b]sqlite3.exe[/b] CLI tool from [url=https://sqlite.org/download.html]sqlite.org[/url], keep ONE copy on the server (e.g. in [b]Mods\shared[/b]), and set [b]sqliteExe[/b] in Config to that path (or [b]"sqlite3.exe"[/b] for PATH). Default-on and per-flag overrides never need it.
 [*]Enable it in [b]...\ue4ss\Mods\mods.txt[/b]:
 [code]WashingMachine : 1[/code]
 Do [b]not[/b] create [b]enabled.txt[/b] — it silently overrides mods.txt.

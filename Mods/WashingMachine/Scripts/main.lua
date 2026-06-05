@@ -33,7 +33,6 @@ WashingMachine = WashingMachine or {}
 local WM = WashingMachine
 
 WM.modDir = MOD_DIR
-WM.sqliteExe = MOD_DIR .. [[\sqlite3.exe]]
 WM.storeFile = MOD_DIR .. [[\entitlements.lua]]
 WM.washersFile = MOD_DIR .. [[\washers.lua]]
 

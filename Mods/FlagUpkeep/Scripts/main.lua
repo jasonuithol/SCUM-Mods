@@ -25,7 +25,6 @@ FlagUpkeep = FlagUpkeep or {}
 local FU = FlagUpkeep
 
 FU.modDir = MOD_DIR
-FU.sqliteExe = MOD_DIR .. [[\sqlite3.exe]]
 FU.storeFile = MOD_DIR .. [[\entitlements.lua]]
 
 local function ts() return os.date("%Y-%m-%d %H:%M:%S") end

@@ -17,8 +17,9 @@
 -- (which calls these M.cmd* plus the mod's own commands), config, and any extra
 -- store fields (declared via opts.storeExtra so this lib (de)serialises them).
 --
--- Requires on M before attach: M.log(msg), M.modDir, M.sqliteExe, M.storeFile,
--- and M.config (the loaded Config table). opts (all optional):
+-- Requires on M before attach: M.log(msg), M.modDir, M.storeFile, and M.config
+-- (the loaded Config table). sqlite is configured via Config.sqliteExe (a path or
+-- bare name; nil = disabled, so per-player grants are off). opts (all optional):
 --   storeExtra      = { fieldName = "floatmap"|"intmap", ... } extra store maps
 --                     (id -> number); core fields are always handled.
 --   defaultNotEnabled = string shown for the "not enabled" default message.
@@ -196,9 +197,12 @@ function Gating.attach(M, opts)
     local function dq(s) return '"' .. tostring(s) .. '"' end
 
     function M.dbRows(sql)
-        local exe = cfg().sqliteExe or M.sqliteExe
+        -- sqlite is OFF unless Config.sqliteExe is explicitly set (a path, or a bare
+        -- name like "sqlite3.exe" to use one on PATH). nil = disabled => no DB reads,
+        -- so per-player grants are unavailable (default/per-flag still work).
+        local exe = cfg().sqliteExe
         local db = cfg().dbPath
-        if not exe or not db then return nil, "sqlite/db path not configured" end
+        if not exe or not db then return nil, "sqlite3.exe not configured (set Config.sqliteExe to enable per-player grants)" end
         local inner = string.format('%s -readonly -batch -noheader -separator "|" %s %s 2>&1', dq(exe), dq(db), dq(sql))
         local h = io.popen('"' .. inner .. '"', "r")
         if not h then return nil, "io.popen failed" end

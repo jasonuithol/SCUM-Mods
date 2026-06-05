@@ -25,7 +25,6 @@ ClothesDryer = ClothesDryer or {}
 local CD = ClothesDryer
 
 CD.modDir = MOD_DIR
-CD.sqliteExe = MOD_DIR .. [[\sqlite3.exe]]
 CD.storeFile = MOD_DIR .. [[\entitlements.lua]]
 CD.dryersFile = MOD_DIR .. [[\dryers.lua]]
 

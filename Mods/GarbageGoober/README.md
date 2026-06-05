@@ -31,11 +31,14 @@ On a timer (default 60s) the mod:
    `SCUM/Binaries/Win64/ue4ss/Mods/`.
 2. Edit `Scripts/main.lua` → `MOD_DIR` if your path differs from the default.
 3. *(Optional — only for the per-player donation model.)* Sorting works out of the
-   box with no database. If you want to grant access to **specific players**
-   (`goober add <player>`), the mod reads `SCUM.db` read-only via `sqlite3.exe`:
-   download the command-line tools from <https://sqlite.org/download.html>, put
-   `sqlite3.exe` in this mod folder, and set `Scripts/Config.lua` → `dbPath` to
-   your server's `SCUM.db`. Default-on and per-flag overrides need none of this.
+   box with no database. To grant access to **specific players** (`goober add
+   <player>`), the mod reads `SCUM.db` read-only via `sqlite3.exe` — **off by
+   default**. To enable: download the command-line tools from
+   <https://sqlite.org/download.html>, keep **one** `sqlite3.exe` on the server
+   (e.g. `…\ue4ss\Mods\shared\sqlite3.exe`), and in `Scripts/Config.lua` set
+   `sqliteExe` to that path (or `"sqlite3.exe"` to use one on your PATH) and
+   `dbPath` to your `SCUM.db`. With `sqliteExe = nil` (default) no DB is read at
+   all. Default-on and per-flag overrides never need it.
 4. Enable it in `ue4ss/Mods/mods.txt`:
    ```
    GarbageGoober : 1
@@ -85,9 +88,9 @@ Operator-facing settings live in `Scripts/Config.lua`:
 - `requireAdmin` — `true` (default) gates the **admin** commands behind
   `IsUserAdmin`; the player commands stay open. `false` lets anyone run everything.
 - `entitlementsEnabled` / `dbPath` / `sqliteExe` / `resyncIntervalMs` — the access
-  gate (above), the path to `SCUM.db`, the sqlite binary (`nil` = a `sqlite3.exe`
-  in this folder; used only for per-player grants), and how often the owner map is
-  refreshed from the DB.
+  gate (above), the path to `SCUM.db`, the sqlite binary (`nil` = **disabled**, no
+  DB read; set a path or `"sqlite3.exe"` on PATH to enable per-player grants), and
+  how often the owner map is refreshed from the DB.
 - `notEnabledMessage` — what a non-enabled player sees on a user command
   (`"default"`, `nil`/`off` = silent, or a custom string/list). Override it live
   with `goober set-access-msg`.
@@ -147,4 +150,5 @@ output also goes to the UE4SS console.
 - `../shared/Scripts/gating.lua` — shared entitlement/flag-scope/SCUM.db/chat library
   (also used by ClothesDryer / WashingMachine / FlagUpkeep). Ship the `shared` folder too.
 - `entitlements.lua` — runtime access state (generated on the server; not in git).
-- `sqlite3.exe` — only needed for per-player grants; user-supplied (not in git).
+- `sqlite3.exe` — only for per-player grants; user-supplied, off by default (point
+  `Config.sqliteExe` at one copy, e.g. in `Mods\shared`, or use one on PATH; not in git).

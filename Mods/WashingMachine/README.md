@@ -18,10 +18,12 @@ nothing runs on players' PCs.
 2. Open `Scripts\main.lua` and set **`MOD_DIR`** (near the top) to the full path
    of this folder.
 3. *(Optional — only for the per-player donation model.)* Washing works out of the
-   box with no database. If you want to grant access to **specific players**
-   (`washer add <player>`), the mod reads `SCUM.db` read-only via `sqlite3.exe`:
-   download the command-line tools from <https://sqlite.org/download.html> and put
-   `sqlite3.exe` in this folder. Default-on and per-flag overrides need none of this.
+   box with no database. Granting access to **specific players** (`washer add
+   <player>`) reads `SCUM.db` via `sqlite3.exe` and is **off by default**. To
+   enable: download the command-line tools from <https://sqlite.org/download.html>,
+   keep **one** `sqlite3.exe` on the server (e.g. `…\ue4ss\Mods\shared\`), and set
+   `Config.lua` → `sqliteExe` to that path (or `"sqlite3.exe"` for PATH). With
+   `sqliteExe = nil` (default) no DB is read. Default-on/per-flag never need it.
 4. The shared gating library is expected at `ue4ss\Mods\shared\Scripts\gating.lua`
    (shipped with ClothesDryer / FlagUpkeep / GarbageGoober). Keep the `shared`
    folder alongside this one.

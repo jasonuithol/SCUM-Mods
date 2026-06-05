@@ -93,10 +93,12 @@ Each flag sets its own trigger with `upkeep trigger <percent>`.
 4. Edit `Scripts/main.lua`'s `MOD_DIR` and `Scripts/Config.lua` to taste
    (keep `allowTestDamage = false` on a real server), then start the server.
 5. *(Optional — only for the per-player donation model.)* Upkeep works out of
-   the box with no database. To grant access to **specific players**
-   (`upkeep add <player>`), the mod reads `SCUM.db` read-only via `sqlite3.exe`:
-   download the command-line tools from <https://sqlite.org/download.html> and
-   put `sqlite3.exe` in this folder.
+   the box with no database. Granting access to **specific players** (`upkeep add
+   <player>`) reads `SCUM.db` via `sqlite3.exe` and is **off by default**. To
+   enable: download the command-line tools from <https://sqlite.org/download.html>,
+   keep **one** `sqlite3.exe` on the server (e.g. `…\ue4ss\Mods\shared\`), and set
+   `Config.lua` → `sqliteExe` to that path (or `"sqlite3.exe"` for PATH). With
+   `sqliteExe = nil` (default) no DB is read.
 
 ## Shared lineage / future library
 
