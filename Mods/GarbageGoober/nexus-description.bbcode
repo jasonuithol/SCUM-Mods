@@ -4,8 +4,11 @@ A server-side mod for [b]SCUM dedicated servers[/b]. On a timer it sweeps loose,
 
 Everything is driven from [b]normal in-game chat[/b] (type [b]goober[/b] for the command list). No client mod — players need nothing installed, so [b]client BattlEye stays on[/b].
 
-[size=4][b]⚠ Server operators only[/b][/size]
-This runs inside your dedicated-server process via UE4SS. Installing it requires file-system access to the server. It does nothing on a game client and cannot affect a server you don't control. Use it on your own / authorised servers only.
+[size=4][b]⚠ Server operators only (the recommended way)[/b][/size]
+This runs inside your dedicated-server process via UE4SS. Installing it requires file-system access to the server. It does nothing on a game client and cannot affect a server you don't control. Run it server-side and [b]client BattlEye stays on[/b]. Use it on your own / authorised servers only.
+
+[size=4][b]Single-player / client-hosted — read this first (new in 1.1.0)[/b][/size]
+As of 1.1.0 the sorter [b]also works in client-hosted single-player[/b]. Be clear on what that costs before you try it: single-player has [b]no separate server process[/b], so you must inject [b]UE4SS into your own SCUM client[/b] and launch the game with [b]-nobattleye[/b]. That is [b]client-side modding, and BattlEye can ban your SCUM account for it.[/b] Only do this on [b]your own account, entirely at your own risk[/b]. The dedicated-server setup above needs none of this and is the recommended way to use the mod.
 
 [size=4][b]Features[/b][/size]
 [list]

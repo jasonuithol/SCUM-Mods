@@ -52,6 +52,25 @@ On a timer (default 60s) the mod:
    HookProcessLocalScriptFunction = 1
    ```
 
+## Single-player / client-hosted (1.1.0+) — read this first
+
+As of 1.1.0 the sorter also works in **client-hosted single-player**, not just
+dedicated servers. Be clear on the trade-off before you do this: single-player has
+**no separate server process**, so you must inject **UE4SS into your own SCUM
+client** and launch with **`-nobattleye`**. That is **client-side modding, and
+BattlEye can ban your SCUM account for it.** Do it only on **your own account and
+entirely at your own risk.**
+
+The dedicated-server install above needs none of this — it runs server-side and
+**client BattlEye stays on**, which is the recommended way to use this mod.
+
+The single-player setup mirrors any client-side UE4SS mod: install the UE4SS bundle
+into the client's `…\SCUM\Binaries\Win64\`, copy the `GarbageGoober` and `shared`
+folders into its `ue4ss\Mods\`, set `MOD_DIR` (main.lua) to the **client** path,
+enable the two hooks above, add `GarbageGoober : 1` to the client `mods.txt`, and
+launch `SCUM.exe` **directly** with `-nobattleye`. The `goober` chat commands work
+in single-player and the auto-sweep runs the same as on a server.
+
 ## Access control (who gets sorted)
 
 With `entitlementsEnabled = true` (default) the gate is active. Out of the box the
