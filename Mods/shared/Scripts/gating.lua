@@ -691,13 +691,39 @@ function Gating.attach(M, opts)
 
     -- ===== chat reply + onChatMessage entry ============================
     local CHAT_SERVERMESSAGE = 6
+    -- Replies are QUEUED and flushed a beat later, not sent inline. The chat hook
+    -- fires WHILE SCUM is still broadcasting the player's own message, so an
+    -- immediate reply renders ABOVE the echoed command. A short ExecuteWithDelay
+    -- pushes our lines after the echo; a single flush sends the whole queue in
+    -- submission order. Channel/PlayerState are captured per line (so concurrent
+    -- issuers on a real server each get their own). Falls back to inline send if
+    -- the scheduler isn't available.
+    M._replyQ = M._replyQ or {}
+    local function flushReplies()
+        M._replyScheduled = false
+        local q = M._replyQ; M._replyQ = {}
+        for _, e in ipairs(q) do
+            if e.chan ~= nil then
+                pcall(function() e.chan:Chat_Client_SendMessageToChat(e.msg, e.ps, {}, CHAT_SERVERMESSAGE, false) end)
+            end
+        end
+    end
     function M.reply(text, raw)
         local chan, ctrl = M.channel, M.controller
         if chan == nil then return false end
         local ps = nil
         if ctrl ~= nil then ps = pcs(function() return ctrl.PlayerState end, nil) end
         local msg = raw and tostring(text) or ("[" .. (M.tag or "mod") .. "] " .. tostring(text))
-        return pcall(function() chan:Chat_Client_SendMessageToChat(msg, ps, {}, CHAT_SERVERMESSAGE, false) end)
+        M._replyQ[#M._replyQ + 1] = { chan = chan, ps = ps, msg = msg }
+        if type(ExecuteWithDelay) == "function" then
+            if not M._replyScheduled then
+                M._replyScheduled = true
+                ExecuteWithDelay(120, flushReplies)
+            end
+        else
+            flushReplies() -- no scheduler: send inline (old behaviour)
+        end
+        return true
     end
 
     -- Called from main.lua's chat hook. Resolves caller context, then delegates to

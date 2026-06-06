@@ -34,7 +34,32 @@ local function isDeployable(it)
     return false
 end
 
--- All loose (non-deployable, on-the-floor) items: { {item=, class=, x=, y=} }
+-- Locate a loose item in the SAME coordinate space as flags and chests (both of
+-- which use the actor world location). A dedicated server populates the
+-- on-the-floor PRESENCE location (_serverPresence.Data.Location) and leaves the
+-- actor transform at/near origin; single-player is the reverse — the presence
+-- location reads as origin and only the actor transform is real. So take the
+-- actor location when it's a genuine (non-origin) point, else the presence
+-- location, else whatever we have. Returns (x, y, source).
+-- returns the chosen (x, y, source) AND the two raw candidates (ax,ay = actor,
+-- px,py = presence) so the caller can probe-log how the two agree per host.
+local function looseLoc(it)
+    local ax, ay = xyz(pcs(function() return it:K2_GetActorLocation() end, nil))
+    local px, py = presLoc(it)
+    local x, y, src
+    if ax and (ax * ax + ay * ay) > 1.0 then x, y, src = ax, ay, "actor"
+    elseif px and (px * px + py * py) > 1.0 then x, y, src = px, py, "pres"
+    else x, y, src = ax or px, ay or py, "weak" end
+    return x, y, src, ax, ay, px, py
+end
+
+-- Passive verifier: log K2 vs presence for the first few loose items after each
+-- (re)load, then go quiet. On a dedicated server this proves which source is
+-- real (and whether the two agree) without spamming the log. Reset on reload.
+GG._locProbe = 12
+local function fmtn(n) return n and string.format("%.0f", n) or "nil" end
+
+-- All loose (non-deployable, on-the-floor) items: { {item=, class=, x=, y=, locSrc=} }
 local function collectLooseLoot()
     local out = {}
     local items = FindAllOf("Item")
@@ -43,8 +68,14 @@ local function collectLooseLoot()
         if isValid(it) then
             local pc = presClass(it)
             if pc and pc:find("OnTheFloor", 1, true) and not isDeployable(it) then
-                local x, y = presLoc(it)
-                out[#out + 1] = { item = it, class = classOf(it), x = x, y = y }
+                local cls = classOf(it)
+                local x, y, src, ax, ay, px, py = looseLoc(it)
+                if (GG._locProbe or 0) > 0 then
+                    GG._locProbe = GG._locProbe - 1
+                    GG.log(string.format("  loc-probe: %-26s K2=(%s,%s) pres=(%s,%s) -> used %s",
+                        cls, fmtn(ax), fmtn(ay), fmtn(px), fmtn(py), src))
+                end
+                out[#out + 1] = { item = it, class = cls, x = x, y = y, locSrc = src }
             end
         end
     end end
@@ -200,6 +231,13 @@ function GG.sweep(onlyBaseId)
         local flag = flagFor(it.x, it.y, flags)
         if not flag then
             noFlag = noFlag + 1 -- POI / outside any flag — not ours to touch
+            if noFlag <= 6 then -- capped diagnostic: why did this item miss every flag?
+                local f1 = flags[1]
+                local d = (it.x and f1 and f1.x) and string.format("%.0f", hdist(it.x, it.y, f1.x, f1.y)) or "?"
+                GG.log(string.format("  outside-flag: %s at (%s,%s)[%s]  nearest-flag(%s,%s) d=%s r=%d",
+                    it.class, tostring(it.x), tostring(it.y), tostring(it.locSrc),
+                    f1 and tostring(f1.x) or "?", f1 and tostring(f1.y) or "?", d, f1 and f1.radius or 0))
+            end
         elseif not flagEnabled(flag) then
             disabled = disabled + 1 -- flag's owner not entitled (or per-flag override OFF)
         else
