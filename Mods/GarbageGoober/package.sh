@@ -8,11 +8,11 @@
 # Users extract and copy BOTH the GarbageGoober/ and shared/ folders into their
 #   ...\SCUM\Binaries\Win64\ue4ss\Mods\
 #
-#   ./package.sh            # version 1.0.0
+#   ./package.sh            # version 1.1.0 (current)
 #   ./package.sh 1.2.0      # custom version
 set -euo pipefail
 MOD="GarbageGoober"
-VERSION="${1:-1.0.0}"
+VERSION="${1:-1.1.0}"
 here="$(cd "$(dirname "$0")" && pwd)"      # Mods/<MOD>
 repo="$(cd "$here/../.." && pwd)"
 shared="$repo/Mods/shared/Scripts/gating.lua"
