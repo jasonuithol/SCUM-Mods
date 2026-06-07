@@ -42,6 +42,24 @@ nothing runs on players' PCs.
 7. Start the server, then check `WashingMachine.log` (created in this folder) for
    `WashingMachine loaded`.
 
+## Single-player / client-hosted — read this first
+
+The washer also works in **client-hosted single-player**, not just dedicated
+servers. Be clear on the trade-off first: single-player has **no separate server
+process**, so you must inject **UE4SS into your own SCUM client** and launch with
+**`-nobattleye`**. That is **client-side modding, and BattlEye can ban your SCUM
+account for it.** Do it only on **your own account and entirely at your own risk.**
+
+The dedicated-server install above needs none of this — it runs server-side and
+**client BattlEye stays on**, which is the recommended way to use this mod.
+
+Single-player setup mirrors any client-side UE4SS mod: install the UE4SS bundle
+into the client's `…\SCUM\Binaries\Win64\`, copy the `WashingMachine` and `shared`
+folders into its `ue4ss\Mods\`, set `MOD_DIR` (main.lua) to the **client** path,
+enable the two hooks above, add `WashingMachine : 1` to the client `mods.txt`, and
+launch `SCUM.exe` **directly** with `-nobattleye`. The `washer` chat commands work
+in single-player exactly as on a server.
+
 ## Using it
 
 Type commands in **normal in-game chat** (not `#` admin commands). `washer` shows

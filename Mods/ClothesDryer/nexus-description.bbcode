@@ -7,6 +7,9 @@ Everything is driven from [b]normal in-game chat[/b] (type [b]dryer[/b] for the 
 [size=4][b]⚠ Server operators only[/b][/size]
 This runs inside your dedicated-server process via UE4SS. Installing it requires file-system access to the server. It does nothing on a game client and cannot affect a server you don't control. Use it on your own / authorised servers only.
 
+[size=4][b]Single-player / client-hosted — read this first[/b][/size]
+The dryer [b]also works in client-hosted single-player[/b], not just dedicated servers. Be clear on what that costs before you try it: single-player has [b]no separate server process[/b], so you must inject [b]UE4SS into your own SCUM client[/b] and launch the game with [b]-nobattleye[/b]. That is [b]client-side modding, and BattlEye can ban your SCUM account for it.[/b] Only do this on [b]your own account, entirely at your own risk[/b]. The dedicated-server setup above needs none of this and is the recommended way to use the mod.
+
 [size=4][b]How it works[/b][/size]
 [list]
 [*]Build and place an [b]Improvised Wardrobe[/b] in your flag.
@@ -38,6 +41,7 @@ Do [b]not[/b] create [b]enabled.txt[/b] — it silently overrides mods.txt.
 [list]
 [*]Drying needs a player nearby — SCUM keeps container contents live only while observed, so an abandoned closed wardrobe pauses until someone's around (which is whenever anyone actually uses it).
 [*]Still looks wet right after it dries? The server already set it dry; your client re-syncs a beat later or on reopening the wardrobe.
+[*]A tiny bit of residual wetness (~1%) can remain — it's harmless and clears very quickly on its own; wear the garment in the [b]sun[/b] or stand near a [b]fire[/b] and the last of it dries off in moments.
 [*]Pairs with my [b]WashingMachine[/b] mod — wash the dirt out there, dry it here.
 [*]The [b]shared[/b] folder is a small library shared by my SCUM mods — if you already have it from another of my mods, the copy is identical.
 [*]All rights reserved. Personal use on servers you administer; please don't re-upload or repackage.

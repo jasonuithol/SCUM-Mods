@@ -39,6 +39,24 @@ nothing runs on players' PCs.
 7. Start the server, then check `ClothesDryer.log` (created in this folder) for
    `ClothesDryer loaded`.
 
+## Single-player / client-hosted — read this first
+
+The dryer also works in **client-hosted single-player**, not just dedicated
+servers. Be clear on the trade-off first: single-player has **no separate server
+process**, so you must inject **UE4SS into your own SCUM client** and launch with
+**`-nobattleye`**. That is **client-side modding, and BattlEye can ban your SCUM
+account for it.** Do it only on **your own account and entirely at your own risk.**
+
+The dedicated-server install above needs none of this — it runs server-side and
+**client BattlEye stays on**, which is the recommended way to use this mod.
+
+Single-player setup mirrors any client-side UE4SS mod: install the UE4SS bundle
+into the client's `…\SCUM\Binaries\Win64\`, copy the `ClothesDryer` and `shared`
+folders into its `ue4ss\Mods\`, set `MOD_DIR` (main.lua) to the **client** path,
+enable the two hooks above, add `ClothesDryer : 1` to the client `mods.txt`, and
+launch `SCUM.exe` **directly** with `-nobattleye`. The `dryer` chat commands work
+in single-player exactly as on a server.
+
 ## Using it
 
 Type commands in **normal in-game chat** (not `#` admin commands). `dryer` shows
@@ -75,6 +93,9 @@ Handy commands:
   it.
 - **Still looks wet after it dried?** The server already set it dry; your client
   re-syncs a beat later (or on reopening the wardrobe).
+- **A tiny bit of residual wetness (~1%) can remain.** This is harmless and clears
+  up very quickly on its own — wear the garment in the **sun**, or stand near a
+  **fire**, and the last of it dries off in moments.
 - **Water containers are safe.** Only clothing is touched — canteens, bottles,
   etc. are never drained.
 
