@@ -4,6 +4,7 @@
 #   README.md
 #   LICENSE
 #   DeveloperMode/dlls/main.dll
+#   DeveloperMode/DeveloperMode.ini   (per-executor-tier access config)
 # Users extract and copy the DeveloperMode/ folder into their server's
 #   ...\SCUM\Binaries\Win64\ue4ss\Mods\
 set -euo pipefail
@@ -16,9 +17,10 @@ bash "$here/build.sh"                                   # -> dlls/main.dll
 stage="$repo/dist/DeveloperMode-$VERSION"
 rm -rf "$stage"
 mkdir -p "$stage/DeveloperMode/dlls"
-cp "$here/dlls/main.dll" "$stage/DeveloperMode/dlls/main.dll"
-cp "$here/README.md"     "$stage/README.md"
-cp "$here/LICENSE"       "$stage/LICENSE"
+cp "$here/dlls/main.dll"       "$stage/DeveloperMode/dlls/main.dll"
+cp "$here/DeveloperMode.ini"   "$stage/DeveloperMode/DeveloperMode.ini"
+cp "$here/README.md"           "$stage/README.md"
+cp "$here/LICENSE"             "$stage/LICENSE"
 
 # zip via python (portable; no `zip` dependency on Windows git-bash)
 python - "$stage" "$repo/dist/DeveloperMode-$VERSION.zip" <<'PY'
