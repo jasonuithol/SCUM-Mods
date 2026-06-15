@@ -1,6 +1,6 @@
 # DeveloperMode
 
-A server-side mod for **SCUM dedicated servers** that unlocks the game's built-in
+A **server-side** SCUM mod (UE4SS) that unlocks the game's built-in
 **developer-tier admin commands** — the ones GamePires gated above the normal
 admin/elevated tiers, which return *"Player must be developer."* for everyone on
 a retail server — and lets you choose **which executor tiers** are allowed to use
@@ -15,49 +15,127 @@ upgrades every base-building element within `<radius>` (cm) of you to its max ti
 
 > **Admins only — by design.** Access is controlled per executor tier in
 > `DeveloperMode.ini`. By default **Regular players are denied** and Admin /
-> SuperAdmin / Elevated / Developer are allowed. (Earlier builds of this mod
-> opened the developer tier to *everyone* — that is fixed; see below.)
+> SuperAdmin / Elevated / Developer are allowed. (An earlier build opened the
+> developer tier to *everyone* — that is fixed; see *How it works*.)
 
-> **Server operators only.** This patches your dedicated-server process in memory,
-> which requires file-system access to the server and UE4SS injection — i.e. a
-> server you run/administer. It does nothing on a client and cannot affect a
-> server you don't control. Use it on your own / authorised servers.
+Built for a **dedicated server** (runs server-side, so clients stay vanilla and
+**client BattlEye stays on** — the recommended setup). It can also run in
+**client-hosted single-player**, with the caveats called out in that section
+below. Pick the matching walk-through.
 
-## Requirements
+This mod is a **native C++ UE4SS mod** — it ships a compiled `main.dll`, **no**
+Lua and **no** `.pak`, so it needs **only UE4SS itself**. The old
+`-fileopenlog` / `-fileloadlog` launch flag and the **SCUM-AllowMods** PAK patch
+are **not** required (those only re-enable *unsigned PAK* mods; this mod has
+none). It does **not** modify `SCUMServer.exe` on disk — it AOB-patches the
+running process in memory at boot and vanishes when the process exits.
 
-- A **SCUM dedicated server** you administer (SteamCMD app `3792580`).
-- **UE4SS injected server-side** (the same setup used by other SCUM server mods).
-  UE4SS must be able to load into `SCUMServer.exe`.
-- The server launched so injection is allowed (self-hosted: BattlEye is
-  client-side and not involved server-side; on a rented host, server-side mod/DLL
-  injection must be permitted).
-- An account with the relevant tier (Admin via `AdminUser.ini`, or Elevated via
-  the `elevated_users` table) to actually issue `#` commands.
+## What you need (both setups)
 
-## Install
+- **SCUM** — a dedicated server you administer (SteamCMD app `3792580`) **or**, for
+  single-player, your own SCUM game client.
+- **UE4SS** — the loader this mod runs inside. Get it from the RE-UE4SS
+  **experimental-latest** page and download the file named **`UE4SS_v3.0.1-*.zip`**
+  (e.g. `UE4SS_v3.0.1-954-g272ce2f8.zip`; the exact build number changes over time):
+  <https://github.com/UE4SS-RE/RE-UE4SS/releases/tag/experimental-latest>.
+  You need **this** build line — it uses the modern **`ue4ss\` sub-folder layout**
+  that every path below assumes (`dwmapi.dll` next to the game `.exe`, everything
+  else under `ue4ss\`). The older *stable* `v3.0.1` download uses a different, flat
+  layout and will **not** match these steps — don't use it.
+- An account with the relevant tier to actually issue `#` commands: **Admin** via
+  `AdminUsers.ini`, or **Elevated** via the `elevated_users` table in `SCUM.db`.
 
-1. Copy the **`DeveloperMode`** folder into your server's UE4SS mods directory so
-   you have:
+Two separate, complete walk-throughs follow — use **one**.
+
+---
+
+## Install — Dedicated server (recommended)
+
+Server-side only: clients stay vanilla, so **client BattlEye stays on** and nothing
+runs on players' PCs. Throughout, `<Win64>` means
+`…\SCUM\Binaries\Win64\` — the folder that contains **`SCUMServer.exe`** (e.g.
+`C:\scumserver\SCUM\Binaries\Win64\`).
+
+1. **Install UE4SS into the server.** Extract the UE4SS download into `<Win64>\`
+   so that **`dwmapi.dll`** and the **`ue4ss\`** folder sit directly next to
+   `SCUMServer.exe`.
+2. **Apply the SCUM-safe settings.** Take **`UE4SS-settings-SCUM.ini`** from this
+   download, copy it to `<Win64>\ue4ss\`, and rename it to **`UE4SS-settings.ini`**
+   (overwrite the one UE4SS shipped). Stock UE4SS settings can crash SCUM on
+   startup; this file is the SCUM-safe baseline (GUI console off). DeveloperMode
+   itself uses no UE4SS hooks, but this file is the known-good baseline — if you
+   already run other SCUM UE4SS mods you have it already; keep it.
+3. **Install the mod.** Copy the single **`DeveloperMode`** folder into
+   `<Win64>\ue4ss\Mods\`, so you have:
    ```
-   <server>\SCUM\Binaries\Win64\ue4ss\Mods\DeveloperMode\dlls\main.dll
-   <server>\SCUM\Binaries\Win64\ue4ss\Mods\DeveloperMode\DeveloperMode.ini
+   <Win64>\ue4ss\Mods\DeveloperMode\dlls\main.dll
+   <Win64>\ue4ss\Mods\DeveloperMode\DeveloperMode.ini
    ```
-2. *(Optional)* Edit **`DeveloperMode.ini`** to choose which tiers may run
-   developer commands (see below). The default already denies Regular players.
-3. Enable it in `…\ue4ss\Mods\mods.txt` by adding:
+   There is nothing to path-edit — the DLL finds its own folder.
+4. *(Optional)* **Choose who gets developer commands.** Edit
+   `<Win64>\ue4ss\Mods\DeveloperMode\DeveloperMode.ini` (see *Configuration*). The
+   default already denies Regular players.
+5. **Enable it.** Add this line to `<Win64>\ue4ss\Mods\mods.txt`:
    ```
    DeveloperMode : 1
    ```
-4. Start the server. Confirm it worked in
-   `…\ue4ss\Mods\DeveloperMode\dlls\DeveloperMode.log`:
+   Do **not** create `enabled.txt` — it silently overrides `mods.txt`.
+6. **Launch.** Start `SCUMServer.exe` the way you normally do. BattlEye is **not
+   involved server-side** — no launch flags needed here.
+7. **Verify.** Open
+   `<Win64>\ue4ss\Mods\DeveloperMode\dlls\DeveloperMode.log` and look for:
    ```
    config loaded: Regular=OFF Admin=ON SuperAdmin=ON Elevated=ON Developer=ON
-   located: validator=0x... gate=0x... canExec=0x... | tierOff=0x52 ...
-   INSTALLED: developer-tier commands are now gated by DeveloperMode.ini (per-executor-tier).
+   located: validator=0x... gate=0x... canExec=0x... | ...
+   INSTALLED: developer-tier commands are now gated by DeveloperMode.ini ...
    ```
-5. In-game, an allowed admin stands in the base and runs e.g.
+   In game, an allowed admin stands in a base and runs e.g.
    `#UpgradeBaseBuildingElementsWithinRadius 5000`. A Regular player who tries it
    still gets *"Player must be developer."*
+
+---
+
+## Install — Single-player / client-hosted (your own risk)
+
+> **⚠ Read this first.** Single-player has **no separate server process**, so this
+> mod has to run **inside your own SCUM client**, which means injecting UE4SS and
+> launching with **`-nobattleye`**. That is **client-side modding, and BattlEye can
+> ban your SCUM account for it.** Do this only on **your own account and entirely
+> at your own risk.** If you can use a dedicated server instead, do — that keeps
+> client BattlEye on and carries no such risk.
+
+Throughout, `<Win64>` means your **client's**
+`…\SCUM\Binaries\Win64\` — the folder that contains **`SCUM.exe`** (default Steam
+path: `C:\Program Files (x86)\Steam\steamapps\common\SCUM\SCUM\Binaries\Win64\`).
+
+1. **Install UE4SS into the client.** Extract the UE4SS download into `<Win64>\`
+   so that **`dwmapi.dll`** and the **`ue4ss\`** folder sit directly next to
+   `SCUM.exe`.
+2. **Apply the SCUM-safe settings.** Take **`UE4SS-settings-SCUM.ini`** from this
+   download, copy it to `<Win64>\ue4ss\`, and rename it to **`UE4SS-settings.ini`**
+   (overwrite the one UE4SS shipped). On the **client** this also avoids the
+   stock-settings startup crash, so don't skip it.
+3. **Install the mod.** Copy the single **`DeveloperMode`** folder into
+   `<Win64>\ue4ss\Mods\` (`DeveloperMode\dlls\main.dll` + `DeveloperMode\DeveloperMode.ini`).
+4. **Enable it.** Add this line to `<Win64>\ue4ss\Mods\mods.txt`:
+   ```
+   DeveloperMode : 1
+   ```
+   Do **not** create `enabled.txt` — it silently overrides `mods.txt`.
+5. **Launch the game correctly — this matters.** Leave the Windows **`BEService`**
+   at its default (Manual) startup — you do **not** need to disable it. Launch
+   **`SCUM.exe` directly** (the executable in `<Win64>\`, e.g. via a desktop
+   shortcut) with **`-nobattleye`** in its arguments. Do **not** use Steam's *Play*
+   button — Steam re-invokes the BattlEye launcher even with the flag set.
+6. **Verify.** Open `<Win64>\ue4ss\Mods\DeveloperMode\dlls\DeveloperMode.log` and
+   confirm the `INSTALLED:` line (as above). The same command-auth code lives in
+   `SCUM.exe`, so the gate is unlocked the same way.
+
+> **Single-player privilege note.** Tier handling differs in client-hosted play.
+> If a developer command is still denied after install, set the relevant tier
+> `ON` in `DeveloperMode.ini` (try `Regular = ON`) and restart.
+
+---
 
 ## Configuration (`DeveloperMode.ini`)
 
@@ -66,9 +144,9 @@ restart). Each SCUM executor tier is `ON` (may run developer commands) or `OFF`:
 
 ```
 Regular    = OFF      # normal connected players
-Admin      = ON       # AdminUser.ini admins
+Admin      = ON       # AdminUsers.ini admins
 SuperAdmin = ON
-Elevated   = ON       # users in elevated_users (e.g. via tools/elevate.py)
+Elevated   = ON       # users in elevated_users (SCUM.db)
 Developer  = ON       # GamePires developer tier (empty on retail)
 ```
 
@@ -79,37 +157,37 @@ If the file is missing, the same defaults apply (Regular **OFF**, all others
 
 Every SCUM admin command carries a required-tier byte
 (`EExecutorStatus`: Regular 0, Admin 1, SuperAdmin 2, Elevated 3, Developer 4).
-For a developer-tier command the per-command validator asks a global
-`IsDeveloper()` predicate — empty on retail, so nobody passes.
+A developer-tier command is gated at **two** independent points — the per-command
+validator (which asks a global `IsDeveloper()` predicate, empty on retail) and the
+command dispatcher (which asks the engine's authorization function for the
+command's required tier). On a retail server both reject everyone.
 
-DeveloperMode installs a tiny in-memory hook on that validator. When a
-**developer-tier** command is run, the hook asks the game's **own** authorization
-function what the caller's actual tier is, then allows the command only if that
+DeveloperMode installs two tiny in-memory hooks, one on each gate. When a
+**developer-tier** command is run, the hooks ask the game's **own** authorization
+function what the caller's actual tier is, then allow the command only if that
 tier is `ON` in `DeveloperMode.ini`. Regular players are denied and still get the
 normal *"Player must be developer."* reply; the game's own dispatcher runs the
 command for allowed tiers (no save-file edits, no reconstructed game state).
 
-It does **not** modify `SCUMServer.exe` on disk — the hook is applied to memory
-each boot and vanishes when the process exits.
-
 All addresses move with every SCUM build, so nothing is hardcoded: the mod
 AOB-scans for the gate logic and cross-checks it against the *"Player must be
 developer."* / *"Not authorized to execute command."* strings before touching
-anything. If the pattern ever stops matching, it logs the failure and installs
-**no** hook — it never blind-writes, and it fails **safe** (the developer tier
-simply stays locked for everyone, exactly like vanilla).
+anything. If a pattern ever stops matching, it logs the failure and installs
+**no** hook — and every dereference is bounds-checked, so a changed layout
+**denies** (developer tier stays locked, exactly like vanilla) rather than
+crashing the server. It fails **safe**.
 
 > **Note — the all-access bug (fixed).** Previous versions patched `IsDeveloper`
 > to always return `true`, which unlocked developer commands for **every**
-> connected player. This version replaces that with the per-tier hook above, so
+> connected player. This version replaces that with the per-tier hooks above, so
 > Regular players are denied by default.
 
 ## When SCUM updates
 
 Usually nothing to do — the AOB re-locates everything on the next boot. If
-`DeveloperMode.log` says it could not locate the gate/validator, the binary
-changed and the mod needs an updated signature; check the mod page for a new
-version. Until then the developer tier stays locked (safe).
+`DeveloperMode.log` says it could not locate a gate/validator, the binary changed
+and the mod needs an updated signature; check the mod page for a new version.
+Until then the developer tier stays locked (safe).
 
 ## License
 

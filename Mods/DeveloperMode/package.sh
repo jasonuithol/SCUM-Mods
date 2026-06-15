@@ -3,12 +3,13 @@
 # Produces  <repo>/dist/DeveloperMode-<VERSION>.zip  with this layout:
 #   README.md
 #   LICENSE
+#   UE4SS-settings-SCUM.ini           (SCUM-safe UE4SS baseline; see README step 2)
 #   DeveloperMode/dlls/main.dll
 #   DeveloperMode/DeveloperMode.ini   (per-executor-tier access config)
 # Users extract and copy the DeveloperMode/ folder into their server's
-#   ...\SCUM\Binaries\Win64\ue4ss\Mods\
+#   ...\SCUM\Binaries\Win64\ue4ss\Mods\  (and apply the settings ini per README).
 set -euo pipefail
-VERSION="${1:-1.0.0}"
+VERSION="${1:-1.1.0}"
 here="$(cd "$(dirname "$0")" && pwd)"
 repo="$(cd "$here/../.." && pwd)"
 
@@ -17,10 +18,11 @@ bash "$here/build.sh"                                   # -> dlls/main.dll
 stage="$repo/dist/DeveloperMode-$VERSION"
 rm -rf "$stage"
 mkdir -p "$stage/DeveloperMode/dlls"
-cp "$here/dlls/main.dll"       "$stage/DeveloperMode/dlls/main.dll"
-cp "$here/DeveloperMode.ini"   "$stage/DeveloperMode/DeveloperMode.ini"
-cp "$here/README.md"           "$stage/README.md"
-cp "$here/LICENSE"             "$stage/LICENSE"
+cp "$here/dlls/main.dll"            "$stage/DeveloperMode/dlls/main.dll"
+cp "$here/DeveloperMode.ini"        "$stage/DeveloperMode/DeveloperMode.ini"
+cp "$here/UE4SS-settings-SCUM.ini"  "$stage/UE4SS-settings-SCUM.ini"
+cp "$here/README.md"                "$stage/README.md"
+cp "$here/LICENSE"                  "$stage/LICENSE"
 
 # zip via python (portable; no `zip` dependency on Windows git-bash)
 python - "$stage" "$repo/dist/DeveloperMode-$VERSION.zip" <<'PY'
