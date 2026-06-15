@@ -19,12 +19,25 @@
 -- Enable by adding   GarbageGoober : 1   to UE4SS Mods/mods.txt  (NEVER enabled.txt —
 -- it silently overrides mods.txt). Requires HookProcessInternal=1 &
 -- HookProcessLocalScriptFunction=1 in UE4SS-settings.ini for the goober chat trigger.
+--
+-- The shared "gating" library (access control / flag-scoping / SCUM.db / chat
+-- framework, also used by ClothesDryer / WashingMachine / FlagUpkeep) is VENDORED
+-- into this mod's own Scripts folder (Scripts\gating.lua) so the mod is fully
+-- self-contained — no dependency on a shared ...\Mods\shared\ folder.
 
 -- >>> set this to the mod's folder on your server <<<
-local MOD_DIR = [[C:\scumserver\SCUM\Binaries\Win64\ue4ss\Mods\GarbageGoober]]
+local MOD_DIR = [[C:\Program Files (x86)\Steam\steamapps\common\SCUM Server\SCUM\Binaries\Win64\ue4ss\Mods\GarbageGoober]]
 local SCRIPTS = MOD_DIR .. [[\Scripts]]
 local LOGFILE = MOD_DIR .. [[\GarbageGoober.log]]
-local LIB     = MOD_DIR .. [[\..\shared\Scripts\gating.lua]]
+
+-- The "gating" library is VENDORED into this mod's own Scripts folder, so the
+-- mod is fully self-contained — no dependency on a shared ...\Mods\shared\
+-- folder (which would couple unrelated mods together). The legacy shared
+-- location is kept as a fallback for older deployments.
+local LIB_CANDIDATES = {
+    SCRIPTS .. [[\gating.lua]],
+    MOD_DIR .. [[\..\shared\Scripts\gating.lua]],
+}
 
 GarbageGoober = GarbageGoober or {}
 local GG = GarbageGoober
@@ -69,9 +82,16 @@ function GG.reload()
     -- the engine loads — same lib ClothesDryer / WashingMachine / FlagUpkeep use.
     GG.trigger = (GG.config and GG.config.chatTrigger) or "goober"
     GG.tag = "GarbageGoober"
+    local LIB
+    for _, p in ipairs(LIB_CANDIDATES) do
+        local f = io.open(p, "r"); if f then f:close(); LIB = p; break end
+    end
+    if not LIB then
+        GG.log("gating lib NOT FOUND — looked in: " .. table.concat(LIB_CANDIDATES, " | ")); return false
+    end
     local okL, Glib = runFile(LIB)
     if not okL or type(Glib) ~= "table" or type(Glib.attach) ~= "function" then
-        GG.log("gating lib load FAILED (" .. tostring(Glib) .. ") — expected " .. LIB); return false
+        GG.log("gating lib load FAILED (" .. tostring(Glib) .. ") — from " .. LIB); return false
     end
     Glib.attach(GG, {
         defaultNotEnabled = "sorting isn't enabled for your base — ask an admin to enable it",

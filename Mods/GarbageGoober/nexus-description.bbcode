@@ -4,43 +4,77 @@ A server-side mod for [b]SCUM dedicated servers[/b]. On a timer it sweeps loose,
 
 Everything is driven from [b]normal in-game chat[/b] (type [b]goober[/b] for the command list). No client mod — players need nothing installed, so [b]client BattlEye stays on[/b].
 
-[size=4][b]⚠ Server operators only (the recommended way)[/b][/size]
-This runs inside your dedicated-server process via UE4SS. Installing it requires file-system access to the server. It does nothing on a game client and cannot affect a server you don't control. Run it server-side and [b]client BattlEye stays on[/b]. Use it on your own / authorised servers only.
+[size=4][b]⚠ Scope[/b][/size]
+Designed for a [b]dedicated server[/b] (runs inside the server process via UE4SS; players need nothing, client BattlEye stays on). It [b]also[/b] works in client-hosted [b]single-player[/b], but that means modding your own client — see that install section's warning. It does nothing on a server you don't control; use it on your own / authorised setups only.
 
-[size=4][b]Single-player / client-hosted — read this first (new in 1.1.0)[/b][/size]
-As of 1.1.0 the sorter [b]also works in client-hosted single-player[/b]. Be clear on what that costs before you try it: single-player has [b]no separate server process[/b], so you must inject [b]UE4SS into your own SCUM client[/b] and launch the game with [b]-nobattleye[/b]. That is [b]client-side modding, and BattlEye can ban your SCUM account for it.[/b] Only do this on [b]your own account, entirely at your own risk[/b]. The dedicated-server setup above needs none of this and is the recommended way to use the mod.
+[size=4][b]How it works[/b][/size]
+[list]
+[*]On a timer (default 60s), every loose on-the-floor item inside a flag's influence is matched to a chest [b]in that same flag[/b] whose custom name matches the item's category, and moved into it.[/*]
+[*]Categories are matched [b]most-specific first[/b], falling back toward the general node; no match means the item is left in place and logged.[/*]
+[*]Name your chests after a [b]category[/b] leaf (e.g. Ammo, Drink, FirstAid) for fine sorting, or after a [b]trader[/b] group (e.g. Armorer, Bartender, GeneralGoods) to catch a whole group.[/*]
+[/list]
 
 [size=4][b]Features[/b][/size]
 [list]
-[*][b]Category sorting[/b] — loose floor loot in a flag is moved into the name-matched category chest in that flag.
-[*][b]Flag-scoped[/b] — only sorts within a flag's influence, into chests in that flag.
-[*][b]Configurable categories[/b] — categories live in an editable [b]categories.yaml[/b] (optionally pulled from a Gist on [b]goober reload[/b]).
-[*][b]Empty-containers[/b] — bags/clothing can be emptied and their contents sorted.
-[*][b]Entitlement gate[/b] — ships [b]default-on[/b] (works for everyone out of the box); restrict or sell access via per-player grants, per-flag overrides, or the global default. Only per-player grants touch the DB (read-only, user-supplied sqlite3.exe).
+[*][b]Category sorting[/b] — loose floor loot in a flag is moved into the name-matched category chest in that flag.[/*]
+[*][b]Flag-scoped[/b] — only sorts within a flag's influence, into chests in that flag.[/*]
+[*][b]Configurable categories[/b] — categories live in an editable [b]categories.yaml[/b] (optionally pulled from a Gist on [b]goober reload[/b]).[/*]
+[*][b]Empty-containers[/b] — bags/clothing can be emptied and their contents sorted.[/*]
+[*][b]Entitlement gate[/b] — ships [b]default-on[/b] (works for everyone out of the box); restrict or sell access via per-player grants, per-flag overrides, or the global default. Only per-player grants touch the DB (read-only, user-supplied sqlite3.exe).[/*]
 [/list]
 
-[size=4][b]Requirements[/b][/size]
+[size=4][b]What you need (both setups)[/b][/size]
 [list]
-[*]A SCUM [b]dedicated server[/b] you administer (SteamCMD app 3792580).
-[*][b]UE4SS injected server-side[/b] (the setup other SCUM server mods use), able to load into SCUMServer.exe.
-[*]In [b]ue4ss\UE4SS-settings.ini[/b]: [b]HookProcessInternal = 1[/b] and [b]HookProcessLocalScriptFunction = 1[/b] (needed for the chat trigger).
+[*][b]SCUM[/b] — a dedicated server you administer (SteamCMD app 3792580) OR, for single-player, your own SCUM client.[/*]
+[*][b]UE4SS[/b] — the loader this mod runs inside. Get it from the RE-UE4SS [url=https://github.com/UE4SS-RE/RE-UE4SS/releases/tag/experimental-latest]experimental-latest[/url] page and download the file named [b]UE4SS_v3.0.1-*.zip[/b] (e.g. UE4SS_v3.0.1-954-g272ce2f8.zip; the build number changes over time).
+
+[i]You need [b]the experimental/latest [/b]build — it uses the modern [b]ue4ss\ sub-folder layout[/b] that every path below assumes (dwmapi.dll next to the game .exe, everything else under ue4ss\). The older stable v3.0.1 download uses a flat layout and will [b]not[/b] match these steps — don't use it. What makes UE4SS stable on SCUM is the shipped [b]UE4SS-settings-SCUM.ini[/b] (step 2), not the exact build number.[/i][/*]
 [/list]
 
-[size=4][b]Installation[/b][/size]
+[size=4][b]Install — Dedicated server (recommended)[/b][/size]
+[i]Server-side only: clients stay vanilla, BattlEye stays on. Below, [b]<Win64>[/b] = the [b]…\SCUM\Binaries\Win64\[/b] folder that contains [b]SCUMServer.exe[/b].[/i]
+
+[b](see image gallery for visual instructions)[/b]
 [list=1]
-[*]Copy the [b]GarbageGoober[/b] folder AND the [b]shared[/b] folder into your server's UE4SS mods directory:
-[code]<server>\SCUM\Binaries\Win64\ue4ss\Mods\GarbageGoober\
-<server>\SCUM\Binaries\Win64\ue4ss\Mods\shared\Scripts\gating.lua[/code]
-[*]Open [b]GarbageGoober\Scripts\main.lua[/b] and set [b]MOD_DIR[/b] to that folder's full path.
-[*][i](Optional — only for the per-player donation model.)[/i] Sorting works out of the box with no database. Granting access to specific players ([b]goober add <player>[/b]) reads SCUM.db via [b]sqlite3.exe[/b] and is [b]off by default[/b]. To enable: download the [b]sqlite3.exe[/b] CLI tool from [url=https://sqlite.org/download.html]sqlite.org[/url], keep ONE copy on the server (e.g. in [b]Mods\shared[/b]), and set [b]sqliteExe[/b] in Config to that path (or [b]"sqlite3.exe"[/b] to use one on PATH) plus [b]dbPath[/b] to your SCUM.db. Default-on and per-flag overrides never need it.
-[*]Enable it in [b]...\ue4ss\Mods\mods.txt[/b]:
+[*][b]Install UE4SS:[/b] extract the download into [b]<Win64>\[/b] so [b]dwmapi.dll[/b] + the [b]ue4ss\[/b] folder sit next to SCUMServer.exe.[/*]
+[*][b]Apply SCUM-safe settings:[/b] copy [b]UE4SS-settings-SCUM.ini[/b] from this download into [b]<Win64>\ue4ss\[/b] and rename it to [b]UE4SS-settings.ini[/b][/*]
+[*][b]Install the mod:[/b] copy the single [b]GarbageGoober[/b] folder into [b]<Win64>\ue4ss\Mods\[/b].[/*]
+[*][b]Point it at itself:[/b] open [b]GarbageGoober\Scripts\main.lua[/b] and set [b]MOD_DIR[/b] to that folder's full path.[/*]
+[*][b]Enable it[/b] in [b]<Win64>\ue4ss\Mods\mods.txt[/b]:
 [code]GarbageGoober : 1[/code]
-Do [b]not[/b] create [b]enabled.txt[/b] — it silently overrides mods.txt.
-[*]Start the server and type [b]goober[/b] in chat for the full command list.
+Do [b]not[/b] create [b]enabled.txt[/b] — it silently overrides mods.txt.[/*]
+[*][b]Launch[/b] SCUMServer.exe normally (BattlEye is not involved server-side), then check [b]GarbageGoober\GarbageGoober.log[/b] for [b]GarbageGoober is loaded[/b] and type [b]goober[/b] in chat.[/*]
 [/list]
 
+[size=4][b]Install — Single-player / client-hosted (your own risk)[/b][/size]
+[b]⚠ Read first:[/b] single-player has no separate server process, so the mod runs inside [b]your own SCUM client[/b] — you must inject UE4SS and launch with [b]-nobattleye[/b]. That is [b]client-side modding, and BattlEye can ban your SCUM account for it[/b]. Do this only on [b]your own account, entirely at your own risk[/b]. Use a local server if you can.
+
+NOTE: Below, [b]<Win64>[/b] = your client's [b]…\SCUM\Binaries\Win64\[/b] folder that contains [b]SCUM.exe[/b] (default: [b]C:\Program Files (x86)\Steam\steamapps\common\SCUM\SCUM\Binaries\Win64\[/b]).
+[list=1]
+[*][b]Install UE4SS:[/b] extract the download into [b]<Win64>\[/b] so [b]dwmapi.dll[/b] + the [b]ue4ss\[/b] folder sit next to SCUM.exe.[/*]
+[*][b]Apply SCUM-safe settings:[/b] copy [b]UE4SS-settings-SCUM.ini[/b] into [b]<Win64>\ue4ss\[/b] and rename it to [b]UE4SS-settings.ini[/b] (overwrite).[/*]
+[*][b]Install the mod:[/b] copy the single [b]GarbageGoober[/b] folder into [b]<Win64>\ue4ss\Mods\[/b][/*]
+[*][b]Point it at itself:[/b] open [b]GarbageGoober\Scripts\main.lua[/b] and set [b]MOD_DIR[/b] to that folder's full [b]client[/b] path.[/*]
+[*][b]Enable it[/b] in [b]<Win64>\ue4ss\Mods\mods.txt[/b]:
+[code]GarbageGoober : 1[/code]
+Do [b]not[/b] create [b]enabled.txt[/b].[/*]
+[*][b]Launch correctly:[/b] NOTE: I have connected to the local sandbox via Steam, and without -nobattleye and have been fine but, for maximum safety:
+
+Leave the [b]BEService[/b] at its default (Manual) — no need to disable it. Launch [b]SCUM.exe directly[/b] (the exe in <Win64>\, e.g. a desktop shortcut) with [b]-nobattleye[/b]. Do [b]not[/b] use Steam's Play button — Steam re-invokes BattlEye even with the flag.
+[/*]
+[*][b]Verify:[/b] check [b]GarbageGoober\GarbageGoober.log[/b] for [b]GarbageGoober is loaded[/b], then type [b]goober[/b] in chat in your single-player game.[/*]
+[/list]
+
+[size=4][b]Optional: per-player access (donation model) — either setup[/b][/size]
+Sorting works out of the box. You only need this extra step if you want to grant access to [b]specific players[/b] ([b]goober add <player>[/b]), which reads SCUM.db read-only via [b]sqlite3.exe[/b] and is [b]off by default[/b]. To enable: download the [b]sqlite3.exe[/b] CLI tool from [url=https://sqlite.org/download.html]sqlite.org[/url], keep ONE copy on the machine, and set [b]sqliteExe[/b] in Config to that path (or [b]"sqlite3.exe"[/b] for PATH) plus [b]dbPath[/b] to your SCUM.db — or set it from chat with [b]goober set-sqlite <path>[/b].
+
+[b]Default=on and per-flag overrides do not need this step
+[/b]
 [size=4][b]Notes[/b][/size]
 [list]
-[*]The [b]shared[/b] folder is a small library shared by my SCUM mods — if you already have it from another of my mods, the copy is identical.
-[*]All rights reserved. Personal use on servers you administer; please don't re-upload or repackage.
+[*]SCUM only keeps loot and chests live within ~200m of a player, so the sweep no-ops on truly unattended bases (a player must be nearby) — by design.[/*]
+[*]Loot with no matching chest is left in place and logged; name a chest after the category (or trader group) to catch it next sweep.[/*]
+[*]Pairs with my [b]ClothesDryer[/b] and [b]WashingMachine[/b] mods.[/*]
+[*]This mod is self-contained: it bundles its own copy of my small shared gating library ([b]Scripts\gating.lua[/b]), so it never clashes with or depends on my other mods.[/*]
+[*]All rights reserved. Personal use on servers you administer; please don't re-upload or repackage.[/*]
 [/list]
