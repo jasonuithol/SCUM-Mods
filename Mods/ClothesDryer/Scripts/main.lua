@@ -16,10 +16,18 @@
 -- .ini for the chat trigger (same as FlagUpkeep).
 
 -- >>> set this to the mod's folder on your server <<<
-local MOD_DIR = [[C:\scumserver\SCUM\Binaries\Win64\ue4ss\Mods\ClothesDryer]]
+local MOD_DIR = [[C:\Program Files (x86)\Steam\steamapps\common\SCUM Server\SCUM\Binaries\Win64\ue4ss\Mods\ClothesDryer]]
 local SCRIPTS = MOD_DIR .. [[\Scripts]]
 local LOGFILE = MOD_DIR .. [[\ClothesDryer.log]]
-local LIB     = MOD_DIR .. [[\..\shared\Scripts\gating.lua]]
+
+-- The "gating" library is VENDORED into this mod's own Scripts folder, so the
+-- mod is fully self-contained — no dependency on a shared ...\Mods\shared\
+-- folder (which would couple unrelated mods together). The legacy shared
+-- location is kept as a fallback for older deployments.
+local LIB_CANDIDATES = {
+    SCRIPTS .. [[\gating.lua]],
+    MOD_DIR .. [[\..\shared\Scripts\gating.lua]],
+}
 
 ClothesDryer = ClothesDryer or {}
 local CD = ClothesDryer
@@ -56,9 +64,16 @@ function CD.reload()
 
     CD.trigger = (CD.config and CD.config.chatTrigger) or "dryer"
     CD.tag = "ClothesDryer"
+    local LIB
+    for _, p in ipairs(LIB_CANDIDATES) do
+        local f = io.open(p, "r"); if f then f:close(); LIB = p; break end
+    end
+    if not LIB then
+        CD.log("gating lib NOT FOUND — looked in: " .. table.concat(LIB_CANDIDATES, " | ")); return false
+    end
     local okL, G = runFile(LIB)
     if not okL or type(G) ~= "table" or type(G.attach) ~= "function" then
-        CD.log("gating lib load FAILED (" .. tostring(G) .. ") — expected " .. LIB); return false
+        CD.log("gating lib load FAILED (" .. tostring(G) .. ") — from " .. LIB); return false
     end
     G.attach(CD, {
         defaultNotEnabled = "drying isn't enabled for your base — ask an admin to enable it",

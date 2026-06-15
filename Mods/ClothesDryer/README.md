@@ -5,57 +5,122 @@ powered **clothes dryer**: wet clothing left inside an activated wardrobe dries
 automatically. A wardrobe becomes a dryer by consuming a build **recipe** placed
 inside it.
 
-Server-side only: clients stay vanilla, so **client BattlEye can stay on** and
-nothing runs on players' PCs.
+Built for a **dedicated server** (runs server-side, so clients stay vanilla and
+**client BattlEye stays on** — the recommended setup). It also works in
+**client-hosted single-player**, with the caveats called out in that section
+below. Pick the matching walk-through.
 
-## Install
+## What you need (both setups)
 
-1. Copy this `ClothesDryer` folder into your server's
-   `SCUM\Binaries\Win64\ue4ss\Mods\`.
-2. Open `Scripts\main.lua` and set **`MOD_DIR`** (near the top) to the full path
-   of this folder.
-3. *(Optional — only for the per-player donation model.)* Drying works out of the
-   box with no database. Granting access to **specific players** (`dryer add
-   <player>`) reads `SCUM.db` via `sqlite3.exe` and is **off by default**. To
-   enable: download the command-line tools from <https://sqlite.org/download.html>,
-   keep **one** `sqlite3.exe` on the server (e.g. `…\ue4ss\Mods\shared\`), and set
-   `Config.lua` → `sqliteExe` to that path (or `"sqlite3.exe"` for PATH). **Or skip
-   the file edit** and set it from chat: `dryer set-sqlite <path-to-sqlite3.exe>`
-   (`dryer set-sqlite off` to clear). With `sqliteExe = nil` (default) no DB is
-   read. Default-on/per-flag never need it.
-4. The shared gating library is expected at `ue4ss\Mods\shared\Scripts\gating.lua`
-   (shipped alongside, in the `shared` folder). Keep the `shared` folder next to
-   this one.
-5. Enable it: add this line to `ue4ss\Mods\mods.txt`
+- **SCUM** — a dedicated server you administer (SteamCMD app `3792580`) **or**, for
+  single-player, your own SCUM game client.
+- **UE4SS** — the loader this mod runs inside. Get it from the RE-UE4SS
+  **experimental-latest** page and download the file named **`UE4SS_v3.0.1-*.zip`**
+  (e.g. `UE4SS_v3.0.1-954-g272ce2f8.zip`; the exact build number changes over time):
+  <https://github.com/UE4SS-RE/RE-UE4SS/releases/tag/experimental-latest>.
+  You need **this** build line — it uses the modern **`ue4ss\` sub-folder layout**
+  that every path below assumes (`dwmapi.dll` next to the game `.exe`, everything
+  else under `ue4ss\`). The older *stable* `v3.0.1` download uses a different, flat
+  layout and will **not** match these steps — don't use it. What actually makes
+  UE4SS stable on SCUM is the shipped `UE4SS-settings-SCUM.ini` (step 2 below), not
+  the exact build number.
+
+This mod is **pure Lua** — it ships no `.pak`, so it needs **only UE4SS itself**.
+The old `-fileopenlog` / `-fileloadlog` launch flag and the **SCUM-AllowMods** PAK
+patch are **not** required (those only re-enable *unsigned PAK* mods; this mod has
+none). Two separate, complete walk-throughs follow — use **one**.
+
+---
+
+## Install — Dedicated server (recommended)
+
+Server-side only: clients stay vanilla, so **client BattlEye stays on** and nothing
+runs on players' PCs. Throughout, `<Win64>` means
+`…\SCUM\Binaries\Win64\` — the folder that contains **`SCUMServer.exe`** (e.g.
+`C:\scumserver\SCUM\Binaries\Win64\`).
+
+1. **Install UE4SS into the server.** Extract the UE4SS download into `<Win64>\`
+   so that **`dwmapi.dll`** and the **`ue4ss\`** folder sit directly next to
+   `SCUMServer.exe`.
+2. **Apply the SCUM-safe settings.** Take **`UE4SS-settings-SCUM.ini`** from this
+   download, copy it to `<Win64>\ue4ss\`, and rename it to **`UE4SS-settings.ini`**
+   (overwrite the one UE4SS shipped). Stock UE4SS settings crash SCUM on startup;
+   this file is the SCUM-safe baseline and already enables the two hooks this mod
+   needs (`HookProcessInternal = 1`, `HookProcessLocalScriptFunction = 1`).
+3. **Install the mod.** Copy the single **`ClothesDryer`** folder into
+   `<Win64>\ue4ss\Mods\`. It is **self-contained** — the shared gating library is
+   bundled inside it (`Scripts\gating.lua`), so there is **no separate `shared`
+   folder** to install.
+4. **Point the mod at itself.** Open
+   `<Win64>\ue4ss\Mods\ClothesDryer\Scripts\main.lua` and set **`MOD_DIR`** (near
+   the top) to that folder's full path, e.g.
+   `C:\scumserver\SCUM\Binaries\Win64\ue4ss\Mods\ClothesDryer`.
+5. **Enable it.** Add this line to `<Win64>\ue4ss\Mods\mods.txt`:
    ```
    ClothesDryer : 1
    ```
    Do **not** create `enabled.txt` — it silently overrides `mods.txt`.
-6. Make sure `ue4ss\UE4SS-settings.ini` has:
+6. **Launch.** Start `SCUMServer.exe` the way you normally do. BattlEye is **not
+   involved server-side** — no launch flags needed here.
+7. **Verify.** Open `<Win64>\ue4ss\Mods\ClothesDryer\ClothesDryer.log` and look for
+   **`ClothesDryer loaded`**. In game, type **`dryer`** in normal chat — you should
+   get the command list back.
+
+---
+
+## Install — Single-player / client-hosted (your own risk)
+
+> **⚠ Read this first.** Single-player has **no separate server process**, so this
+> mod has to run **inside your own SCUM client**, which means injecting UE4SS and
+> launching with **`-nobattleye`**. That is **client-side modding, and BattlEye can
+> ban your SCUM account for it.** Do this only on **your own account and entirely
+> at your own risk.** If you can use a dedicated server instead, do — that keeps
+> client BattlEye on and carries no such risk.
+
+Throughout, `<Win64>` means your **client's**
+`…\SCUM\Binaries\Win64\` — the folder that contains **`SCUM.exe`** (default Steam
+path: `C:\Program Files (x86)\Steam\steamapps\common\SCUM\SCUM\Binaries\Win64\`).
+
+1. **Install UE4SS into the client.** Extract the UE4SS download into `<Win64>\`
+   so that **`dwmapi.dll`** and the **`ue4ss\`** folder sit directly next to
+   `SCUM.exe`.
+2. **Apply the SCUM-safe settings.** Take **`UE4SS-settings-SCUM.ini`** from this
+   download, copy it to `<Win64>\ue4ss\`, and rename it to **`UE4SS-settings.ini`**
+   (overwrite the one UE4SS shipped).
+3. **Install the mod.** Copy the single **`ClothesDryer`** folder into
+   `<Win64>\ue4ss\Mods\`. It is self-contained (gating library bundled inside) — no
+   separate `shared` folder.
+4. **Point the mod at itself.** Open
+   `<Win64>\ue4ss\Mods\ClothesDryer\Scripts\main.lua` and set **`MOD_DIR`** to that
+   folder's full **client** path, e.g.
+   `C:\Program Files (x86)\Steam\steamapps\common\SCUM\SCUM\Binaries\Win64\ue4ss\Mods\ClothesDryer`.
+5. **Enable it.** Add this line to `<Win64>\ue4ss\Mods\mods.txt`:
    ```
-   HookProcessInternal = 1
-   HookProcessLocalScriptFunction = 1
+   ClothesDryer : 1
    ```
-7. Start the server, then check `ClothesDryer.log` (created in this folder) for
-   `ClothesDryer loaded`.
+   Do **not** create `enabled.txt` — it silently overrides `mods.txt`.
+6. **Launch the game correctly — this matters.** Leave the Windows **`BEService`**
+   at its default (Manual) startup — you do **not** need to disable it. Launch
+   **`SCUM.exe` directly** (the executable in `<Win64>\`, e.g. via a desktop
+   shortcut) with **`-nobattleye`** in its arguments. Do **not** use Steam's *Play*
+   button — Steam re-invokes the BattlEye launcher even with the flag set.
+7. **Verify.** Open `<Win64>\ue4ss\Mods\ClothesDryer\ClothesDryer.log` and look for
+   **`ClothesDryer loaded`**. In your single-player game, type **`dryer`** in normal
+   chat — the `dryer` commands work exactly as on a server.
 
-## Single-player / client-hosted — read this first
+---
 
-The dryer also works in **client-hosted single-player**, not just dedicated
-servers. Be clear on the trade-off first: single-player has **no separate server
-process**, so you must inject **UE4SS into your own SCUM client** and launch with
-**`-nobattleye`**. That is **client-side modding, and BattlEye can ban your SCUM
-account for it.** Do it only on **your own account and entirely at your own risk.**
+## Optional: per-player access (donation model) — either setup
 
-The dedicated-server install above needs none of this — it runs server-side and
-**client BattlEye stays on**, which is the recommended way to use this mod.
-
-Single-player setup mirrors any client-side UE4SS mod: install the UE4SS bundle
-into the client's `…\SCUM\Binaries\Win64\`, copy the `ClothesDryer` and `shared`
-folders into its `ue4ss\Mods\`, set `MOD_DIR` (main.lua) to the **client** path,
-enable the two hooks above, add `ClothesDryer : 1` to the client `mods.txt`, and
-launch `SCUM.exe` **directly** with `-nobattleye`. The `dryer` chat commands work
-in single-player exactly as on a server.
+Drying works **out of the box with no database**. You only need this if you want to
+grant access to **specific players** (`dryer add <player>`), which reads `SCUM.db`
+via `sqlite3.exe` and is **off by default**. To enable: download the command-line
+tools from <https://sqlite.org/download.html>, keep **one** `sqlite3.exe` somewhere
+on the machine, and set `Config.lua` → `sqliteExe` to that path (or `"sqlite3.exe"`
+if it's on PATH). **Or** set it from chat without editing the file:
+`dryer set-sqlite <path-to-sqlite3.exe>` (`dryer set-sqlite off` to clear). With
+`sqliteExe = nil` (the default) no DB is ever read; default-on and per-flag
+overrides never need it either.
 
 ## Using it
 

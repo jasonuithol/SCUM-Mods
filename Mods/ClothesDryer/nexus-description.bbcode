@@ -4,45 +4,69 @@ A server-side mod for [b]SCUM dedicated servers[/b]. An [b]Improvised Wardrobe[/
 
 Everything is driven from [b]normal in-game chat[/b] (type [b]dryer[/b] for the command list). No client mod — players need nothing installed, so [b]client BattlEye stays on[/b].
 
-[size=4][b]⚠ Server operators only[/b][/size]
-This runs inside your dedicated-server process via UE4SS. Installing it requires file-system access to the server. It does nothing on a game client and cannot affect a server you don't control. Use it on your own / authorised servers only.
-
-[size=4][b]Single-player / client-hosted — read this first[/b][/size]
-The dryer [b]also works in client-hosted single-player[/b], not just dedicated servers. Be clear on what that costs before you try it: single-player has [b]no separate server process[/b], so you must inject [b]UE4SS into your own SCUM client[/b] and launch the game with [b]-nobattleye[/b]. That is [b]client-side modding, and BattlEye can ban your SCUM account for it.[/b] Only do this on [b]your own account, entirely at your own risk[/b]. The dedicated-server setup above needs none of this and is the recommended way to use the mod.
+[size=4][b]⚠ Scope[/b][/size]
+Designed for a [b]dedicated server[/b] (runs inside the server process via UE4SS; players need nothing, client BattlEye stays on). It [b]also[/b] works in client-hosted [b]single-player[/b], but that means modding your own client — see that install section's warning. It does nothing on a server you don't control; use it on your own / authorised setups only.
 
 [size=4][b]How it works[/b][/size]
 [list]
-[*]Build and place an [b]Improvised Wardrobe[/b] in your flag.
-[*]Put the recipe inside — [b]5× Metal Scraps + any Alternator + 1× Wire + 5× Bolts[/b] — and type [b]dryer activate[/b]. The recipe is consumed and the wardrobe becomes a dryer (remembered by location, so it survives renames and restarts).
-[*]Drop wet clothes (or worn bags/backpacks — they're clothing too) inside. They dry within a few seconds while you're nearby. Water containers like canteens are never touched.
+[*]Build and place an [b]Improvised Wardrobe[/b] in your flag.[/*]
+[*]Put the recipe inside — [b]5× Metal Scraps + any Alternator + 1× Wire + 5× Bolts[/b] — and type [b]dryer activate[/b]. The recipe is consumed and the wardrobe becomes a dryer (remembered by location, so it survives renames and restarts).[/*]
+[*]Drop wet clothes (or worn bags/backpacks — they're clothing too) inside. They dry within a few seconds while you're nearby. Water containers like canteens are never touched.[/*]
 [/list]
 
-[size=4][b]Requirements[/b][/size]
+[size=4][b]What you need (both setups)[/b][/size]
 [list]
-[*]A SCUM [b]dedicated server[/b] you administer (SteamCMD app 3792580).
-[*][b]UE4SS injected server-side[/b] (the setup other SCUM server mods use), able to load into SCUMServer.exe.
-[*]In [b]ue4ss\UE4SS-settings.ini[/b]: [b]HookProcessInternal = 1[/b] and [b]HookProcessLocalScriptFunction = 1[/b] (needed for the chat trigger).
+[*][b]SCUM[/b] — a dedicated server you administer (SteamCMD app 3792580) OR, for single-player, your own SCUM client.[/*]
+[*][b]UE4SS[/b] — the loader this mod runs inside. Get it from the RE-UE4SS [url=https://github.com/UE4SS-RE/RE-UE4SS/releases/tag/experimental-latest]experimental-latest[/url] page and download the file named [b]UE4SS_v3.0.1-*.zip[/b] (e.g. UE4SS_v3.0.1-954-g272ce2f8.zip; the build number changes over time). 
+
+[i]You need [b]the experimental/latest [/b]build — it uses the modern [b]ue4ss\ sub-folder layout[/b] that every path below assumes (dwmapi.dll next to the game .exe, everything else under ue4ss\). The older stable v3.0.1 download uses a flat layout and will [b]not[/b] match these steps — don't use it. What makes UE4SS stable on SCUM is the shipped [b]UE4SS-settings-SCUM.ini[/b] (step 2), not the exact build number.[/i][/*]
 [/list]
 
-[size=4][b]Installation[/b][/size]
+[size=4][b]Install — Dedicated server (recommended)[/b][/size]
+[i]Server-side only: clients stay vanilla, BattlEye stays on. Below, [b]<Win64>[/b] = the [b]…\SCUM\Binaries\Win64\[/b] folder that contains [b]SCUMServer.exe[/b].[/i]
+
+[b](see image gallery for visual instructions)[/b]
 [list=1]
-[*]Copy the [b]ClothesDryer[/b] folder AND the [b]shared[/b] folder into your server's UE4SS mods directory:
-[code]<server>\SCUM\Binaries\Win64\ue4ss\Mods\ClothesDryer\
-<server>\SCUM\Binaries\Win64\ue4ss\Mods\shared\Scripts\gating.lua[/code]
-[*]Open [b]ClothesDryer\Scripts\main.lua[/b] and set [b]MOD_DIR[/b] to that folder's full path.
-[*][i](Optional — only for the per-player donation model.)[/i] Drying works out of the box with no database. Granting access to specific players ([b]dryer add <player>[/b]) reads SCUM.db via [b]sqlite3.exe[/b] and is [b]off by default[/b]. To enable: download the [b]sqlite3.exe[/b] CLI tool from [url=https://sqlite.org/download.html]sqlite.org[/url], keep ONE copy on the server (e.g. in [b]Mods\shared[/b]), and set [b]sqliteExe[/b] in Config to that path (or [b]"sqlite3.exe"[/b] for PATH). Default-on and per-flag overrides never need it.
-[*]Enable it in [b]...\ue4ss\Mods\mods.txt[/b]:
+[*][b]Install UE4SS:[/b] extract the download into [b]<Win64>\[/b] so [b]dwmapi.dll[/b] + the [b]ue4ss\[/b] folder sit next to SCUMServer.exe.[/*]
+[*][b]Apply SCUM-safe settings:[/b] copy [b]UE4SS-settings-SCUM.ini[/b] from this download into [b]<Win64>\ue4ss\[/b] and rename it to [b]UE4SS-settings.ini[/b][/*]
+[*][b]Install the mod:[/b] copy the single [b]ClothesDryer[/b] folder into [b]<Win64>\ue4ss\Mods\[/b].[/*]
+[*][b]Point it at itself:[/b] open [b]ClothesDryer\Scripts\main.lua[/b] and set [b]MOD_DIR[/b] to that folder's full path.[/*]
+[*][b]Enable it[/b] in [b]<Win64>\ue4ss\Mods\mods.txt[/b]:
 [code]ClothesDryer : 1[/code]
-Do [b]not[/b] create [b]enabled.txt[/b] — it silently overrides mods.txt.
-[*]Start the server and type [b]dryer[/b] in chat for the full command list.
+Do [b]not[/b] create [b]enabled.txt[/b] — it silently overrides mods.txt.[/*]
+[*][b]Launch[/b] SCUMServer.exe normally (BattlEye is not involved server-side), then check [b]ClothesDryer\ClothesDryer.log[/b] for [b]ClothesDryer loaded[/b] and type [b]dryer[/b] in chat.[/*]
 [/list]
 
+[size=4][b]Install — Single-player / client-hosted (your own risk)[/b][/size]
+[b]⚠ Read first:[/b] single-player has no separate server process, so the mod runs inside [b]your own SCUM client[/b] — you must inject UE4SS and launch with [b]-nobattleye[/b]. That is [b]client-side modding, and BattlEye can ban your SCUM account for it[/b]. Do this only on [b]your own account, entirely at your own risk[/b]. Use a local server if you can. 
+
+NOTE: Below, [b]<Win64>[/b] = your client's [b]…\SCUM\Binaries\Win64\[/b] folder that contains [b]SCUM.exe[/b] (default: [b]C:\Program Files (x86)\Steam\steamapps\common\SCUM\SCUM\Binaries\Win64\[/b]).
+[list=1]
+[*][b]Install UE4SS:[/b] extract the download into [b]<Win64>\[/b] so [b]dwmapi.dll[/b] + the [b]ue4ss\[/b] folder sit next to SCUM.exe.[/*]
+[*][b]Apply SCUM-safe settings:[/b] copy [b]UE4SS-settings-SCUM.ini[/b] into [b]<Win64>\ue4ss\[/b] and rename it to [b]UE4SS-settings.ini[/b] (overwrite).[/*]
+[*][b]Install the mod:[/b] copy the single [b]ClothesDryer[/b] folder into [b]<Win64>\ue4ss\Mods\[/b][/*]
+[*][b]Point it at itself:[/b] open [b]ClothesDryer\Scripts\main.lua[/b] and set [b]MOD_DIR[/b] to that folder's full [b]client[/b] path.[/*]
+[*][b]Enable it[/b] in [b]<Win64>\ue4ss\Mods\mods.txt[/b]:
+[code]ClothesDryer : 1[/code]
+Do [b]not[/b] create [b]enabled.txt[/b].[/*]
+[*][b]Launch correctly:[/b] NOTE: I have connected to the local sandbox via Steam, and without -nobattleye and have been fine but, for maximum safety: 
+
+Leave the [b]BEService[/b] at its default (Manual) — no need to disable it. Launch [b]SCUM.exe directly[/b] (the exe in <Win64>\, e.g. a desktop shortcut) with [b]-nobattleye[/b]. Do [b]not[/b] use Steam's Play button — Steam re-invokes BattlEye even with the flag.
+[/*]
+[*][b]Verify:[/b] check [b]ClothesDryer\ClothesDryer.log[/b] for [b]ClothesDryer loaded[/b], then type [b]dryer[/b] in chat in your single-player game.[/*]
+[/list]
+
+[size=4][b]Optional: per-player access (donation model) — either setup[/b][/size]
+Drying works out of the box. You only need this extra step if you want to grant access to [b]specific players[/b] ([b]dryer add <player>[/b]), which reads SCUM.db via [b]sqlite3.exe[/b] and is [b]off by default[/b]. To enable: download the [b]sqlite3.exe[/b] CLI tool from [url=https://sqlite.org/download.html]sqlite.org[/url], keep ONE copy on the machine, and set [b]sqliteExe[/b] in Config to that path (or [b]"sqlite3.exe"[/b] for PATH) — or set it from chat with [b]dryer set-sqlite <path>[/b]. 
+
+[b]Default=on and per-flag overrides do not need this step
+[/b]
 [size=4][b]Notes[/b][/size]
 [list]
-[*]Drying needs a player nearby — SCUM keeps container contents live only while observed, so an abandoned closed wardrobe pauses until someone's around (which is whenever anyone actually uses it).
-[*]Still looks wet right after it dries? The server already set it dry; your client re-syncs a beat later or on reopening the wardrobe.
-[*]A tiny bit of residual wetness (~1%) can remain — it's harmless and clears very quickly on its own; wear the garment in the [b]sun[/b] or stand near a [b]fire[/b] and the last of it dries off in moments.
-[*]Pairs with my [b]WashingMachine[/b] mod — wash the dirt out there, dry it here.
-[*]The [b]shared[/b] folder is a small library shared by my SCUM mods — if you already have it from another of my mods, the copy is identical.
-[*]All rights reserved. Personal use on servers you administer; please don't re-upload or repackage.
+[*]Drying needs a player nearby — SCUM keeps container contents live only while observed, so an abandoned closed wardrobe pauses until someone's around (which is whenever anyone actually uses it).[/*]
+[*]Still looks wet right after it dries? The server already set it dry; your client re-syncs a beat later or on reopening the wardrobe.[/*]
+[*]A tiny bit of residual wetness (~1%) can remain — it's harmless and clears very quickly on its own; wear the garment in the [b]sun[/b] or stand near a [b]fire[/b] and the last of it dries off in moments.[/*]
+[*]Pairs with my [b]WashingMachine[/b] mod — wash the dirt out there, dry it here.[/*]
+[*]This mod is self-contained: it bundles its own copy of my small shared gating library ([b]Scripts\gating.lua[/b]), so it never clashes with or depends on my other mods.[/*]
+[*]All rights reserved. Personal use on servers you administer; please don't re-upload or repackage.[/*]
 [/list]

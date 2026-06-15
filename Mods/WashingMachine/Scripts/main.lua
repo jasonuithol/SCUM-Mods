@@ -16,18 +16,28 @@
 -- dryer recipe + 2 hoses) placed in it. Server-side only; coexists with BattlEye.
 --
 -- The access-control / flag-scoping / SCUM.db / chat-command framework lives in
--- the shared library  ..\shared\Scripts\gating.lua  (also used by ClothesDryer /
--- FlagUpkeep / GarbageGoober). This file loads it and calls Gating.attach(WM, opts);
--- the mod-specific engine (wash action, recipe, activation, commands) is in washer.lua.
+-- the shared "gating" library, VENDORED into this mod's own Scripts folder
+-- (Scripts\gating.lua) so the mod is fully self-contained — no dependency on a
+-- shared ...\Mods\shared\ folder (also used by ClothesDryer / FlagUpkeep /
+-- GarbageGoober). This file loads it and calls Gating.attach(WM, opts); the
+-- mod-specific engine (wash action, recipe, activation, commands) is in washer.lua.
 --
 -- Enable by adding   WashingMachine : 1   to UE4SS Mods/mods.txt (NEVER enabled.txt).
 -- Needs HookProcessInternal=1 & HookProcessLocalScriptFunction=1 in UE4SS-settings.ini.
 
 -- >>> set this to the mod's folder on your server <<<
-local MOD_DIR = [[C:\scumserver\SCUM\Binaries\Win64\ue4ss\Mods\WashingMachine]]
+local MOD_DIR = [[C:\Program Files (x86)\Steam\steamapps\common\SCUM Server\SCUM\Binaries\Win64\ue4ss\Mods\WashingMachine]]
 local SCRIPTS = MOD_DIR .. [[\Scripts]]
 local LOGFILE = MOD_DIR .. [[\WashingMachine.log]]
-local LIB     = MOD_DIR .. [[\..\shared\Scripts\gating.lua]]
+
+-- The "gating" library is VENDORED into this mod's own Scripts folder, so the
+-- mod is fully self-contained — no dependency on a shared ...\Mods\shared\
+-- folder (which would couple unrelated mods together). The legacy shared
+-- location is kept as a fallback for older deployments.
+local LIB_CANDIDATES = {
+    SCRIPTS .. [[\gating.lua]],
+    MOD_DIR .. [[\..\shared\Scripts\gating.lua]],
+}
 
 WashingMachine = WashingMachine or {}
 local WM = WashingMachine
@@ -64,9 +74,16 @@ function WM.reload()
 
     WM.trigger = (WM.config and WM.config.chatTrigger) or "washer"
     WM.tag = "WashingMachine"
+    local LIB
+    for _, p in ipairs(LIB_CANDIDATES) do
+        local f = io.open(p, "r"); if f then f:close(); LIB = p; break end
+    end
+    if not LIB then
+        WM.log("gating lib NOT FOUND — looked in: " .. table.concat(LIB_CANDIDATES, " | ")); return false
+    end
     local okL, G = runFile(LIB)
     if not okL or type(G) ~= "table" or type(G.attach) ~= "function" then
-        WM.log("gating lib load FAILED (" .. tostring(G) .. ") — expected " .. LIB); return false
+        WM.log("gating lib load FAILED (" .. tostring(G) .. ") — from " .. LIB); return false
     end
     G.attach(WM, {
         defaultNotEnabled = "washing isn't enabled for your base — ask an admin to enable it",

@@ -3,10 +3,13 @@
 # Produces  <repo>/dist/WashingMachine-<VERSION>.zip  with this layout:
 #   README.md
 #   LICENSE
-#   WashingMachine/Scripts/...          (the mod)
-#   shared/Scripts/gating.lua          (the shared lib the mod loads)
-# Users extract and copy BOTH the WashingMachine/ and shared/ folders into their
+#   UE4SS-settings-SCUM.ini            (SCUM-safe UE4SS config; replaces theirs)
+#   WashingMachine/Scripts/...        (the mod, incl. a VENDORED copy of
+#                                       gating.lua — the mod is self-contained,
+#                                       no external shared/ folder dependency)
+# Users extract and copy the single WashingMachine/ folder into their
 #   ...\SCUM\Binaries\Win64\ue4ss\Mods\
+# (and drop UE4SS-settings-SCUM.ini in as their ...\ue4ss\UE4SS-settings.ini)
 #
 #   ./package.sh            # version 1.0.0
 #   ./package.sh 1.2.0      # custom version
@@ -18,10 +21,12 @@ repo="$(cd "$here/../.." && pwd)"
 shared="$repo/Mods/shared/Scripts/gating.lua"
 
 [ -f "$shared" ] || { echo "missing shared gating lib: $shared" >&2; exit 1; }
+ue4ss_ini="$here/UE4SS-settings-SCUM.ini"
+[ -f "$ue4ss_ini" ] || { echo "missing UE4SS settings: $ue4ss_ini" >&2; exit 1; }
 
 stage="$repo/dist/$MOD-$VERSION"
 rm -rf "$stage"
-mkdir -p "$stage/$MOD/Scripts" "$stage/shared/Scripts"
+mkdir -p "$stage/$MOD/Scripts"
 
 # the mod: Lua scripts (+ any data files) — Scripts/ holds no runtime state
 cp "$here"/Scripts/*.lua "$stage/$MOD/Scripts/"
@@ -30,7 +35,11 @@ for extra in "$here"/Scripts/*.yaml "$here"/Scripts/*.yml "$here"/Scripts/*.json
 done
 cp "$here/README.md" "$stage/README.md"
 cp "$here/LICENSE"   "$stage/LICENSE"
-cp "$shared"         "$stage/shared/Scripts/gating.lua"
+cp "$ue4ss_ini"      "$stage/UE4SS-settings-SCUM.ini"
+# VENDOR the shared gating lib INTO the mod's own Scripts folder so the shipped
+# mod is self-contained (no ...\Mods\shared\ dependency). main.lua loads it from
+# its own Scripts\gating.lua first.
+cp "$shared"         "$stage/$MOD/Scripts/gating.lua"
 
 # zip via python (portable; no `zip` dependency on Windows git-bash)
 python - "$stage" "$repo/dist/$MOD-$VERSION.zip" <<'PY'
