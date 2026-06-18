@@ -3,5 +3,6 @@
 __pycache__/
 *.pyc
 ping_preview.png
+sidecar.out
 # Drop your real map here; don't commit a binary that may be copyrighted.
 scum_map.png

@@ -24,4 +24,14 @@ return {
     -- ---- feedback -------------------------------------------------------
     -- Send a short confirmation back to the player in chat after a ping.
     replyInChat = true,
+
+    -- ---- reverse path: Discord buttons -> in-game map markers -----------
+    -- When enabled, the mod polls the sidecar's GET /commands and, for each
+    -- "map_ping" command (from the Discord "Ping Green"/"Ping Red" buttons),
+    -- broadcasts a colored circle onto EVERY connected client's map.
+    pollEnabled    = true,
+    pollIntervalSec = 5,    -- how often to poll (keep >= httpTimeoutSec so a slow
+                            -- GET can't overlap the next read)
+    pingExpireSec   = 30,   -- a broadcast ping auto-clears after this many seconds
+    pingRadiusCm    = 30000, -- circle radius in world cm (30000 = 300 m)
 }

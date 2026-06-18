@@ -14,8 +14,8 @@ UE4SS Lua mod  ──HTTP──►  this sidecar  ──Gateway (WebSocket)─�
  (emits events)          (FastAPI + discord.py)
 ```
 
-- **Mod → Discord:** the mod `POST`s in-game events to `/event`; the bot relays them to a channel.
-- **Discord → Mod:** Discord slash commands and buttons enqueue commands; the mod polls `/commands` and acts on them in-game.
+- **Mod → Discord:** the mod `POST`s in-game events to `/event` and map pings to `/ping`; the bot relays them to a channel.
+- **Discord → Mod:** Discord slash commands and buttons enqueue commands; the mod polls `/commands` and acts on them in-game. In particular, each map ping is posted with **Ping Green / Ping Red** buttons that broadcast a colored circle back onto every player's in-game map.
 
 The Discord Gateway (a long-lived WebSocket with heartbeat/reconnect) runs as a background task on the same asyncio loop as the FastAPI server, so a single `python main.py` runs both.
 
@@ -46,7 +46,8 @@ All except `/health` require the `X-API-Key` header matching `SIDECAR_API_KEY`.
 ## Map pings
 
 When a player types `ping` in-game, the mod sends their name and world coords to
-`POST /ping`; the sidecar marks the spot on the map image and posts it to the channel.
+`POST /ping`; the sidecar marks the spot on the map image and posts it to the channel
+**with two buttons, Ping Green and Ping Red** (see below).
 
 Two things you must provide:
 
@@ -62,6 +63,22 @@ curl -X POST http://127.0.0.1:8765/ping \
   -H "Content-Type: application/json" -H "X-API-Key: change-me" \
   -d '{"player":"Bob_Survivor","x":200000,"y":-150000}'
 ```
+
+### Ping back to the game (the Green/Red buttons)
+
+Every `/ping` post includes two buttons, **Ping Green** and **Ping Red** (handled by
+`PingButtons` in `bot.py`). Clicking one enqueues a `map_ping` command:
+
+```json
+{"action": "map_ping", "x": <world x>, "y": <world y>, "color": "green|red", "player": "...", "by": "<discord user>"}
+```
+
+The MapPing mod polls `GET /commands`, picks it up, and draws a colored circle at
+that spot on every connected player's in-game map (auto-expiring). Anyone who can see
+the message can click; the click position is the original pinger's location.
+
+The buttons are a **per-message** (non-persistent) view, so they carry the ping's
+x/y in memory and stop working after a sidecar restart — fine for ephemeral pings.
 
 ### Quick test (no game needed)
 

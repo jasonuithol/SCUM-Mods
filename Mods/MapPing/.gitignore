@@ -1,0 +1,4 @@
+# Runtime artifacts written into the deployed mod folder (MOD_DIR on the server).
+MapPing.log
+.ping_post.json
+.commands.json

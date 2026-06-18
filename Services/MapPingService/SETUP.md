@@ -127,6 +127,25 @@ Invoke-WebRequest -Uri http://127.0.0.1:8765/ping -Method POST `
 The marker position will be **uncalibrated** (placeholder world bounds in `config.py`)
 until you do the in-game calibration in `HANDOFF.md` step 4.
 
+### Reverse path (Ping Green / Ping Red buttons)
+
+Each map ping is posted **with two buttons**, *Ping Green* and *Ping Red*. Clicking
+one queues a `map_ping` command (`GET /commands`) that the MapPing mod polls and
+broadcasts as a colored circle onto every player's in-game map.
+
+This half only completes the loop when the **mod is running and polling** — the
+sidecar just queues the command. To confirm the sidecar side alone, click a button,
+then read the queue back:
+
+```powershell
+Invoke-WebRequest http://127.0.0.1:8765/commands -Headers @{"X-API-Key"="change-me"} -UseBasicParsing
+# -> {"commands":[{"action":"map_ping","x":...,"y":...,"color":"red",...}]}
+```
+
+(That `GET` drains the queue, so the mod won't also see it — only check this way when
+the mod isn't polling.) The in-game half is configured in the mod's `Config.lua`
+(`pollEnabled`, `pollIntervalSec`, `pingExpireSec`, `pingRadiusCm`).
+
 ---
 
 ## Error handling (what failure looks like)

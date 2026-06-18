@@ -19,6 +19,18 @@ can resume on Windows without the chat history.
 > - `bot.py` — `setup_hook` catches the `403 Forbidden` from slash-command sync and
 >   re-raises a `RuntimeError` naming the guild and printing a ready-made invite link.
 > So a failed start now says *why* in the console instead of just `discord_ready:false`.
+>
+> **Update 2026-06-18 — REVERSE PATH LIVE (Discord → in-game).** The map ping is now
+> two-way and verified in-game. Each `/ping` embed carries **Ping Green / Ping Red**
+> buttons (`PingButtons` in `bot.py`); clicking one queues a `map_ping` command that
+> the mod polls via `GET /commands` and broadcasts as a colored circle on **every
+> player's in-game map** (auto-expiring, existing zones preserved). No new endpoints or
+> env vars — reuses the existing command queue. The in-game broadcast uses SCUM's
+> custom-zone system (`UCustomZoneRegistry:NetMulticast_ReceiveCustomZoneData`); the
+> crash-free recipe + gotchas (never marshal an `FName` field from a Lua table) are
+> documented in `../../Mods/CustomZoneProbe/`. Mod side: new `pingback.lua` (JSON
+> decode + non-blocking poll loop + active-ping list) and reverse-path knobs in
+> `Config.lua` (`pollEnabled`, `pollIntervalSec`, `pingExpireSec`, `pingRadiusCm`).
 
 ## Goal
 

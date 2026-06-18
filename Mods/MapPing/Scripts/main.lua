@@ -53,6 +53,8 @@ function MP.reload()
     end
     local ok2, e2 = runFile(SCRIPTS .. [[\ping.lua]])
     if not ok2 then MP.log("ping.lua load FAILED: " .. tostring(e2)); return false end
+    local ok3, e3 = runFile(SCRIPTS .. [[\pingback.lua]])
+    if not ok3 then MP.log("pingback.lua load FAILED: " .. tostring(e3)); return false end
     return true
 end
 
@@ -75,6 +77,11 @@ end)
 MP.log(okHook and "ready: 'ping' / 'pingcal' chat triggers installed."
     or ("chat trigger FAILED: " .. tostring(errHook)))
 
+-- reverse path: poll the sidecar for Discord-button map pings and broadcast them
+-- to all clients' maps. Safe to call once; guarded against duplicate loops.
+if type(MP.startPolling) == "function" then pcall(MP.startPolling) end
+
 MP.log("=====================================================")
 MP.log("MapPing loaded. Players type 'ping' in chat to share their location.")
+MP.log("Discord 'Ping Green'/'Ping Red' buttons broadcast back to all clients' maps.")
 MP.log("=====================================================")

@@ -82,12 +82,53 @@ async def send_to_channel(content: str, *, view: discord.ui.View | None = None) 
     await (await _channel()).send(content, view=view)
 
 
+class PingButtons(discord.ui.View):
+    """Buttons posted under a map ping. Clicking one queues a 'map_ping' command
+    that the UE4SS mod polls (GET /commands) and broadcasts back in-game as a
+    colored circle on every player's map.
+
+    This is a per-message (non-persistent) view: it carries the ping's x/y in the
+    instance, so the buttons stop working after a sidecar restart. That's fine for
+    ephemeral pings; persistence would mean encoding x/y into the custom_id.
+    """
+
+    def __init__(self, player: str, x: float, y: float) -> None:
+        super().__init__(timeout=None)
+        self.player = player
+        self.x = x
+        self.y = y
+
+    async def _queue(self, interaction: discord.Interaction, color: str) -> None:
+        queue_game_command(
+            {
+                "action": "map_ping",
+                "x": self.x,
+                "y": self.y,
+                "color": color,
+                "player": self.player,
+                "by": str(interaction.user),
+            }
+        )
+        await interaction.response.send_message(
+            f"📍 {color.capitalize()} ping sent in-game at X:{self.x:.0f} Y:{self.y:.0f}",
+            ephemeral=True,
+        )
+
+    @discord.ui.button(label="Ping Green", style=discord.ButtonStyle.success)
+    async def ping_green(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+        await self._queue(interaction, "green")
+
+    @discord.ui.button(label="Ping Red", style=discord.ButtonStyle.danger)
+    async def ping_red(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+        await self._queue(interaction, "red")
+
+
 async def send_ping(player: str, x: float, y: float, image_png: bytes) -> None:
     file = discord.File(io.BytesIO(image_png), filename="ping.png")
     embed = discord.Embed(title="📍 Map Ping", description=f"**{player}** pinged a location")
     embed.add_field(name="Coordinates", value=f"X: {x:.0f}   Y: {y:.0f}")
     embed.set_image(url="attachment://ping.png")
-    await (await _channel()).send(embed=embed, file=file)
+    await (await _channel()).send(embed=embed, file=file, view=PingButtons(player, x, y))
 
 
 # --- Discord -> game: slash commands and buttons enqueue work for the mod ---
