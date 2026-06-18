@@ -1,4 +1,4 @@
--- MapPing reverse path (reloadable): Discord "Ping Green"/"Ping Red" buttons ->
+-- MapPing reverse path (reloadable): a Discord color button ->
 -- a colored circle on every connected client's in-game map.
 --
 -- Flow: a Discord button enqueues a {"action":"map_ping",x,y,color} command in the
@@ -16,6 +16,21 @@ local MP = MapPing
 local C  = MP.config
 
 MP.activePings = MP.activePings or {}   -- {x,y,color,label,expireAt}; survives reloads
+
+-- Distinct ping colors (FLinearColor fractions, 0-1). Chosen to stand out from
+-- native map furniture (trader/outpost greens, dull reds). Alpha is applied at
+-- build time (PING_ALPHA). Unknown colors fall back to "green".
+MP.palette = MP.palette or {
+    green  = { R = 0.10, G = 0.90, B = 0.20 },
+    red    = { R = 0.95, G = 0.08, B = 0.08 },
+    pink   = { R = 1.00, G = 0.08, B = 0.58 },  -- hot pink
+    yellow = { R = 1.00, G = 0.92, B = 0.00 },  -- bright yellow
+    cyan   = { R = 0.00, G = 0.90, B = 1.00 },
+    orange = { R = 1.00, G = 0.45, B = 0.00 },
+    violet = { R = 0.60, G = 0.10, B = 1.00 },
+    white  = { R = 1.00, G = 1.00, B = 1.00 },
+}
+local PING_ALPHA = 0.55
 
 -- ---- tiny JSON decoder (objects/arrays/strings/numbers/bool/null) ---------
 local function jsonDecode(str)
@@ -132,13 +147,23 @@ function MP.applyPings()
     pcall(function() cfg0 = reg._defaultConfiguration end)
     if global == nil or cfg0 == nil then MP.log("applyPings: base configs nil"); return end
 
-    -- Hand-built ping configs (safe: no FName). Index 0 stays the REAL config so
-    -- existing regions (ConfigurationIndex 0) keep their color; 1=green, 2=red.
-    local green = { Name = "Ping Green", Settings = 1, EventHandlingMethod = 0,
-                    Color = { R = 0.10, G = 0.90, B = 0.20, A = 0.55 } }
-    local red   = { Name = "Ping Red",   Settings = 1, EventHandlingMethod = 0,
-                    Color = { R = 0.95, G = 0.08, B = 0.08, A = 0.55 } }
-    local configs = { cfg0, green, red }
+    -- Build the configs array on the fly: index 0 (Lua [1]) stays the REAL config
+    -- so existing regions (ConfigurationIndex 0) keep their color; one extra config
+    -- is appended per DISTINCT ping color actually in use. Configs are hand-built
+    -- (safe: no FName — marshalling one from a Lua table crashes the server).
+    local configs = { cfg0 }
+    local colorIndex = {}   -- color name -> 0-based ConfigurationIndex
+    local function indexForColor(name)
+        if colorIndex[name] then return colorIndex[name] end
+        local rgb = MP.palette[name] or MP.palette.green
+        configs[#configs + 1] = {
+            Name = "Ping " .. name, Settings = 1, EventHandlingMethod = 0,
+            Color = { R = rgb.R, G = rgb.G, B = rgb.B, A = PING_ALPHA },
+        }
+        local idx = #configs - 1   -- 0-based: [1]=cfg0 is index 0
+        colorIndex[name] = idx
+        return idx
+    end
 
     local regions = collectRealRegions(reg)
     local nBase = #regions
@@ -149,7 +174,7 @@ function MP.applyPings()
             Location = { X = p.x, Y = p.y },
             Size = { X = p.radius or radius, Y = 0.0 },
             Shape = 0,                                       -- Circle
-            ConfigurationIndex = (p.color == "red") and 2 or 1,
+            ConfigurationIndex = indexForColor(p.color),
         }
     end
 
@@ -174,7 +199,8 @@ local function handleCommand(cmd)
     if type(cmd) ~= "table" or cmd.action ~= "map_ping" then return false end
     local x, y = tonumber(cmd.x), tonumber(cmd.y)
     if not x or not y then MP.log("map_ping: bad coords, ignored"); return false end
-    local color = (cmd.color == "red") and "red" or "green"
+    local color = cmd.color
+    if type(color) ~= "string" or not MP.palette[color] then color = "green" end
     local label = cmd.player and ("PING " .. tostring(cmd.player)) or "PING"
     MP.activePings[#MP.activePings+1] = {
         x = x, y = y, color = color, label = label,

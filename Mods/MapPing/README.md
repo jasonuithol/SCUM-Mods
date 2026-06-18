@@ -6,9 +6,10 @@ A server-side SCUM (UE4SS) mod with a **two-way** Discord bridge for map pings:
 position and name are sent to a companion web service (the **sidecar**), which draws
 the spot on the SCUM map and posts it to a Discord channel.
 
-**Back — Discord → in-game.** That Discord message carries two buttons, **Ping
-Green** and **Ping Red**. Clicking one broadcasts a colored circle at that location
-onto **every connected player's in-game map** (auto-clearing after a timeout).
+**Back — Discord → in-game.** That Discord message carries a row of color buttons
+(green, red, hot pink, yellow, cyan, orange, violet, white). Clicking one broadcasts
+a circle of that color at the location onto **every connected player's in-game map**
+(auto-clearing after a timeout).
 
 ```
                  ┌─────────────────────────── out ──────────────────────────┐
@@ -16,7 +17,7 @@ player types     │  MapPing  ──HTTP POST /ping──►  sidecar  ──�
 "ping"  ─────────┘  (name+coords)                 (map img)     (embed + 2 buttons)
                  ┌─────────────────────────── back ─────────────────────────┐
 all clients' map │  MapPing  ◄──HTTP GET /commands── sidecar ◄── button click │
- ◄── red/green ──┘  (poll, then broadcast a custom-zone circle to everyone)   │
+ ◄── colored ────┘  (poll, then broadcast a custom-zone circle to everyone)   │
    circle
 ```
 
@@ -31,7 +32,7 @@ Server-side only — no client files, so it coexists with BattlEye.
 
 | Typed in chat | Who | Does |
 |---|---|---|
-| `ping` | anyone | Share your current location to Discord (posts a map + Green/Red buttons) |
+| `ping` | anyone | Share your current location to Discord (posts a map + color buttons) |
 | `pingcal` | anyone | Log your raw world coords (for calibration) — see below |
 | `ping reload` | admin | Hot-reload `Config.lua` + `ping.lua` + `pingback.lua` (no restart) |
 
@@ -40,9 +41,10 @@ Matching is exact and case-insensitive, so normal sentences containing "ping" do
 ## How the reverse path works (Discord buttons → in-game)
 
 The mod can't receive pushes (UE4SS Lua can't host a server), so it **polls** the
-sidecar on a timer (`GET /commands`, non-blocking detached curl). Each **Ping
-Green/Red** button click enqueues a `map_ping` command in the sidecar; the next poll
-picks it up and draws a circle on everyone's map via SCUM's **custom-zone** system
+sidecar on a timer (`GET /commands`, non-blocking detached curl). Each color
+button click enqueues a `map_ping` command (with its `color`) in the sidecar; the
+next poll picks it up and draws a circle on everyone's map via SCUM's **custom-zone**
+system
 (`UCustomZoneRegistry:NetMulticast_ReceiveCustomZoneData` on the GameState). Pings
 are tracked in an active list and auto-expire; existing server zones (trader/outpost
 circles) are always preserved.
@@ -95,7 +97,14 @@ Reverse path:
 | `pingExpireSec` | `30` | A broadcast ping auto-clears after this many seconds |
 | `pingRadiusCm` | `30000` | Circle radius in world cm (30000 = 300 m) |
 
-Ping colors live in `pingback.lua` (`MP.applyPings`).
+### Ping colors
+
+The palette lives in `pingback.lua` as `MP.palette` (color name → `FLinearColor`
+fractions; alpha is fixed at `0.55`). Ships with `green`, `red`, `pink` (hot pink),
+`yellow`, `cyan`, `orange`, `violet`, `white`. To add one: add an entry here **and**
+a matching `(key, emoji, label, style)` row in the sidecar's `PING_COLORS` (`bot.py`)
+— the `color` key must match on both sides. Unknown colors fall back to `green`.
+`applyPings` builds the custom-zone configs on the fly, one per color actually in use.
 
 ## Files
 

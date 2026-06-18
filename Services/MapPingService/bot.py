@@ -82,6 +82,31 @@ async def send_to_channel(content: str, *, view: discord.ui.View | None = None) 
     await (await _channel()).send(content, view=view)
 
 
+# Ping palette: (color key sent to the mod, button emoji, label, button style).
+# The color key MUST match a key in the mod's MP.palette (pingback.lua). Discord
+# buttons only have 5 fixed styles, so non-green/red colors are grey (secondary)
+# and rely on the emoji square to convey the actual color.
+PING_COLORS = [
+    ("green",  "🟢", "Green",    discord.ButtonStyle.success),
+    ("red",    "🔴", "Red",      discord.ButtonStyle.danger),
+    ("pink",   "🩷", "Hot Pink", discord.ButtonStyle.secondary),
+    ("yellow", "🟡", "Yellow",   discord.ButtonStyle.secondary),
+    ("cyan",   "🩵", "Cyan",     discord.ButtonStyle.secondary),
+    ("orange", "🟠", "Orange",   discord.ButtonStyle.secondary),
+    ("violet", "🟣", "Violet",   discord.ButtonStyle.secondary),
+    ("white",  "⚪", "White",    discord.ButtonStyle.secondary),
+]
+
+
+class _PingColorButton(discord.ui.Button):
+    def __init__(self, color: str, emoji: str, label: str, style: discord.ButtonStyle, row: int) -> None:
+        super().__init__(label=label, emoji=emoji, style=style, row=row)
+        self.color = color
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        await self.view._queue(interaction, self.color)
+
+
 class PingButtons(discord.ui.View):
     """Buttons posted under a map ping. Clicking one queues a 'map_ping' command
     that the UE4SS mod polls (GET /commands) and broadcasts back in-game as a
@@ -97,6 +122,9 @@ class PingButtons(discord.ui.View):
         self.player = player
         self.x = x
         self.y = y
+        # 8 buttons -> two rows of 4 (Discord allows max 5 per row, 5 rows).
+        for i, (color, emoji, label, style) in enumerate(PING_COLORS):
+            self.add_item(_PingColorButton(color, emoji, label, style, row=i // 4))
 
     async def _queue(self, interaction: discord.Interaction, color: str) -> None:
         queue_game_command(
@@ -113,14 +141,6 @@ class PingButtons(discord.ui.View):
             f"📍 {color.capitalize()} ping sent in-game at X:{self.x:.0f} Y:{self.y:.0f}",
             ephemeral=True,
         )
-
-    @discord.ui.button(label="Ping Green", style=discord.ButtonStyle.success)
-    async def ping_green(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-        await self._queue(interaction, "green")
-
-    @discord.ui.button(label="Ping Red", style=discord.ButtonStyle.danger)
-    async def ping_red(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-        await self._queue(interaction, "red")
 
 
 async def send_ping(player: str, x: float, y: float, image_png: bytes) -> None:

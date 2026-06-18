@@ -127,11 +127,14 @@ Invoke-WebRequest -Uri http://127.0.0.1:8765/ping -Method POST `
 The marker position will be **uncalibrated** (placeholder world bounds in `config.py`)
 until you do the in-game calibration in `HANDOFF.md` step 4.
 
-### Reverse path (Ping Green / Ping Red buttons)
+### Reverse path (color buttons)
 
-Each map ping is posted **with two buttons**, *Ping Green* and *Ping Red*. Clicking
-one queues a `map_ping` command (`GET /commands`) that the MapPing mod polls and
-broadcasts as a colored circle onto every player's in-game map.
+Each map ping is posted **with a row of color buttons** (green, red, hot pink,
+yellow, cyan, orange, violet, white — defined in `PING_COLORS` in `bot.py`).
+Clicking one queues a `map_ping` command (`GET /commands`) carrying that `color`,
+which the MapPing mod polls and broadcasts as a circle of that color onto every
+player's in-game map. (Discord only has 5 fixed button styles, so the non-green/red
+buttons are grey with a colored-square emoji indicating the actual color.)
 
 This half only completes the loop when the **mod is running and polling** — the
 sidecar just queues the command. To confirm the sidecar side alone, click a button,

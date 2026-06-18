@@ -27,8 +27,9 @@ return {
 
     -- ---- reverse path: Discord buttons -> in-game map markers -----------
     -- When enabled, the mod polls the sidecar's GET /commands and, for each
-    -- "map_ping" command (from the Discord "Ping Green"/"Ping Red" buttons),
-    -- broadcasts a colored circle onto EVERY connected client's map.
+    -- "map_ping" command (from a Discord color button: green/red/pink/yellow/
+    -- cyan/orange/violet/white), broadcasts a colored circle onto EVERY connected
+    -- client's map. Colors are defined in MP.palette (pingback.lua).
     pollEnabled    = true,
     pollIntervalSec = 5,    -- how often to poll (keep >= httpTimeoutSec so a slow
                             -- GET can't overlap the next read)
