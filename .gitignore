@@ -10,6 +10,13 @@ __pycache__/
 *.pyc
 *.exe
 
+# Python service (Services/MapPingService) — venv + secrets + local artifacts.
+# NEVER commit .env (holds the Discord bot token) or the map image (copyrighted).
+.venv/
+.env
+Services/MapPingService/scum_map.png
+Services/MapPingService/ping_preview.png
+
 # Binaries / archives
 *.pak
 *.dll
