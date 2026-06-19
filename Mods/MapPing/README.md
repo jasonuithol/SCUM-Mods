@@ -96,6 +96,25 @@ Reverse path:
 | `pollIntervalSec` | `5` | How often to poll (keep ≥ `httpTimeoutSec`) |
 | `pingExpireSec` | `30` | A broadcast ping auto-clears after this many seconds |
 | `pingRadiusCm` | `30000` | Circle radius in world cm (30000 = 300 m) |
+| `pulseEnabled` | `true` | Animate ping circles (radius "breathes") — see warning below |
+| `pulseIntervalMs` | `1500` | Re-broadcast cadence — **keep high** (see warning) |
+| `pulsePeriodSec` | `5.0` | Seconds per full breath (one shrink+grow cycle) |
+| `pulseAmplitude` | `0.3` | Radius swing as a fraction of base (`0.3` = 70%…130%) |
+
+### Pulse animation (and why the interval must stay high)
+
+Ping circles "breathe" so they stand out from the static trader/outpost circles.
+There's no client-side tween, so the mod **re-broadcasts the whole zone set on a
+timer** (`pulseIntervalMs`) with each ping's radius scaled by a sine wave; it's idle
+when no pings are active.
+
+> ⚠️ **Each re-broadcast forces every client to re-bake its map render target** —
+> SCUM's custom-zone system is built for occasional admin edits, not animation. So
+> `pulseIntervalMs` is a lag dial that must stay **high** (1500 ms is the tested
+> default). Low values don't just lag: ~500 ms was observed to **desync the client
+> map overlay into a stuck "ghost" circle** that only a reconnect clears. Set
+> `pulseEnabled = false` for zero-cost static circles. The pulse interval/period are
+> read from live config, so `ping reload` re-tunes them without a restart.
 
 ### Ping colors
 
@@ -108,10 +127,11 @@ a matching `(key, emoji, label, style)` row in the sidecar's `PING_COLORS` (`bot
 
 ## Files
 
-- `Scripts/main.lua` — bootstrap: registers the chat hook + starts the poll loop.
+- `Scripts/main.lua` — bootstrap: registers the chat hook; `MP.reload()` (re)starts
+  the poll + pulse loops (guarded), so `ping reload` activates them without a restart.
 - `Scripts/ping.lua` — reloadable engine for the **out** path (`ping`/`pingcal`).
 - `Scripts/pingback.lua` — reloadable engine for the **back** path (JSON decode,
-  poll loop, custom-zone broadcast, active-ping expiry).
+  poll loop, custom-zone broadcast, active-ping expiry, pulse animation, color palette).
 - `Scripts/Config.lua` — operator config.
 
 ## Notes / tuning
