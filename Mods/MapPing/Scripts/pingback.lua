@@ -16,6 +16,8 @@ local MP = MapPing
 local C  = MP.config
 
 MP.activePings = MP.activePings or {}   -- {x,y,color,label,expireAt}; survives reloads
+MP._regionCache = nil   -- cached real outpost/trader regions; nil = rebuild on next use.
+                        -- Reset on (re)load so a reload re-reads the live zone set.
 
 -- Distinct ping colors (FLinearColor fractions, 0-1). Chosen to stand out from
 -- native map furniture (trader/outpost greens, dull reds). Alpha is applied at
@@ -31,6 +33,21 @@ MP.palette = MP.palette or {
     white  = { R = 1.00, G = 1.00, B = 1.00 },
 }
 local PING_ALPHA = 0.55
+
+-- Pulse animation: the broadcast circles "breathe" so they stand out from the
+-- static trader/outpost circles. We can't tween client-side, so we re-broadcast
+-- the whole zone set on a fast timer with each ping's radius scaled by a sine of
+-- an accumulated phase. Phase is advanced by the pulse timer (not a wall clock,
+-- which UE4SS Lua can't read sub-second), and kept modulo the period.
+MP._pulsePhase = MP._pulsePhase or 0.0   -- seconds into the current pulse cycle
+
+local function pulseScale()
+    if not (C and C.pulseEnabled) then return 1.0 end
+    local period = C.pulsePeriodSec or 2.0
+    if period <= 0 then return 1.0 end
+    local amp = C.pulseAmplitude or 0.3
+    return 1.0 + amp * math.sin((2 * math.pi * MP._pulsePhase) / period)
+end
 
 -- ---- tiny JSON decoder (objects/arrays/strings/numbers/bool/null) ---------
 local function jsonDecode(str)
@@ -139,7 +156,10 @@ local function collectRealRegions(reg)
 end
 
 -- Broadcast existing zones + all active pings to every client.
-function MP.applyPings()
+-- refreshRegions=true re-reads the real outpost/trader zones (expensive: ForEach +
+-- per-struct :get()). The fast pulse path omits it and reuses MP._regionCache; the
+-- slow poll path (commands/expiry, ~every 5s) passes true to keep the cache fresh.
+function MP.applyPings(refreshRegions)
     local reg = findRegistry()
     if not reg then MP.log("applyPings: no registry (no world yet?)"); return end
     local global, cfg0
@@ -165,14 +185,22 @@ function MP.applyPings()
         return idx
     end
 
-    local regions = collectRealRegions(reg)
+    -- Real regions: rebuild the cache only when asked (or first use); otherwise
+    -- reuse it so the pulse tick skips the costly unmarshalling each frame.
+    if refreshRegions or MP._regionCache == nil then
+        MP._regionCache = collectRealRegions(reg)
+    end
+    -- Fresh broadcast array each call (cheap) = cached reals + current pings.
+    local regions = {}
+    for i = 1, #MP._regionCache do regions[i] = MP._regionCache[i] end
     local nBase = #regions
     local radius = C.pingRadiusCm or 30000
+    local scale = pulseScale()
     for _, p in ipairs(MP.activePings) do
         regions[#regions+1] = {
             Name = p.label or "PING",
             Location = { X = p.x, Y = p.y },
-            Size = { X = p.radius or radius, Y = 0.0 },
+            Size = { X = (p.radius or radius) * scale, Y = 0.0 },
             Shape = 0,                                       -- Circle
             ConfigurationIndex = indexForColor(p.color),
         }
@@ -230,13 +258,13 @@ function MP.pollOnce()
                 for _, c in ipairs(data.commands) do
                     if handleCommand(c) then changed = true end
                 end
-                if changed then MP.applyPings() end
+                if changed then MP.applyPings(true) end   -- refresh real-region cache
             end
         end
     end
 
     -- 2) drop expired pings (re-broadcast so they disappear)
-    if purgeExpired() > 0 then MP.applyPings() end
+    if purgeExpired() > 0 then MP.applyPings(true) end     -- refresh real-region cache
 
     -- 3) launch the next detached GET
     local curl    = C.curlExe or "curl"
@@ -262,4 +290,31 @@ function MP.startPolling()
     end
     ExecuteWithDelay(2000, tick)
     MP.log("reverse-ping polling started (every " .. (C.pollIntervalSec or 5) .. "s)")
+end
+
+-- Fast self-rescheduling timer that advances the pulse phase and re-broadcasts
+-- while pings are active (idle when none, so no needless multicasts). Guarded so
+-- reloads don't spawn duplicate loops; reads MP.applyPings by name each fire so
+-- hot-reloads take effect live.
+function MP.startPulsing()
+    if not (C and C.pulseEnabled) then MP.log("ping pulse disabled in config"); return end
+    if MP._pulsingStarted then return end
+    if type(ExecuteWithDelay) ~= "function" then MP.log("ExecuteWithDelay missing — pulse NOT started"); return end
+    MP._pulsingStarted = true
+    -- Read interval/period/enabled from LIVE config (MP.config) each fire, so
+    -- 'ping reload' re-tunes the pulse with no restart. Re-broadcasting is the
+    -- expensive part (whole zone set, multicast to all clients), so the interval
+    -- is the lag dial: bigger = less smooth but much lighter on the server.
+    local function tick()
+        local cfg = MP.config or {}
+        local interval = cfg.pulseIntervalMs or 600
+        if cfg.pulseEnabled then
+            local period = cfg.pulsePeriodSec or 2.0
+            if period > 0 then MP._pulsePhase = (MP._pulsePhase + interval / 1000) % period end
+            if #MP.activePings > 0 then pcall(MP.applyPings) end
+        end
+        ExecuteWithDelay(interval, tick)
+    end
+    ExecuteWithDelay((MP.config and MP.config.pulseIntervalMs) or 600, tick)
+    MP.log("ping pulse animation started (interval read live from config)")
 end

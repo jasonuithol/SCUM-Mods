@@ -55,6 +55,11 @@ function MP.reload()
     if not ok2 then MP.log("ping.lua load FAILED: " .. tostring(e2)); return false end
     local ok3, e3 = runFile(SCRIPTS .. [[\pingback.lua]])
     if not ok3 then MP.log("pingback.lua load FAILED: " .. tostring(e3)); return false end
+    -- Ensure the reverse-path loops are running. Both are guarded against
+    -- duplicates, so calling them here makes 'ping reload' enough to activate
+    -- them (the bootstrap only runs once, on server start).
+    if type(MP.startPolling) == "function" then pcall(MP.startPolling) end
+    if type(MP.startPulsing) == "function" then pcall(MP.startPulsing) end
     return true
 end
 
@@ -77,11 +82,10 @@ end)
 MP.log(okHook and "ready: 'ping' / 'pingcal' chat triggers installed."
     or ("chat trigger FAILED: " .. tostring(errHook)))
 
--- reverse path: poll the sidecar for Discord-button map pings and broadcast them
--- to all clients' maps. Safe to call once; guarded against duplicate loops.
-if type(MP.startPolling) == "function" then pcall(MP.startPolling) end
+-- reverse path: the poll + pulse loops are started inside MP.reload() (above),
+-- so they come up here on first load and also (re)start on 'ping reload'.
 
 MP.log("=====================================================")
 MP.log("MapPing loaded. Players type 'ping' in chat to share their location.")
-MP.log("Discord 'Ping Green'/'Ping Red' buttons broadcast back to all clients' maps.")
+MP.log("Discord color buttons broadcast back to all clients' maps (pulsing circles).")
 MP.log("=====================================================")

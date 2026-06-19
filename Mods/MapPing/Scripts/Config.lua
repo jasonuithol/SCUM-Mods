@@ -35,4 +35,19 @@ return {
                             -- GET can't overlap the next read)
     pingExpireSec   = 30,   -- a broadcast ping auto-clears after this many seconds
     pingRadiusCm    = 30000, -- circle radius in world cm (30000 = 300 m)
+
+    -- ---- pulse animation ------------------------------------------------
+    -- Broadcast circles "breathe" (radius oscillates) so they stand out from
+    -- the static trader/outpost circles. The mod re-broadcasts on a slow timer
+    -- while any ping is active (idle otherwise). Disable to get static circles.
+    --
+    -- NOTE: each re-broadcast forces every client to re-bake its map render
+    -- target, so the interval must stay LARGE (custom zones aren't built for
+    -- animation). Keep pulseIntervalMs high enough that the hitch is acceptable.
+    pulseEnabled   = true,
+    pulseIntervalMs = 1500, -- re-broadcast cadence (THE lag dial): each tick re-
+                            -- multicasts the whole zone set, so smaller = smoother
+                            -- but heavier. Read live, so 'ping reload' re-tunes it.
+    pulsePeriodSec  = 5.0,  -- seconds per full breath (one shrink+grow cycle)
+    pulseAmplitude  = 0.3,  -- radius swings to ±this fraction of base (0.3 = 70%..130%)
 }
