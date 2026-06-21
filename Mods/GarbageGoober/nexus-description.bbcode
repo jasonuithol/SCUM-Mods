@@ -1,6 +1,6 @@
 [size=5][b]GarbageGoober — auto-sort loose loot into category chests[/b][/size]
 
-A server-side mod for [b]SCUM dedicated servers[/b]. On a timer it sweeps loose, on-the-floor loot inside a flag's influence and moves each item into a chest [b]in that same flag[/b] whose custom name matches the item's category — built from SCUM's real vendor categories. Drop your haul on the floor, walk away, come back to a sorted base.
+A server-side mod for [b]SCUM dedicated servers[/b]. On a timer it sweeps loose, on-the-floor loot inside a flag's influence and sorts each item into a chest [b]in that same flag[/b] whose custom name matches the item's category — built from SCUM's real vendor categories. Drop your haul [b]anywhere in the base[/b] — loose loot, loaded bags, even guns with attachments — and come back to it sorted into the right chests.
 
 Everything is driven from [b]normal in-game chat[/b] (type [b]goober[/b] for the command list). No client mod — players need nothing installed, so [b]client BattlEye stays on[/b].
 
@@ -9,17 +9,18 @@ Designed for a [b]dedicated server[/b] (runs inside the server process via UE4SS
 
 [size=4][b]How it works[/b][/size]
 [list]
-[*]On a timer (default 60s), every loose on-the-floor item inside a flag's influence is matched to a chest [b]in that same flag[/b] whose custom name matches the item's category, and moved into it.[/*]
+[*]On a timer (default 60s), every loose on-the-floor item inside a flag's influence is matched to a chest [b]in that same flag[/b] whose custom name matches the item's category — and relocated to it from [b]anywhere in the base[/b], not just from within arm's reach of the chest.[/*]
 [*]Categories are matched [b]most-specific first[/b], falling back toward the general node; no match means the item is left in place and logged.[/*]
 [*]Name your chests after a [b]category[/b] leaf (e.g. Ammo, Drink, FirstAid) for fine sorting, or after a [b]trader[/b] group (e.g. Armorer, Bartender, GeneralGoods) to catch a whole group.[/*]
+[*][b]Loaded bags and attachment-laden guns:[/b] drop one and its contents/attachments are tipped onto the ground next to you, then sorted to their own category chests over the next couple of sweeps (the empty bag/gun goes to its own chest). Walk over to your chests and watch it tidy itself.[/*]
 [/list]
 
 [size=4][b]Features[/b][/size]
 [list]
-[*][b]Category sorting[/b] — loose floor loot in a flag is moved into the name-matched category chest in that flag.[/*]
+[*][b]Category sorting, base-wide[/b] — loose floor loot anywhere in a flag is relocated into the name-matched category chest in that flag (not just loot already sitting beside a chest).[/*]
 [*][b]Flag-scoped[/b] — only sorts within a flag's influence, into chests in that flag.[/*]
 [*][b]Configurable categories[/b] — categories live in an editable [b]categories.yaml[/b] (optionally pulled from a Gist on [b]goober reload[/b]).[/*]
-[*][b]Empty-containers[/b] — bags/clothing can be emptied and their contents sorted.[/*]
+[*][b]Empties bags & strips guns[/b] — a dropped bag's contents and a gun's attachments are tipped out and sorted to their own category chests (ammo → Ammo, scope → RangedWeaponAccessories, …), the empty bag/gun to its own chest.[/*]
 [*][b]Entitlement gate[/b] — ships [b]default-on[/b] (works for everyone out of the box); restrict or sell access via per-player grants, per-flag overrides, or the global default. Only per-player grants touch the DB (read-only, user-supplied sqlite3.exe).[/*]
 [/list]
 
