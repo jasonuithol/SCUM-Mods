@@ -20,7 +20,9 @@ end
 
 return {
     -- ---- behaviour -------------------------------------------------------
-    sweepIntervalMs = 60000,  -- sweep period (ms); restart to change; "goober now" = on demand
+    sweepIntervalMs = 5000,   -- sweep period (ms); restart to change; "goober now" = on demand.
+                              -- Short = snappier auto-absorb; each sweep does FindAllOf
+                              -- scans, so raise it if a busy server hitches.
     flagRadiusOverride = nil, -- nil = live ConZBaseManager._flagInfluenceRadius (5000cm
                               -- /50m). This scopes which loose loot a flag gathers — keep
                               -- it ~the base footprint. Set a cm value only for unusually

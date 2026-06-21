@@ -129,8 +129,16 @@ end
 -- stripAttachments do a plain (range-gated) move instead, not gatherAbsorb.
 local function gatherAbsorb(iuc, item, chest, dropper)
     if GG.config.relocateToChest ~= false then
-        local okD, resD = pcall(function() return item:DropAround(chest.owner, dropper, 50.0) end)
-        if not okD then GG.log("  DropAround ERR: " .. tostring(resD)) end
+        -- skip the re-drop if the item is ALREADY gathered at this chest (within
+        -- ~2.5m) — otherwise, on short sweep intervals, an item waiting to be
+        -- absorbed gets re-scattered every sweep and visibly bounces around.
+        local ix, iy = actorLoc(item)
+        local cx, cy = actorLoc(chest.owner)
+        local already = ix and cx and hdist(ix, iy, cx, cy) <= 250
+        if not already then
+            local okD, resD = pcall(function() return item:DropAround(chest.owner, dropper, 50.0) end)
+            if not okD then GG.log("  DropAround ERR: " .. tostring(resD)) end
+        end
     end
     local openH = (GG._openHandle or 1000) + 1
     GG._openHandle = openH
