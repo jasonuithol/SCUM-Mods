@@ -175,20 +175,30 @@ function Gating.attach(M, opts)
         return nil
     end
 
+    -- Flag-zone membership. SCUM flag zones are SQUARE, so use a box test
+    -- (|dx|<=R and |dy|<=R), NOT a circle (hdist<=R) — a circle excludes the
+    -- square's corners, so a player/chest/item in a corner reads as "outside".
+    -- R = the flag's influence radius (treated as the square's half-side).
+    local function inFlag(x, y, f)
+        if not x or not f or not f.x then return false end
+        return math.abs(x - f.x) <= f.radius and math.abs(y - f.y) <= f.radius
+    end
+
     local function flagFor(x, y, flags)
         if not x then return nil end
         local best, bestd
         for _, f in ipairs(flags) do
-            if f.x then
-                local d = hdist(x, y, f.x, f.y)
-                if d <= f.radius and (not bestd or d < bestd) then best, bestd = f, d end
+            if inFlag(x, y, f) then
+                local dx, dy = x - f.x, y - f.y
+                local d = dx * dx + dy * dy -- nearest by (squared) distance, for ties
+                if not bestd or d < bestd then best, bestd = f, d end
             end
         end
         return best
     end
 
     M.collectFlags, M.collectChests = collectFlags, collectChests
-    M.collectContainerContents, M.findIUC, M.flagFor = collectContainerContents, findIUC, flagFor
+    M.collectContainerContents, M.findIUC, M.flagFor, M.inFlag = collectContainerContents, findIUC, flagFor, inFlag
 
     -- ===== read-only SCUM.db reader (constant SQL only) ================
     local OWNER_SQL = "SELECT b.id, up.user_id FROM base b JOIN user_profile up ON up.id=b.owner_user_profile_id WHERE b.is_owned_by_player=1;"

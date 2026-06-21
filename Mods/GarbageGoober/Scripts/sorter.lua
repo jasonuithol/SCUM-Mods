@@ -16,7 +16,7 @@ local pcs, isValid, classOf, fullName, presClass = GG.pcs, GG.isValid, GG.classO
 local xyz, presLoc, actorLoc, hdist = GG.xyz, GG.presLoc, GG.actorLoc, GG.hdist
 local findAllAny, trim, fstr, nameMatches = GG.findAllAny, GG.trim, GG.fstr, GG.nameMatches
 local collectFlags, collectChests, collectContainerContents = GG.collectFlags, GG.collectChests, GG.collectContainerContents
-local findIUC, flagFor, currentFlagBaseId = GG.findIUC, GG.flagFor, GG.currentFlagBaseId
+local findIUC, flagFor, currentFlagBaseId, inFlag = GG.findIUC, GG.flagFor, GG.currentFlagBaseId, GG.inFlag
 local flagEnabled, flagEnabledForIssuer, replyNotEnabled = GG.flagEnabled, GG.flagEnabledForIssuer, GG.replyNotEnabled
 
 -- double-quote a shell arg (used by GG.fetchUrl). The shared lib has its own copy
@@ -105,36 +105,76 @@ local function matchChest(path, candidates)
     return nil
 end
 
+-- VERIFY a move actually landed: true iff `item` now sits in `chest`'s inventory
+-- (compare the item's live inventory owner to the chest actor). Presence ==
+-- "InTheInventory" alone is AMBIGUOUS for an item that STARTED in another container
+-- (a backpack's contents read InTheInventory whether or not the move took), so we
+-- compare the actual owning chest — this is what catches a silent no-op.
+local function inChest(item, chest)
+    local p = pcs(function() return item._serverPresence end, nil)
+    local inv = p and pcs(function() return p._inventory end, nil) or nil
+    local owner = inv and pcs(function() return inv:GetOwner() end, nil) or nil
+    return (isValid(owner) and chest and chest.owner
+        and fullName(owner) == fullName(chest.owner)) or false
+end
+
+-- GATHER then ABSORB one LOOSE FLOOR item into `chest`: re-drop it ONTO the chest
+-- with the game's native AItem:DropAround (keeps it a REAL, registered item and
+-- works at ANY range — AddOrMoveEntry alone only commits within a player's ~2m
+-- vicinity), then open the chest + AddOrMoveEntry to absorb it inside, VERIFYING it
+-- actually landed in THIS chest (never trust the RPC's quiet OK). Returns "moved"
+-- (inside the chest now), "gathered" (a real item on the chest; absorbs when a
+-- player visits), or "error". NOTE: DropAround only works on loose floor items —
+-- it can't reach into a container or off a weapon socket, so emptyContainers /
+-- stripAttachments do a plain (range-gated) move instead, not gatherAbsorb.
+local function gatherAbsorb(iuc, item, chest, dropper)
+    if GG.config.relocateToChest ~= false then
+        local okD, resD = pcall(function() return item:DropAround(chest.owner, dropper, 50.0) end)
+        if not okD then GG.log("  DropAround ERR: " .. tostring(resD)) end
+    end
+    local openH = (GG._openHandle or 1000) + 1
+    GG._openHandle = openH
+    if GG.config.absorbIntoChest ~= false then
+        pcall(function() iuc:Server_OpenInventory(chest.inv, openH) end)
+    end
+    local ok, e = pcall(function()
+        iuc:Server_InventoryComponent_AddOrMoveEntry(chest.inv, item, { Value = AUTOPLACE })
+    end)
+    if not ok then GG.log("  AddOrMoveEntry ERR: " .. tostring(e)); return "error" end
+    return inChest(item, chest) and "moved" or "gathered"
+end
+
 
 -- Recursively move a loose container's contents into matching category chests
 -- (candidates = chests in the same flag). Nested containers are unpacked first,
 -- then sorted themselves. Returns (moved, remaining): remaining = contents that
 -- matched no chest (left inside). Uses the same AddOrMoveEntry move as the sort.
--- NOTE: drop-to-floor RPCs (DropItem/DropItemAt) no-op from a server mod, so we
--- move contents straight to their destination instead of dropping them.
-local function emptyContainerInto(iuc, container, contentsMap, candidates, depth)
+-- SPILL a container's contents onto the floor (next to the container, where the
+-- player is when a bag is dropped) via native DropAround, so the next sweep's
+-- loose-loot gather-absorb carries each to its category chest base-wide. We only
+-- spill contents that HAVE a destination chest (don't litter unmatched items), and
+-- VERIFY each actually left the container (presence == OnTheFloor) — DropAround on
+-- an item still locked inside reports nothing useful, so we check.
+local function emptyContainerInto(iuc, container, contentsMap, candidates, depth, dropper)
     local key = fullName(container)
     local rec = key and contentsMap[key]
     if not rec then return 0, 0 end
     local moved, remaining = 0, 0
     for _, child in ipairs(rec.items) do
         if depth < 6 then
-            local m = emptyContainerInto(iuc, child, contentsMap, candidates, depth + 1)
+            local m = emptyContainerInto(iuc, child, contentsMap, candidates, depth + 1, dropper)
             moved = moved + m
         end
         local cls = classOf(child)
-        local path = categoryPath(cls)
-        local chest = matchChest(path, candidates)
-        if chest then
-            local ok = pcall(function()
-                iuc:Server_InventoryComponent_AddOrMoveEntry(chest.inv, child, { Value = AUTOPLACE })
-            end)
-            if ok then
+        if matchChest(categoryPath(cls), candidates) then
+            pcall(function() child:DropAround(container, dropper, 50.0) end)
+            local pc = pcs(function() return presClass(child) end, nil)
+            if type(pc) == "string" and pc:find("OnTheFloor", 1, true) then
                 moved = moved + 1
-                GG.log(string.format("  emptied %s -> chest '%s'", cls, chest.name))
+                GG.log(string.format("  spilled %s out of %s (next sweep sorts it)", cls, classOf(container)))
             else
                 remaining = remaining + 1
-                GG.log(string.format("  ERROR emptying %s -> '%s'", cls, chest.name))
+                GG.log(string.format("  could not extract %s from %s (presence %s)", cls, classOf(container), tostring(pc)))
             end
         else
             remaining = remaining + 1
@@ -164,23 +204,23 @@ local function collectMounts(item)
     return out
 end
 
--- Move a weapon's removable attachments into matching category chests (same
--- AddOrMoveEntry move the client uses to drag an attachment off a gun — captured
--- in recon). Magazines go to the Ammo chest still loaded. Returns count moved.
-local function stripMountsInto(iuc, item, candidates)
+-- SPILL a weapon's removable attachments onto the floor (next to the weapon, where
+-- the player is when a gun is dropped) via native DropAround, so the next sweep's
+-- loose-loot gather-absorb carries each to its category chest. Only spill ones with
+-- a destination chest, and VERIFY each detached (presence == OnTheFloor). Magazines
+-- spill loaded. (DropAround off a weapon socket works the same as out of a bag.)
+local function stripMountsInto(iuc, item, candidates, dropper)
     local moved = 0
     for _, m in ipairs(collectMounts(item)) do
         local cls = classOf(m)
-        local chest = matchChest(categoryPath(cls), candidates)
-        if chest then
-            local ok = pcall(function()
-                iuc:Server_InventoryComponent_AddOrMoveEntry(chest.inv, m, { Value = AUTOPLACE })
-            end)
-            if ok then
+        if matchChest(categoryPath(cls), candidates) then
+            pcall(function() m:DropAround(item, dropper, 50.0) end)
+            local pc = pcs(function() return presClass(m) end, nil)
+            if type(pc) == "string" and pc:find("OnTheFloor", 1, true) then
                 moved = moved + 1
-                GG.log(string.format("  stripped %s -> chest '%s'", cls, chest.name))
+                GG.log(string.format("  stripped %s off weapon (next sweep sorts it)", cls))
             else
-                GG.log(string.format("  ERROR stripping %s -> '%s'", cls, chest.name))
+                GG.log(string.format("  could not detach %s (presence %s)", cls, tostring(pc)))
             end
         end
     end
@@ -212,7 +252,7 @@ function GG.sweep(onlyBaseId)
     local dropper = pawns[1] and pawns[1].pawn or nil
     local function flagHasVisitor(flag)
         for _, p in ipairs(pawns) do
-            if flag.x and hdist(p.x, p.y, flag.x, flag.y) <= flag.radius then return true end
+            if inFlag(p.x, p.y, flag) then return true end
         end
         return false
     end
@@ -268,7 +308,7 @@ function GG.sweep(onlyBaseId)
             -- candidate chests = those inside the SAME flag's influence
             local candidates = {}
             for _, c in ipairs(chests) do
-                if c.name and c.x and hdist(c.x, c.y, flag.x, flag.y) <= flag.radius then
+                if c.name and inFlag(c.x, c.y, flag) then
                     candidates[#candidates + 1] = c
                 end
             end
@@ -281,12 +321,12 @@ function GG.sweep(onlyBaseId)
                     local rec = contentsMap[fullName(it.item)]
                     if rec then
                         GG.log(string.format("  unpacking %s (%d item(s) inside)", it.class, #rec.items))
-                        emptied = emptied + emptyContainerInto(iuc, it.item, contentsMap, candidates, 0)
+                        emptied = emptied + emptyContainerInto(iuc, it.item, contentsMap, candidates, 0, dropper)
                     end
                 end
                 -- if it's a weapon with attachments, strip them into chests first
                 if GG.config.stripAttachments then
-                    stripped = stripped + stripMountsInto(iuc, it.item, candidates)
+                    stripped = stripped + stripMountsInto(iuc, it.item, candidates, dropper)
                 end
                 local path, isDefault = categoryPath(it.class)
                 if isDefault then unmapped[it.class] = true end
@@ -296,42 +336,17 @@ function GG.sweep(onlyBaseId)
                     GG.log(string.format("  no chest for %s (path=%s)", it.class,
                         path and ("{" .. table.concat(path, ">") .. "}") or "<none>"))
                 else
-                    -- GATHER then ABSORB. AddOrMoveEntry only moves loose loot into a
-                    -- chest when the item AND chest are within a player's vicinity (a raw
-                    -- coordinate/presence write to fake that just yields an un-pickup-able
-                    -- ghost). So GATHER: re-drop the item AROUND its category chest via the
-                    -- game's own native drop (AItem:DropAround) — it stays a REAL,
-                    -- registered, interactable item and lands in the chest's vicinity.
-                    if GG.config.relocateToChest ~= false then
-                        local okD, resD = pcall(function()
-                            return it.item:DropAround(chest.owner, dropper, 50.0)
-                        end)
-                        if not okD then
-                            GG.log(string.format("  DropAround ERR for %s: %s", it.class, tostring(resD)))
-                        end
-                    end
-                    -- absorb: open the chest on our IUC then attempt the real move. With
-                    -- a player nearby this commits the item inside; otherwise it no-ops
-                    -- and the item just sits ON the chest until someone visits.
-                    local openH = (GG._openHandle or 1000) + 1
-                    GG._openHandle = openH
-                    if GG.config.absorbIntoChest ~= false then
-                        pcall(function() iuc:Server_OpenInventory(chest.inv, openH) end)
-                    end
-                    local ok, e = pcall(function()
-                        iuc:Server_InventoryComponent_AddOrMoveEntry(chest.inv, it.item, { Value = AUTOPLACE })
-                    end)
-                    local post = pcs(function() return presClass(it.item) end, nil)
-                    local landed = type(post) == "string" and post:find("InTheInventory", 1, true) ~= nil
-                    if ok and landed then
+                    -- gather onto the matched chest, then absorb when a player's near
+                    local st = gatherAbsorb(iuc, it.item, chest, dropper)
+                    if st == "moved" then
                         moved = moved + 1
                         GG.log(string.format("  moved %s -> chest '%s'", it.class, chest.name))
-                    elseif ok then
+                    elseif st == "gathered" then
                         gathered = gathered + 1 -- piled onto the chest, awaiting a visitor
                         GG.log(string.format("  gathered %s onto '%s' (awaiting player to absorb)", it.class, chest.name))
                     else
                         errs = errs + 1
-                        GG.log(string.format("  ERROR moving %s -> '%s': %s", it.class, chest.name, tostring(e)))
+                        GG.log(string.format("  ERROR moving %s -> '%s'", it.class, chest.name))
                     end
                 end
             end
@@ -418,7 +433,7 @@ function GG.dumpChests()
     GG.log("chests in your flag --")
     local n, shownChat = 0, 0
     for _, c in ipairs(collectChests()) do
-        if c.x and hdist(c.x, c.y, flag.x, flag.y) <= flag.radius then
+        if inFlag(c.x, c.y, flag) then
             n = n + 1
             local nm, line = c.name, nil
             if nm == nil or nm == "" then

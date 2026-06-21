@@ -47,6 +47,23 @@ Tune this in `Config.lua`: `relocateToChest` (do the gather), `absorbIntoChest`
 (pull gathered loot inside when a player's near), and `onlySortWithVisitor` (only
 act on a flag when someone's actually home, so abandoned bases don't pile up).
 
+### Containers and attachments (spill, then sort)
+
+`emptyContainers` and `stripAttachments` sort the *contents* of a dropped bag and
+the *attachments* on a dropped gun. An item locked inside a container or on a weapon
+socket can't be moved straight to a chest at range, so instead the mod **spills it
+onto the ground** right where it is — which is next to you, since you've just dropped
+the item — and then the **next sweep treats it as ordinary loose loot** and gathers
+it to the right chest like anything else.
+
+In practice: drop a loaded backpack or a gun with attachments and wait a moment — its
+contents/attachments pop out onto the ground, the empty bag/gun goes to its own chest,
+and the following sweeps carry the spilled items to their categories. One catch: a
+container's contents are only visible to the mod while a **player is near the bag/gun**
+(SCUM hides the contents of unattended containers), so this happens for items dropped
+or handled at the base, not for a sealed bag sitting untouched in a far corner — that
+one is simply sorted **whole** into a single chest, contents intact.
+
 > **Scope limit (by design):** SCUM only keeps loot and chests as live objects
 > within ~200m of a player. A base with nobody nearby has neither loose loot nor
 > chests in the world, so the sweep simply finds nothing there. Tidying a truly
