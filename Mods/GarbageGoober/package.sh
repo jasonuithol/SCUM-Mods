@@ -11,11 +11,11 @@
 #   ...\SCUM\Binaries\Win64\ue4ss\Mods\
 # (and drop UE4SS-settings-SCUM.ini in as their ...\ue4ss\UE4SS-settings.ini)
 #
-#   ./package.sh            # version 1.1.0 (current)
-#   ./package.sh 1.2.0      # custom version
+#   ./package.sh            # version 1.2.0 (current)
+#   ./package.sh 1.3.0      # custom version
 set -euo pipefail
 MOD="GarbageGoober"
-VERSION="${1:-1.1.0}"
+VERSION="${1:-1.2.0}"
 here="$(cd "$(dirname "$0")" && pwd)"      # Mods/<MOD>
 repo="$(cd "$here/../.." && pwd)"
 shared="$repo/Mods/shared/Scripts/gating.lua"
