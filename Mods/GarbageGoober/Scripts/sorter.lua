@@ -70,7 +70,7 @@ local function collectLooseLoot()
             if pc and pc:find("OnTheFloor", 1, true) and not isDeployable(it) then
                 local cls = classOf(it)
                 local x, y, src, ax, ay, px, py = looseLoc(it)
-                if (GG._locProbe or 0) > 0 then
+                if GG.config.debugLocProbe and (GG._locProbe or 0) > 0 then
                     GG._locProbe = GG._locProbe - 1
                     GG.log(string.format("  loc-probe: %-26s K2=(%s,%s) pres=(%s,%s) -> used %s",
                         cls, fmtn(ax), fmtn(ay), fmtn(px), fmtn(py), src))
@@ -197,6 +197,26 @@ function GG.sweep(onlyBaseId)
         return "no player nearby — nothing to sort"
     end
 
+    -- live player pawns: used as the AItem:DropAround dropper AND to tell whether
+    -- anyone is "home" at a flag, so we don't pile loot onto an abandoned base.
+    local pawns = {}
+    do
+        local ps = findAllAny("Prisoner", "BP_Prisoner_C")
+        if ps then for i = 1, #ps do local pw = ps[i]
+            if isValid(pw) then
+                local px, py = actorLoc(pw)
+                if px then pawns[#pawns + 1] = { pawn = pw, x = px, y = py } end
+            end
+        end end
+    end
+    local dropper = pawns[1] and pawns[1].pawn or nil
+    local function flagHasVisitor(flag)
+        for _, p in ipairs(pawns) do
+            if flag.x and hdist(p.x, p.y, flag.x, flag.y) <= flag.radius then return true end
+        end
+        return false
+    end
+
     -- refresh the per-player/per-flag entitlement set (throttled; see Config)
     GG.ensureResolved(false)
     if GG.config.entitlementsEnabled and not GG.resolved then
@@ -226,6 +246,8 @@ function GG.sweep(onlyBaseId)
     local moved, noFlag, disabled, noChest, noMatch, errs = 0, 0, 0, 0, 0, 0
     local emptied = 0 -- items pulled out of containers into chests
     local stripped = 0 -- attachments pulled off weapons into chests
+    local gathered = 0 -- items re-dropped onto a chest, awaiting a player to absorb
+    local noVisitor = 0 -- items in a flag with nobody home (skipped, not gathered)
     local unmapped = {} -- distinct item classes that hit no rule (tree gaps)
     for _, it in ipairs(items) do
         local flag = flagFor(it.x, it.y, flags)
@@ -240,6 +262,8 @@ function GG.sweep(onlyBaseId)
             end
         elseif not flagEnabled(flag) then
             disabled = disabled + 1 -- flag's owner not entitled (or per-flag override OFF)
+        elseif GG.config.onlySortWithVisitor ~= false and not flagHasVisitor(flag) then
+            noVisitor = noVisitor + 1 -- nobody home; don't pile loot on an abandoned base
         else
             -- candidate chests = those inside the SAME flag's influence
             local candidates = {}
@@ -272,12 +296,39 @@ function GG.sweep(onlyBaseId)
                     GG.log(string.format("  no chest for %s (path=%s)", it.class,
                         path and ("{" .. table.concat(path, ">") .. "}") or "<none>"))
                 else
+                    -- GATHER then ABSORB. AddOrMoveEntry only moves loose loot into a
+                    -- chest when the item AND chest are within a player's vicinity (a raw
+                    -- coordinate/presence write to fake that just yields an un-pickup-able
+                    -- ghost). So GATHER: re-drop the item AROUND its category chest via the
+                    -- game's own native drop (AItem:DropAround) — it stays a REAL,
+                    -- registered, interactable item and lands in the chest's vicinity.
+                    if GG.config.relocateToChest ~= false then
+                        local okD, resD = pcall(function()
+                            return it.item:DropAround(chest.owner, dropper, 50.0)
+                        end)
+                        if not okD then
+                            GG.log(string.format("  DropAround ERR for %s: %s", it.class, tostring(resD)))
+                        end
+                    end
+                    -- absorb: open the chest on our IUC then attempt the real move. With
+                    -- a player nearby this commits the item inside; otherwise it no-ops
+                    -- and the item just sits ON the chest until someone visits.
+                    local openH = (GG._openHandle or 1000) + 1
+                    GG._openHandle = openH
+                    if GG.config.absorbIntoChest ~= false then
+                        pcall(function() iuc:Server_OpenInventory(chest.inv, openH) end)
+                    end
                     local ok, e = pcall(function()
                         iuc:Server_InventoryComponent_AddOrMoveEntry(chest.inv, it.item, { Value = AUTOPLACE })
                     end)
-                    if ok then
+                    local post = pcs(function() return presClass(it.item) end, nil)
+                    local landed = type(post) == "string" and post:find("InTheInventory", 1, true) ~= nil
+                    if ok and landed then
                         moved = moved + 1
                         GG.log(string.format("  moved %s -> chest '%s'", it.class, chest.name))
+                    elseif ok then
+                        gathered = gathered + 1 -- piled onto the chest, awaiting a visitor
+                        GG.log(string.format("  gathered %s onto '%s' (awaiting player to absorb)", it.class, chest.name))
                     else
                         errs = errs + 1
                         GG.log(string.format("  ERROR moving %s -> '%s': %s", it.class, chest.name, tostring(e)))
@@ -287,15 +338,15 @@ function GG.sweep(onlyBaseId)
         end
     end
 
-    GG.log(string.format("sweep done: moved=%d  emptied=%d  stripped=%d  disabled=%d  outside-flag=%d  no-chest-in-flag=%d  no-name-match=%d  errors=%d",
-        moved, emptied, stripped, disabled, noFlag, noChest, noMatch, errs))
+    GG.log(string.format("sweep done: moved=%d  gathered=%d  emptied=%d  stripped=%d  disabled=%d  no-visitor=%d  outside-flag=%d  no-chest-in-flag=%d  no-name-match=%d  errors=%d",
+        moved, gathered, emptied, stripped, disabled, noVisitor, noFlag, noChest, noMatch, errs))
     local gaps = {}
     for cls in pairs(unmapped) do gaps[#gaps + 1] = cls end
     if #gaps > 0 then
         table.sort(gaps)
         GG.log("  unmapped (no rule -> default): " .. table.concat(gaps, ", "))
     end
-    return string.format("moved %d  emptied %d  stripped %d  (%d disabled, %d no-chest, %d no-match)", moved, emptied, stripped, disabled, noChest, noMatch)
+    return string.format("moved %d  gathered %d  emptied %d  stripped %d  (%d disabled, %d no-chest, %d no-match)", moved, gathered, emptied, stripped, disabled, noChest, noMatch)
 end
 
 -- goober classes — dump every distinct item class currently in the world and

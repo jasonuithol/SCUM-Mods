@@ -1,7 +1,7 @@
 # GarbageGoober
 
 A **server-side** SCUM UE4SS mod that periodically tidies bases: it sweeps loose
-loot lying on the ground inside a flag's influence and moves each item into a
+loot lying on the ground inside a flag's influence and sorts each item into a
 chest **in that same flag** whose custom name matches the item's category.
 
 Built for a **dedicated server** (runs server-side, so clients stay vanilla and
@@ -21,7 +21,31 @@ On a timer (default 60s) the mod:
 5. Builds a category **path** for the item (general → specific) from
    `categories.yaml` and looks for a chest whose name matches a path node,
    **most-specific first**, falling back toward the general node. First match wins.
-6. Moves the item into that chest. No match → the item is left alone and logged.
+6. Sorts the item into that chest (see **Gather then absorb** below). No match →
+   the item is left alone and logged.
+
+### Gather then absorb
+
+SCUM has no server-authoritative "add item to chest": its only move RPC
+(`AddOrMoveEntry`) commits a loose item into a chest **only when the item and the
+chest are both within a player's interaction reach (~2m)**. There's no way to move
+loot across a base from a distance — faking the item's position with a raw
+coordinate write just produces an un-pickup-able ghost.
+
+So the mod works *with* that limit in two stages:
+
+- **Gather** — each matched loose item is re-dropped **onto its category chest**
+  using the game's own native drop, so it stays a **real, pick-up-able item** and
+  lands right next to the chest. This works at any range, so loot from anywhere in
+  the flag is collected onto the correct chests.
+- **Absorb** — while a player is at the base, the sweep pulls each gathered item
+  **inside** its chest. Until someone visits, gathered loot sits as normal items
+  stacked next to the chests (harmless — real items, and they persist across
+  restarts). It's absorbed the next time a player is present.
+
+Tune this in `Config.lua`: `relocateToChest` (do the gather), `absorbIntoChest`
+(pull gathered loot inside when a player's near), and `onlySortWithVisitor` (only
+act on a flag when someone's actually home, so abandoned bases don't pile up).
 
 > **Scope limit (by design):** SCUM only keeps loot and chests as live objects
 > within ~200m of a player. A base with nobody nearby has neither loose loot nor

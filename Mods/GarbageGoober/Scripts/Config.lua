@@ -21,8 +21,30 @@ end
 return {
     -- ---- behaviour -------------------------------------------------------
     sweepIntervalMs = 60000,  -- sweep period (ms); restart to change; "goober now" = on demand
-    flagRadiusOverride = nil, -- nil = live ConZBaseManager._flagInfluenceRadius (5000cm)
+    flagRadiusOverride = nil, -- nil = live ConZBaseManager._flagInfluenceRadius (5000cm
+                              -- /50m). This scopes which loose loot a flag gathers — keep
+                              -- it ~the base footprint. Set a cm value only for unusually
+                              -- large bases; too large vacuums a neighbour's loot in.
     nameContains = false,     -- false = exact chest-name match; true = substring
+
+    -- GATHER then ABSORB. SCUM's move RPC (AddOrMoveEntry) only puts loose loot into
+    -- a chest when the item AND the chest are within a player's interaction vicinity
+    -- (~2m) — there's no server-authoritative "add to chest". So instead of moving
+    -- loot across the base (impossible), we GATHER it onto the right chest with the
+    -- game's native re-drop, and let it ABSORB into the chest when a player visits.
+    --   relocateToChest: re-drop each matched loose item onto its category chest
+    --     (real, pick-up-able item). false = leave loot where it lies (then only loot
+    --     already next to a chest ever sorts — the old ~2m behaviour).
+    --   absorbIntoChest: open the chest on our IUC before the move so a gathered item
+    --     commits INSIDE the chest while a player is nearby. false = gather only.
+    --   onlySortWithVisitor: only gather/sort a flag when a player is within it, so
+    --     abandoned bases don't accumulate loot piles on their chests. false = always.
+    relocateToChest = true,
+    absorbIntoChest = true,
+    onlySortWithVisitor = true,
+    -- debugLocProbe: log K2-vs-presence location for the first few loot items after
+    -- each reload (diagnostic only). Leave false in normal operation.
+    debugLocProbe = false,
 
     -- Empty containers: when a swept loose item CONTAINS other items (backpack,
     -- clothing with pockets, etc.), first move its contents out into the matching
