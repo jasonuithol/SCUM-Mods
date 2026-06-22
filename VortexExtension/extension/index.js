@@ -40,10 +40,30 @@ function registerVariant(context, variant) {
     queryModPath: () => '.', // base deploy = game root; mod-types override per type
     logo: 'gameart.png',
     executable: () => variant.exe,
+    // -log opens the UE console window + writes the live log, for diagnosing
+    // a Vortex-launched run. The game's own starter params are set here, not
+    // editable in Vortex's UI — which is why there's no field for them.
+    parameters: ['-log'],
     requiredFiles: [variant.exe],
     setup: (discovery) => setup(context.api, discovery, variant),
-    supportedTools: [],
-    environment: { SteamAPPId: variant.steamAppId },
+    // Also expose a clickable starter tile with -log, in case the main play
+    // button doesn't forward the game parameters.
+    supportedTools: [{
+      id: `${variant.id}-log`,
+      name: `${variant.name} (-log console)`,
+      executable: () => variant.exe,
+      requiredFiles: [variant.exe], // Vortex iterates this during tool discovery
+      parameters: ['-log'],
+      relative: true,
+      exclusive: true,
+      defaultPrimary: false,
+    }],
+    // NB: deliberately NO `environment: { SteamAPPId }`. Forcing the server's
+    // app id (3792580) into the process env breaks client auth — the joining
+    // client's Steam ticket is for the game app, the forced id mismatches, and
+    // BeginAuthSession never completes (join times out). Letting the server
+    // resolve its own Steam context (as a Steam/tool launch does) makes joins
+    // work. Confirmed: the -log tool (no env override) connects fine.
     details: {
       steamAppId: parseInt(variant.steamAppId, 10),
       // Both variants pull mods from the single "scum" domain on nexusmods.com,
