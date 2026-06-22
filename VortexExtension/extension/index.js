@@ -31,6 +31,30 @@ async function setup(api, discovery, variant) {
   await ensureUE4SS(api, variant.id, discovery.path);
 }
 
+// Build the launcher tools shown on a variant's dashboard. Every tool needs
+// requiredFiles or Vortex throws "requiredFiles is not iterable" during tool
+// discovery and blocks game-mode activation.
+function toolsFor(variant) {
+  const tool = (suffix, label, params) => ({
+    id: `${variant.id}-${suffix}`,
+    name: `${variant.name} (${label})`,
+    executable: () => variant.exe,
+    requiredFiles: [variant.exe],
+    parameters: params,
+    relative: true,
+    exclusive: true,
+    defaultPrimary: false,
+  });
+  const tools = [tool('log', '-log console', ['-log'])];
+  if (variant.side === 'client') {
+    // Launch the client with BattlEye off (e.g. to join a modded/BE-off
+    // server). Launching SCUM.exe directly — as Vortex does, not via Steam —
+    // is what makes -nobattleye actually take effect.
+    tools.push(tool('nobattleye', 'no BattlEye', ['-nobattleye']));
+  }
+  return tools;
+}
+
 function registerVariant(context, variant) {
   context.registerGame({
     id: variant.id,
@@ -46,18 +70,10 @@ function registerVariant(context, variant) {
     parameters: ['-log'],
     requiredFiles: [variant.exe],
     setup: (discovery) => setup(context.api, discovery, variant),
-    // Also expose a clickable starter tile with -log, in case the main play
-    // button doesn't forward the game parameters.
-    supportedTools: [{
-      id: `${variant.id}-log`,
-      name: `${variant.name} (-log console)`,
-      executable: () => variant.exe,
-      requiredFiles: [variant.exe], // Vortex iterates this during tool discovery
-      parameters: ['-log'],
-      relative: true,
-      exclusive: true,
-      defaultPrimary: false,
-    }],
+    // Clickable starter tiles: a -log console for both variants (also a
+    // fallback if the play button doesn't forward params), plus a no-BattlEye
+    // launcher for the client. See toolsFor().
+    supportedTools: toolsFor(variant),
     // NB: deliberately NO `environment: { SteamAPPId }`. Forcing the server's
     // app id (3792580) into the process env breaks client auth — the joining
     // client's Steam ticket is for the game app, the forced id mismatches, and
