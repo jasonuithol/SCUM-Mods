@@ -17,13 +17,15 @@ automatic UE4SS provisioning and one-click install of UE4SS Lua/DLL mods.
 > Vortex game extension for **SCUM**, covering both the game client (Steam
 > 513710) and the dedicated server (Steam 3792580).
 >
-> - **Auto-installs UE4SS.** On first manage it downloads RE-UE4SS v3.0.1 from
->   GitHub and configures it with SCUM-safe settings (disables the UObjectArray
->   cache that crashes SCUM, and the GUI console for headless servers). Skips if
->   UE4SS is already present.
+> - **Auto-installs UE4SS.** On first manage it downloads the SCUM-compatible
+>   RE-UE4SS build from GitHub and configures it with SCUM-safe settings (engine
+>   hooks off, UE 4.27 override, the UObjectArray cache that crashes SCUM
+>   disabled, GUI console off for headless servers). Skips if UE4SS is already
+>   present.
 > - **One-click mod installs.** UE4SS mods carrying a `ue4ss.mod.json` manifest
 >   install straight into `SCUM/Binaries/Win64/ue4ss/Mods/<Name>/` and are
->   registered in `mods.txt` on enable (never writes `enabled.txt`).
+>   enabled in the UE4SS mod list (`mods.json`) on enable/deploy (never writes
+>   `enabled.txt`).
 > - **Updates** work through Vortex's normal Nexus integration.
 >
 > Source: https://github.com/jasonuithol/SCUM-Mods
@@ -32,15 +34,17 @@ automatic UE4SS provisioning and one-click install of UE4SS Lua/DLL mods.
 
 - Pure game-extension; registers two games (client + dedicated server), one
   UE4SS injector mod type + installer, one manifest-driven UE4SS mod type +
-  installer, and a `mods.txt` sync. No native modules.
+  installer, and a `mods.json` (+ legacy `mods.txt`) sync. No native modules.
 - UE4SS is fetched from the official RE-UE4SS GitHub releases at setup time
-  (best-effort; falls back to a manual-download notification on failure).
-- Tested live: clean-slate auto-provision of UE4SS with SCUM-safe settings, and
-  install/enable/deploy of several Lua + one DLL mod.
+  (a pinned SCUM-tested experimental build; best-effort, falls back to a
+  manual-download notification on failure).
+- Tested live end-to-end: clean-slate auto-provision of UE4SS with SCUM-safe
+  settings on a dedicated server, mods deployed + enabled in `mods.json` and
+  confirmed loading/running; client launch + connect verified.
 
 ## Pre-publish checklist
 
 - [x] `extension/gameart.jpg` is real 16:9 art (SCUM landscape store art, 640x360).
-- [ ] In-game smoke test: a mod actually runs on a live server (not just deploys).
-- [ ] Bump `info.json` version if iterating; keep `name` stable across updates.
-- [ ] Re-run `./package.sh` after any change.
+- [x] In-game smoke test: mods auto-provision + load + run on a live server.
+- [x] Version `1.0.0`; `name` ("Game: SCUM (UE4SS)") kept stable for updates.
+- [x] Re-run `./package.sh` after changes (artifact: dist/scum-vortex-extension-1.0.0.zip).
