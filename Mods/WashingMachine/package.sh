@@ -41,6 +41,25 @@ cp "$ue4ss_ini"      "$stage/UE4SS-settings-SCUM.ini"
 # its own Scripts\gating.lua first.
 cp "$shared"         "$stage/$MOD/Scripts/gating.lua"
 
+# Vortex manifest (ue4ss.mod.json) — makes this zip installable by the SCUM
+# Vortex extension. Placed INSIDE the mod folder so the same zip serves both
+# manual install and Vortex (the extension treats this folder as the payload).
+modid="$(printf '%s' "$MOD" | sed -E 's/([a-z0-9])([A-Z])/\1-\2/g' | tr '[:upper:]' '[:lower:]')"
+cat > "$stage/$MOD/ue4ss.mod.json" <<JSON
+{
+  "id": "$modid",
+  "name": "$MOD",
+  "version": "$VERSION",
+  "folderId": "$MOD",
+  "side": "server",
+  "loadOrder": 100,
+  "ue4ssMinVersion": "3.0.1",
+  "author": "Jason Uithol",
+  "homepage": "https://github.com/jasonuithol/SCUM-Mods",
+  "nexus": { "domain": "scum", "modId": 70 }
+}
+JSON
+
 # zip via python (portable; no `zip` dependency on Windows git-bash)
 python - "$stage" "$repo/dist/$MOD-$VERSION.zip" <<'PY'
 import sys, os, zipfile

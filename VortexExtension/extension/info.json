@@ -1,0 +1,6 @@
+{
+  "name": "Game: SCUM (UE4SS)",
+  "author": "Jason Uithol",
+  "version": "0.1.0",
+  "description": "Vortex support for SCUM (client + dedicated server), with UE4SS auto-provisioning and manifest-driven UE4SS Lua mod installation."
+}

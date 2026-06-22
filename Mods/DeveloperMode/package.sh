@@ -24,6 +24,24 @@ cp "$here/UE4SS-settings-SCUM.ini"  "$stage/UE4SS-settings-SCUM.ini"
 cp "$here/README.md"                "$stage/README.md"
 cp "$here/LICENSE"                  "$stage/LICENSE"
 
+# Vortex manifest (ue4ss.mod.json) — makes this zip installable by the SCUM
+# Vortex extension. Placed INSIDE the mod folder so the same zip serves both
+# manual install and Vortex (the extension treats this folder as the payload).
+cat > "$stage/DeveloperMode/ue4ss.mod.json" <<JSON
+{
+  "id": "developer-mode",
+  "name": "DeveloperMode",
+  "version": "$VERSION",
+  "folderId": "DeveloperMode",
+  "side": "server",
+  "loadOrder": 100,
+  "ue4ssMinVersion": "3.0.1",
+  "author": "Jason Uithol",
+  "homepage": "https://github.com/jasonuithol/SCUM-Mods",
+  "nexus": { "domain": "scum", "modId": 45 }
+}
+JSON
+
 # zip via python (portable; no `zip` dependency on Windows git-bash)
 python - "$stage" "$repo/dist/DeveloperMode-$VERSION.zip" <<'PY'
 import sys, os, zipfile

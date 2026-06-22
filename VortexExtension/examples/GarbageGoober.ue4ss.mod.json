@@ -1,0 +1,9 @@
+{
+  "id": "garbage-goober",
+  "name": "GarbageGoober",
+  "version": "1.2.0",
+  "folderId": "GarbageGoober",
+  "side": "server",
+  "loadOrder": 100,
+  "ue4ssMinVersion": "3.0.1"
+}
