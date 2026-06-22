@@ -63,7 +63,7 @@ function registerVariant(context, variant) {
     mergeMods: true,
     queryArgs: { steam: [{ id: variant.steamAppId }] },
     queryModPath: () => '.', // base deploy = game root; mod-types override per type
-    logo: 'gameart.png',
+    logo: 'gameart.jpg',
     executable: () => variant.exe,
     // -log opens the UE console window + writes the live log, for diagnosing
     // a Vortex-launched run. The game's own starter params are set here, not

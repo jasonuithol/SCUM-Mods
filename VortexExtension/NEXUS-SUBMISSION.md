@@ -40,7 +40,7 @@ automatic UE4SS provisioning and one-click install of UE4SS Lua/DLL mods.
 
 ## Pre-publish checklist
 
-- [ ] Replace `extension/gameart.png` with real 16:9 art (current is a placeholder).
+- [x] `extension/gameart.jpg` is real 16:9 art (SCUM landscape store art, 640x360).
 - [ ] In-game smoke test: a mod actually runs on a live server (not just deploys).
 - [ ] Bump `info.json` version if iterating; keep `name` stable across updates.
 - [ ] Re-run `./package.sh` after any change.

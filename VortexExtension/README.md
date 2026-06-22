@@ -31,7 +31,7 @@ VortexExtension/
 │   ├── installers.js   ← UE4SS injector + Lua mod installers
 │   ├── modsFile.js     ← live mods.txt sync
 │   ├── downloader.js   ← RE-UE4SS GitHub auto-download
-│   └── gameart.png     ← logo (replace with real art before publishing)
+│   └── gameart.jpg     ← logo (SCUM landscape store art, 640x360)
 ├── MANIFEST.md         ← the mod manifest spec
 ├── deploy-local.ps1    ← copy extension/ into the local Vortex plugins dir
 └── package.sh          ← zip extension/ for distribution
@@ -60,6 +60,6 @@ Upload under the **Vortex > Extensions** category on Nexus Mods.
 - The GitHub auto-download path drives Vortex's download+install pipeline and is
   the piece most in need of **in-Vortex testing** (it's best-effort: on any
   failure it shows a notification with a manual RE-UE4SS link).
-- `gameart.png` is a placeholder — replace with real 16:9 art before publishing.
+- `gameart.jpg` is the SCUM landscape store art (640x360, 16:9).
 - Strict manifest gating by design; no inference fallback for third-party mods
   (easy to add later — see MANIFEST.md).
