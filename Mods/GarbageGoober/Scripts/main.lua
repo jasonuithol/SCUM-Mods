@@ -25,8 +25,17 @@
 -- into this mod's own Scripts folder (Scripts\gating.lua) so the mod is fully
 -- self-contained — no dependency on a shared ...\Mods\shared\ folder.
 
--- >>> set this to the mod's folder on your server <<<
-local MOD_DIR = [[C:\Program Files (x86)\Steam\steamapps\common\SCUM Server\SCUM\Binaries\Win64\ue4ss\Mods\GarbageGoober]]
+-- Resolve this mod's folder from main.lua's own path, so it works on ANY
+-- install (client or server, any drive, Vortex or manual) with no hand-edit.
+-- Falls back to a fixed path only if Lua reflection is unavailable.
+local MOD_DIR
+do
+    local src = ((debug and debug.getinfo) and debug.getinfo(1, "S").source) or ""
+    MOD_DIR = (src:gsub("^@", "")):match("^(.*)[/\\][^/\\]+[/\\][^/\\]+$")
+    if not MOD_DIR or #MOD_DIR == 0 then
+        MOD_DIR = [[C:\Program Files (x86)\Steam\steamapps\common\SCUM Server\SCUM\Binaries\Win64\ue4ss\Mods\GarbageGoober]]
+    end
+end
 local SCRIPTS = MOD_DIR .. [[\Scripts]]
 local LOGFILE = MOD_DIR .. [[\GarbageGoober.log]]
 
