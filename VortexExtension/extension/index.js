@@ -45,14 +45,15 @@ function toolsFor(variant) {
     exclusive: true,
     defaultPrimary: false,
   });
-  const tools = [tool('log', '-log console', ['-log'])];
   if (variant.side === 'client') {
-    // Launch the client with BattlEye off (e.g. to join a modded/BE-off
-    // server). Launching SCUM.exe directly — as Vortex does, not via Steam —
-    // is what makes -nobattleye actually take effect.
-    tools.push(tool('nobattleye', 'no BattlEye', ['-nobattleye']));
+    // Client: a BattlEye-off launcher (to join a modded / BE-off server).
+    // Launching SCUM.exe directly — as Vortex does, not via Steam — is what
+    // makes -nobattleye actually take effect.
+    return [tool('nobattleye', 'no BattlEye', ['-nobattleye'])];
   }
-  return tools;
+  // Server: a -log console launcher with BattlEye off, for local mod testing.
+  // (The play button already launches the server with -log + BattlEye on.)
+  return [tool('log-nobattleye', '-log -nobattleye', ['-log', '-nobattleye'])];
 }
 
 function registerVariant(context, variant) {
@@ -70,9 +71,8 @@ function registerVariant(context, variant) {
     parameters: ['-log'],
     requiredFiles: [variant.exe],
     setup: (discovery) => setup(context.api, discovery, variant),
-    // Clickable starter tiles: a -log console for both variants (also a
-    // fallback if the play button doesn't forward params), plus a no-BattlEye
-    // launcher for the client. See toolsFor().
+    // Clickable starter tiles: client -> a no-BattlEye launcher; server -> a
+    // -log -nobattleye launcher. See toolsFor().
     supportedTools: toolsFor(variant),
     // NB: deliberately NO `environment: { SteamAPPId }`. Forcing the server's
     // app id (3792580) into the process env breaks client auth — the joining
