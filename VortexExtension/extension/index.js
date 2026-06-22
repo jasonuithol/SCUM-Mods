@@ -103,10 +103,28 @@ function registerProvenance(context) {
     if (!isOurGame(gameId)) return;
     const all = api.getState().persistent.mods[gameId] || {};
     const mod = all[modId];
-    if (!mod || mod.type !== common.MODTYPE_LUA) return;
+    if (!mod) return;
     const a = mod.attributes || {};
-    if (a.source) return; // genuine download already identified — leave it alone
     const set = (key, value) => api.store.dispatch(actions.setModAttribute(gameId, modId, key, value));
+
+    // UE4SS is auto-downloaded from GitHub. Vortex's MD5 meta-lookup can match
+    // the zip to a copy someone uploaded on an unrelated game's Nexus page
+    // (e.g. "Gothic Remake"), mislabelling its origin. Force-correct it so it
+    // shows as a GitHub-sourced UE4SS for SCUM with no bogus update target.
+    if (mod.type === common.MODTYPE_UE4SS) {
+      set('source', 'other');
+      set('downloadGame', gameId);
+      set('modName', 'RE-UE4SS');
+      set('customFileName', 'RE-UE4SS (auto-provisioned)');
+      set('homepage', 'https://github.com/UE4SS-RE/RE-UE4SS');
+      set('modId', undefined);   // drop the misattributed Nexus mod id
+      set('fileId', undefined);
+      log('info', 'corrected UE4SS mod attribution', { gameId, modId });
+      return;
+    }
+
+    if (mod.type !== common.MODTYPE_LUA) return;
+    if (a.source) return; // genuine download already identified — leave it alone
     if (a.scumNexusModId && a.scumNexusFileId) {
       // Complete Nexus identification -> full update support.
       set('source', 'nexus');
