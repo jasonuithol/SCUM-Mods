@@ -22,6 +22,16 @@ Designed for a [b]dedicated server[/b] (runs inside the server process via UE4SS
 [i]You need [b]the experimental/latest [/b]build — it uses the modern [b]ue4ss\ sub-folder layout[/b] that every path below assumes (dwmapi.dll next to the game .exe, everything else under ue4ss\). The older stable v3.0.1 download uses a flat layout and will [b]not[/b] match these steps — don't use it. What makes UE4SS stable on SCUM is the shipped [b]UE4SS-settings-SCUM.ini[/b] (step 2), not the exact build number.[/i][/*]
 [/list]
 
+[size=4][b]Install — Vortex (easiest)[/b][/size]
+[i]If you use the [url=https://www.nexusmods.com/site/mods/1]Vortex[/url] mod manager with the [b]SCUM (UE4SS)[/b] game extension, this is by far the simplest path — Vortex sets up UE4SS and enables the mod for you, so you can skip the manual UE4SS download, the settings file, and the mod-list editing below.[/i]
+[list=1]
+[*][b]Manage the game in Vortex[/b] — [b]SCUM Dedicated Server[/b] (server-side, recommended) or [b]SCUM[/b] (single-player). On first manage, the extension auto-downloads UE4SS and applies the SCUM-safe settings.[/*]
+[*][b]Install this mod[/b] — click [b]Mod Manager Download[/b] on this page's [b]Files[/b] tab, or drag the mod's [b].zip[/b] onto Vortex's [b]Mods[/b] tab.[/*]
+[*][b]Enable[/b] the mod and click [b]Deploy[/b]. Vortex installs it to [b]…\ue4ss\Mods\ClothesDryer\[/b] and adds it to the UE4SS mod list for you.[/*]
+[*][b]Launch[/b] — server: the normal play button; single-player: the extension's [b]"SCUM (no BattlEye)"[/b] launcher tool. Type [b]dryer[/b] in chat to confirm it loaded.[/*]
+[/list]
+[i]Everything below is only needed for a manual install (without Vortex).[/i]
+
 [size=4][b]Install — Dedicated server (recommended)[/b][/size]
 [i]Server-side only: clients stay vanilla, BattlEye stays on. Below, [b]<Win64>[/b] = the [b]…\SCUM\Binaries\Win64\[/b] folder that contains [b]SCUMServer.exe[/b].[/i]
 
@@ -30,10 +40,9 @@ Designed for a [b]dedicated server[/b] (runs inside the server process via UE4SS
 [*][b]Install UE4SS:[/b] extract the download into [b]<Win64>\[/b] so [b]dwmapi.dll[/b] + the [b]ue4ss\[/b] folder sit next to SCUMServer.exe.[/*]
 [*][b]Apply SCUM-safe settings:[/b] copy [b]UE4SS-settings-SCUM.ini[/b] from this download into [b]<Win64>\ue4ss\[/b] and rename it to [b]UE4SS-settings.ini[/b][/*]
 [*][b]Install the mod:[/b] copy the single [b]ClothesDryer[/b] folder into [b]<Win64>\ue4ss\Mods\[/b].[/*]
-[*][b]Point it at itself:[/b] open [b]ClothesDryer\Scripts\main.lua[/b] and set [b]MOD_DIR[/b] to that folder's full path.[/*]
-[*][b]Enable it[/b] in [b]<Win64>\ue4ss\Mods\mods.txt[/b]:
-[code]ClothesDryer : 1[/code]
-Do [b]not[/b] create [b]enabled.txt[/b] — it silently overrides mods.txt.[/*]
+[*][b]Enable it[/b] — add an entry to [b]<Win64>\ue4ss\Mods\mods.json[/b] (a JSON array):
+[code]{ "mod_name": "ClothesDryer", "mod_enabled": true }[/code]
+Current UE4SS builds use [b]mods.json[/b]; older builds used a [b]mods.txt[/b] line [b]ClothesDryer : 1[/b]. Do [b]not[/b] create [b]enabled.txt[/b] — it silently overrides the mod list.[/*]
 [*][b]Launch[/b] SCUMServer.exe normally (BattlEye is not involved server-side), then check [b]ClothesDryer\ClothesDryer.log[/b] for [b]ClothesDryer loaded[/b] and type [b]dryer[/b] in chat.[/*]
 [/list]
 
@@ -45,10 +54,9 @@ NOTE: Below, [b]<Win64>[/b] = your client's [b]…\SCUM\Binaries\Win64\[/b] fold
 [*][b]Install UE4SS:[/b] extract the download into [b]<Win64>\[/b] so [b]dwmapi.dll[/b] + the [b]ue4ss\[/b] folder sit next to SCUM.exe.[/*]
 [*][b]Apply SCUM-safe settings:[/b] copy [b]UE4SS-settings-SCUM.ini[/b] into [b]<Win64>\ue4ss\[/b] and rename it to [b]UE4SS-settings.ini[/b] (overwrite).[/*]
 [*][b]Install the mod:[/b] copy the single [b]ClothesDryer[/b] folder into [b]<Win64>\ue4ss\Mods\[/b][/*]
-[*][b]Point it at itself:[/b] open [b]ClothesDryer\Scripts\main.lua[/b] and set [b]MOD_DIR[/b] to that folder's full [b]client[/b] path.[/*]
-[*][b]Enable it[/b] in [b]<Win64>\ue4ss\Mods\mods.txt[/b]:
-[code]ClothesDryer : 1[/code]
-Do [b]not[/b] create [b]enabled.txt[/b].[/*]
+[*][b]Enable it[/b] — add an entry to [b]<Win64>\ue4ss\Mods\mods.json[/b] (a JSON array):
+[code]{ "mod_name": "ClothesDryer", "mod_enabled": true }[/code]
+Current UE4SS builds use [b]mods.json[/b]; older builds used a [b]mods.txt[/b] line [b]ClothesDryer : 1[/b]. Do [b]not[/b] create [b]enabled.txt[/b] — it silently overrides the mod list.[/*]
 [*][b]Launch correctly:[/b] NOTE: I have connected to the local sandbox via Steam, and without -nobattleye and have been fine but, for maximum safety: 
 
 Leave the [b]BEService[/b] at its default (Manual) — no need to disable it. Launch [b]SCUM.exe directly[/b] (the exe in <Win64>\, e.g. a desktop shortcut) with [b]-nobattleye[/b]. Do [b]not[/b] use Steam's Play button — Steam re-invokes BattlEye even with the flag.

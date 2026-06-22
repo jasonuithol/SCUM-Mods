@@ -17,12 +17,23 @@ This patches your dedicated-server process [b]in memory[/b]. Installing it requi
 [*]Your account already has admin/elevated rights to issue [b]#[/b] commands.
 [/list]
 
+[size=4][b]Install — Vortex (easiest)[/b][/size]
+[i]If you use the [url=https://www.nexusmods.com/site/mods/1]Vortex[/url] mod manager with the [b]SCUM (UE4SS)[/b] game extension, this is the simplest path — Vortex sets up UE4SS and enables the mod for you.[/i]
+[list=1]
+[*][b]Manage SCUM Dedicated Server in Vortex.[/b] On first manage, the extension auto-downloads UE4SS and applies the SCUM-safe settings.
+[*][b]Install this mod[/b] — click [b]Mod Manager Download[/b] on this page's [b]Files[/b] tab, or drag the [b].zip[/b] onto Vortex's [b]Mods[/b] tab.
+[*][b]Enable[/b] the mod and click [b]Deploy[/b]. Vortex installs it to [b]…\ue4ss\Mods\DeveloperMode\[/b] and adds it to the UE4SS mod list for you.
+[*][b]Start the server[/b], then confirm in [b]…\Mods\DeveloperMode\dlls\DeveloperMode.log[/b] (look for [b]PATCHED[/b]).
+[/list]
+[i]Everything below is only needed for a manual install (without Vortex).[/i]
+
 [size=4][b]Installation[/b][/size]
 [list=1]
 [*]Copy the [b]DeveloperMode[/b] folder into your server's UE4SS mods directory, so you have:
 [code]<server>\SCUM\Binaries\Win64\ue4ss\Mods\DeveloperMode\dlls\main.dll[/code]
-[*]Enable it in [b]...\ue4ss\Mods\mods.txt[/b] by adding the line:
-[code]DeveloperMode : 1[/code]
+[*]Enable it in [b]...\ue4ss\Mods\mods.json[/b] (a JSON array) by adding:
+[code]{ "mod_name": "DeveloperMode", "mod_enabled": true }[/code]
+(Current UE4SS builds use [b]mods.json[/b]; older builds used a [b]mods.txt[/b] line [b]DeveloperMode : 1[/b].)
 [*]Start the server. Confirm it worked in [b]...\Mods\DeveloperMode\dlls\DeveloperMode.log[/b]:
 [code]PATCHED predicate 0x... -> B0 01 C3. Tier-4 developer commands unlocked.[/code]
 [*]In-game, an admin stands in the base and runs e.g. [b]#UpgradeBaseBuildingElementsWithinRadius 5000[/b].
@@ -36,7 +47,7 @@ It does [b]not[/b] modify SCUMServer.exe on disk — the 3-byte patch is applied
 [size=4][b]Troubleshooting[/b][/size]
 [list]
 [*]No effect? Check [b]DeveloperMode.log[/b] next to the DLL. "PATCHED ..." = success; "dev gate not located" = SCUM changed the gate (wait for an updated version).
-[*]Still "Player must be developer."? The mod isn't loading — verify UE4SS loads server-side and the mods.txt line is present.
+[*]Still "Player must be developer."? The mod isn't loading — verify UE4SS loads server-side and the mods.json entry (or legacy mods.txt line) is present.
 [/list]
 
 [size=4][b]Notes[/b][/size]
