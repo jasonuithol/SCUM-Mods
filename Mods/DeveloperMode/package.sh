@@ -36,7 +36,7 @@ cat > "$stage/DeveloperMode/ue4ss.mod.json" <<JSON
   "side": "server",
   "loadOrder": 100,
   "ue4ssMinVersion": "3.0.1",
-  "author": "Jason Uithol",
+  "author": "modunderscore",
   "homepage": "https://github.com/jasonuithol/SCUM-Mods",
   "nexus": { "domain": "scum", "modId": 45 }
 }
