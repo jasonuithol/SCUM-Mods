@@ -92,11 +92,25 @@ function startInstall(api, downloadId) {
   });
 }
 
+// Is UE4SS already installed as a Vortex MOD for this game? This is the
+// authoritative check — the on-disk files come and go as Vortex deploys/purges
+// on profile switches, but the mod entry persists. Without this guard, setup()
+// re-triggers an install on every profile switch (the "replace / install
+// variant" popup) because the deployed files are briefly absent.
+function hasUE4SSMod(api, gameId) {
+  const mods = api.getState().persistent.mods[gameId] || {};
+  return Object.values(mods).some((m) => m.type === common.MODTYPE_UE4SS);
+}
+
 // Public: ensure UE4SS exists for this game; download+install if missing.
 async function ensureUE4SS(api, gameId, gamePath) {
   if (!gamePath) return;
+  if (hasUE4SSMod(api, gameId)) {
+    log('info', 'UE4SS already installed as a Vortex mod; skipping auto-download', { gameId });
+    return;
+  }
   if (await isInstalled(gamePath)) {
-    log('info', 'UE4SS already present for SCUM; skipping auto-download', { gameId });
+    log('info', 'UE4SS already present on disk for SCUM; skipping auto-download', { gameId });
     return;
   }
   let asset;
