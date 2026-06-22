@@ -87,7 +87,30 @@ one is simply sorted **whole** into a single chest, contents intact.
 This mod is **pure Lua** — it ships no `.pak`, so it needs **only UE4SS itself**.
 The old `-fileopenlog` / `-fileloadlog` launch flag and the **SCUM-AllowMods** PAK
 patch are **not** required (those only re-enable *unsigned PAK* mods; this mod has
-none). Two separate, complete walk-throughs follow — use **one**.
+none). Three ways to install follow — **Vortex** (easiest), or one of the two
+manual walk-throughs (use one).
+
+---
+
+## Install — Vortex (easiest)
+
+If you use the [Vortex](https://www.nexusmods.com/vortex) mod manager with the
+**SCUM (UE4SS)** game extension, this is by far the simplest path — Vortex sets up
+UE4SS and enables the mod for you, so you can skip the manual UE4SS download, the
+settings file, and the mod-list editing described below.
+
+1. **Manage the game in Vortex** — *SCUM Dedicated Server* (server-side,
+   recommended) or *SCUM* (single-player). The first time you manage it, the
+   extension automatically downloads UE4SS and applies the SCUM-safe settings.
+2. **Install this mod** — click **Mod Manager Download** on the Nexus *Files* page,
+   or drag the mod's `.zip` onto Vortex's **Mods** tab.
+3. **Enable** the mod and click **Deploy**. Vortex installs it to
+   `…\ue4ss\Mods\GarbageGoober\` and adds it to the UE4SS mod list for you.
+4. **Launch** — for a server, the normal Vortex play button; for single-player, the
+   extension's **"SCUM (no BattlEye)"** launcher tool. In game, type **`goober`** in
+   normal chat to confirm it loaded.
+
+Everything below is only needed for a **manual** install (without Vortex).
 
 ---
 
@@ -110,18 +133,14 @@ runs on players' PCs. Throughout, `<Win64>` means
    `<Win64>\ue4ss\Mods\`. It is **self-contained** — the shared gating library is
    bundled inside it (`Scripts\gating.lua`), so there is **no separate `shared`
    folder** to install.
-4. **Point the mod at itself.** Open
-   `<Win64>\ue4ss\Mods\GarbageGoober\Scripts\main.lua` and set **`MOD_DIR`** (near
-   the top) to that folder's full path, e.g.
-   `C:\Program Files (x86)\Steam\steamapps\common\SCUM Server\SCUM\Binaries\Win64\ue4ss\Mods\GarbageGoober`.
-5. **Enable it.** Add this line to `<Win64>\ue4ss\Mods\mods.txt`:
+4. **Enable it.** Add an entry for this mod to `<Win64>\ue4ss\Mods\mods.json` (a JSON array):
+   ```json
+   { "mod_name": "GarbageGoober", "mod_enabled": true }
    ```
-   GarbageGoober : 1
-   ```
-   Do **not** create `enabled.txt` — it silently overrides `mods.txt`.
-6. **Launch.** Start `SCUMServer.exe` the way you normally do. BattlEye is **not
+   Current UE4SS builds use `mods.json`; older builds used a `mods.txt` line `GarbageGoober : 1`. Do **not** create `enabled.txt` — it silently overrides the mod list.
+5. **Launch.** Start `SCUMServer.exe` the way you normally do. BattlEye is **not
    involved server-side** — no launch flags needed here.
-7. **Verify.** Open `<Win64>\ue4ss\Mods\GarbageGoober\GarbageGoober.log` and look
+6. **Verify.** Open `<Win64>\ue4ss\Mods\GarbageGoober\GarbageGoober.log` and look
    for **`GarbageGoober is loaded`**. In game, type **`goober`** in normal chat —
    you should get the command list back.
 
@@ -149,21 +168,17 @@ path: `C:\Program Files (x86)\Steam\steamapps\common\SCUM\SCUM\Binaries\Win64\`)
 3. **Install the mod.** Copy the single **`GarbageGoober`** folder into
    `<Win64>\ue4ss\Mods\`. It is self-contained (gating library bundled inside) — no
    separate `shared` folder.
-4. **Point the mod at itself.** Open
-   `<Win64>\ue4ss\Mods\GarbageGoober\Scripts\main.lua` and set **`MOD_DIR`** to that
-   folder's full **client** path, e.g.
-   `C:\Program Files (x86)\Steam\steamapps\common\SCUM\SCUM\Binaries\Win64\ue4ss\Mods\GarbageGoober`.
-5. **Enable it.** Add this line to `<Win64>\ue4ss\Mods\mods.txt`:
+4. **Enable it.** Add an entry for this mod to `<Win64>\ue4ss\Mods\mods.json` (a JSON array):
+   ```json
+   { "mod_name": "GarbageGoober", "mod_enabled": true }
    ```
-   GarbageGoober : 1
-   ```
-   Do **not** create `enabled.txt` — it silently overrides `mods.txt`.
-6. **Launch the game correctly — this matters.** Leave the Windows **`BEService`**
+   Current UE4SS builds use `mods.json`; older builds used a `mods.txt` line `GarbageGoober : 1`. Do **not** create `enabled.txt` — it silently overrides the mod list.
+5. **Launch the game correctly — this matters.** Leave the Windows **`BEService`**
    at its default (Manual) startup — you do **not** need to disable it. Launch
    **`SCUM.exe` directly** (the executable in `<Win64>\`, e.g. via a desktop
    shortcut) with **`-nobattleye`** in its arguments. Do **not** use Steam's *Play*
    button — Steam re-invokes the BattlEye launcher even with the flag set.
-7. **Verify.** Open `<Win64>\ue4ss\Mods\GarbageGoober\GarbageGoober.log` and look
+6. **Verify.** Open `<Win64>\ue4ss\Mods\GarbageGoober\GarbageGoober.log` and look
    for **`GarbageGoober is loaded`**. In your single-player game, type **`goober`**
    in normal chat — the `goober` commands work exactly as on a server.
 

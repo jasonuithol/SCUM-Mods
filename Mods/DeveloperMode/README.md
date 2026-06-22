@@ -49,6 +49,29 @@ Two separate, complete walk-throughs follow — use **one**.
 
 ---
 
+## Install — Vortex (easiest)
+
+If you use the [Vortex](https://www.nexusmods.com/vortex) mod manager with the
+**SCUM (UE4SS)** game extension, this is by far the simplest path — Vortex sets up
+UE4SS and enables the mod for you, so you can skip the manual UE4SS download, the
+settings file, and the mod-list editing described below.
+
+1. **Manage the game in Vortex** — *SCUM Dedicated Server* (server-side,
+   recommended) or *SCUM* (single-player). The first time you manage it, the
+   extension automatically downloads UE4SS and applies the SCUM-safe settings.
+2. **Install this mod** — click **Mod Manager Download** on the Nexus *Files* page,
+   or drag the mod's `.zip` onto Vortex's **Mods** tab.
+3. **Enable** the mod and click **Deploy**. Vortex installs it to
+   `…\ue4ss\Mods\DeveloperMode\` and adds it to the UE4SS mod list for you.
+4. **Configure & launch.** Edit `…\ue4ss\Mods\DeveloperMode\DeveloperMode.ini` to
+   set which executor tiers get developer access (see *Configuration* below), then
+   launch (server: the normal Vortex play button). Check
+   `…\ue4ss\Mods\DeveloperMode\dlls\DeveloperMode.log` for `INSTALLED` to confirm.
+
+Everything below is only needed for a **manual** install (without Vortex).
+
+---
+
 ## Install — Dedicated server (recommended)
 
 Server-side only: clients stay vanilla, so **client BattlEye stays on** and nothing
@@ -75,11 +98,14 @@ runs on players' PCs. Throughout, `<Win64>` means
 4. *(Optional)* **Choose who gets developer commands.** Edit
    `<Win64>\ue4ss\Mods\DeveloperMode\DeveloperMode.ini` (see *Configuration*). The
    default already denies Regular players.
-5. **Enable it.** Add this line to `<Win64>\ue4ss\Mods\mods.txt`:
+5. **Enable it.** Add an entry for this mod to `<Win64>\ue4ss\Mods\mods.json` (a
+   JSON array):
+   ```json
+   { "mod_name": "DeveloperMode", "mod_enabled": true }
    ```
-   DeveloperMode : 1
-   ```
-   Do **not** create `enabled.txt` — it silently overrides `mods.txt`.
+   Current UE4SS builds use `mods.json`; older builds used a `mods.txt` line
+   `DeveloperMode : 1`. Do **not** create `enabled.txt` — it silently overrides the
+   mod list.
 6. **Launch.** Start `SCUMServer.exe` the way you normally do. BattlEye is **not
    involved server-side** — no launch flags needed here.
 7. **Verify.** Open
@@ -117,11 +143,14 @@ path: `C:\Program Files (x86)\Steam\steamapps\common\SCUM\SCUM\Binaries\Win64\`)
    stock-settings startup crash, so don't skip it.
 3. **Install the mod.** Copy the single **`DeveloperMode`** folder into
    `<Win64>\ue4ss\Mods\` (`DeveloperMode\dlls\main.dll` + `DeveloperMode\DeveloperMode.ini`).
-4. **Enable it.** Add this line to `<Win64>\ue4ss\Mods\mods.txt`:
+4. **Enable it.** Add an entry for this mod to `<Win64>\ue4ss\Mods\mods.json` (a
+   JSON array):
+   ```json
+   { "mod_name": "DeveloperMode", "mod_enabled": true }
    ```
-   DeveloperMode : 1
-   ```
-   Do **not** create `enabled.txt` — it silently overrides `mods.txt`.
+   Current UE4SS builds use `mods.json`; older builds used a `mods.txt` line
+   `DeveloperMode : 1`. Do **not** create `enabled.txt` — it silently overrides the
+   mod list.
 5. **Launch the game correctly — this matters.** Leave the Windows **`BEService`**
    at its default (Manual) startup — you do **not** need to disable it. Launch
    **`SCUM.exe` directly** (the executable in `<Win64>\`, e.g. via a desktop
