@@ -1,0 +1,52 @@
+[size=5][b]SCUM (UE4SS) — Vortex Game Extension[/b][/size]
+
+A [b]Vortex[/b] extension that adds [b]SCUM[/b] as a managed game, so you can install UE4SS mods for SCUM with one click instead of editing files by hand. It covers [b]both[/b] the SCUM game client and the SCUM dedicated server, and it sets up UE4SS for you.
+
+[i]This is a Vortex extension, not a gameplay mod. Install it into Vortex; it doesn't change the game by itself — it manages the mods that do.[/i]
+
+[size=4][b]What it does[/b][/size]
+[list]
+[*][b]Adds two games to Vortex[/b] — [b]SCUM[/b] (the game client) and [b]SCUM Dedicated Server[/b] — discovered automatically through Steam. Manage whichever one you're modding.[/*]
+[*][b]Installs UE4SS for you.[/b] The first time you manage SCUM, it downloads a SCUM-tested RE-UE4SS build and writes a known-good, SCUM-safe [b]UE4SS-settings.ini[/b] (engine hooks off, UE 4.27 override, the object-cache that crashes SCUM disabled, GUI console off for headless servers). If UE4SS is already installed, it leaves it alone.[/*]
+[*][b]One-click mod installs.[/b] Any UE4SS mod that ships a [b]ue4ss.mod.json[/b] manifest installs straight into [b]…\SCUM\Binaries\Win64\ue4ss\Mods\[/b] and is enabled in the UE4SS mod list for you on deploy. No manual copying, path editing, or mod-list editing.[/*]
+[*][b]Updates[/b] flow through Vortex's normal Nexus update checks, like any other mod.[/*]
+[*][b]Launcher tools[/b] — a [b]no-BattlEye[/b] launcher for the client and a [b]-log[/b] console launcher for the server, on the Vortex dashboard.[/*]
+[/list]
+
+[size=4][b]Requirements[/b][/size]
+[list]
+[*][url=https://www.nexusmods.com/site/mods/1]Vortex[/url] mod manager.[/*]
+[*]A Steam install of [b]SCUM[/b] (the game) and/or the [b]SCUM Dedicated Server[/b] tool.[/*]
+[*]An internet connection on first setup (so the extension can fetch UE4SS).[/*]
+[/list]
+
+[size=4][b]How to use it[/b][/size]
+[list=1]
+[*][b]Install this extension[/b] — in Vortex, drag this file onto the [b]Extensions[/b] page (Settings ▸ Extensions), or use [b]Install From File[/b]. Restart Vortex when prompted.[/*]
+[*][b]Manage your game[/b] — on the [b]Games[/b] tab, find [b]SCUM[/b] or [b]SCUM Dedicated Server[/b] and click [b]Manage[/b]. UE4SS is set up automatically the first time.[/*]
+[*][b]Install mods[/b] — use [b]Mod Manager Download[/b] on a supported SCUM mod's files page, or drag a mod's [b].zip[/b] onto the [b]Mods[/b] tab. Enable it and click [b]Deploy[/b].[/*]
+[*][b]Launch[/b] — for a server, the normal play button; for the client, the [b]"SCUM (no BattlEye)"[/b] launcher tool.[/*]
+[/list]
+
+[size=4][b]Client vs. dedicated server[/b][/size]
+SCUM UE4SS mods are typically [b]server-side[/b]: install them on the [b]SCUM Dedicated Server[/b] and your players need nothing — their clients stay vanilla and [b]client BattlEye stays on[/b]. Installing mods into the [b]client[/b] is for single-player / self-hosted testing and means modding your own client; do that only on your own account and at your own risk.
+
+[size=4][b]For mod authors[/b][/size]
+To make a UE4SS mod installable by this extension, include a [b]ue4ss.mod.json[/b] manifest at the root of the mod folder inside your archive:
+[code]{
+  "id": "my-mod",
+  "name": "MyMod",
+  "version": "1.0.0",
+  "folderId": "MyMod",
+  "side": "server"
+}[/code]
+The extension deploys everything in that folder to [b]ue4ss\Mods\<folderId>\[/b] and enables it. Mods without a manifest fall back to Vortex's generic installer.
+
+[size=4][b]Notes[/b][/size]
+[list]
+[*]It never writes [b]enabled.txt[/b] (that file silently overrides the UE4SS mod list).[/*]
+[*]UE4SS is fetched from the official [url=https://github.com/UE4SS-RE/RE-UE4SS]RE-UE4SS[/url] GitHub releases. If the automatic download ever fails, the extension shows a notification with a manual-download link.[/*]
+[/list]
+
+[size=4][b]Source[/b][/size]
+[url=https://github.com/jasonuithol/SCUM-Mods]github.com/jasonuithol/SCUM-Mods[/url]
