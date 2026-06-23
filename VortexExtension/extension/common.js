@@ -100,6 +100,7 @@ function discoveryPath(api, gameId) {
 const ue4ssRoot = (gamePath) => path.join(gamePath, BINARIES_PREFIX, UE4SS_FOLDER);
 const ue4ssModsRoot = (gamePath) => path.join(ue4ssRoot(gamePath), MODS_FOLDER);
 const binariesRoot = (gamePath) => path.join(gamePath, BINARIES_PREFIX);
+const paksRoot = (gamePath) => path.join(gamePath, PAKS_PREFIX);
 const paksModsRoot = (gamePath) => path.join(gamePath, PAKS_PREFIX, PAK_MODS_FOLDER);
 const modsTxtPath = (gamePath) => path.join(ue4ssModsRoot(gamePath), MODS_TXT);
 const modsTxtBackupPath = (gamePath) => path.join(ue4ssModsRoot(gamePath), MODS_TXT_BACKUP);
@@ -140,6 +141,7 @@ module.exports = {
   ue4ssRoot,
   ue4ssModsRoot,
   binariesRoot,
+  paksRoot,
   paksModsRoot,
   modsTxtPath,
   modsTxtBackupPath,

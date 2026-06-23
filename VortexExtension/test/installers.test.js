@@ -165,18 +165,44 @@ async function run() {
     check('J claimed by pak installer', t.supported === true);
     const { instructions } = await installers.installPakMod(files, '/stage', CLIENT);
     check('J modtype pak', modtype(instructions) === common.MODTYPE_PAK, modtype(instructions));
-    check('J deploys pak flat to ~mods root', copies(instructions).includes('MegaPak.pak'), copies(instructions).join());
+    check('J bare pak defaults into ~mods', copies(instructions).includes('~mods/MegaPak.pak'), copies(instructions).join());
   }
 
-  // K. pak in a wrapper folder + IoStore siblings + junk ---------------------
+  // K. pak in an arbitrary wrapper folder + IoStore siblings + junk ----------
   {
     const files = ['MyMod/MyMod.pak', 'MyMod/MyMod.utoc', 'MyMod/MyMod.ucas', 'MyMod/readme.txt'];
     const { instructions } = await installers.installPakMod(files, '/stage', CLIENT);
     const dests = copies(instructions);
-    check('K flattens pak', dests.includes('MyMod.pak'), dests.join());
-    check('K keeps utoc sibling', dests.includes('MyMod.utoc'));
-    check('K keeps ucas sibling', dests.includes('MyMod.ucas'));
+    check('K wrapper pak -> ~mods', dests.includes('~mods/MyMod.pak'), dests.join());
+    check('K keeps utoc sibling', dests.includes('~mods/MyMod.utoc'));
+    check('K keeps ucas sibling', dests.includes('~mods/MyMod.ucas'));
     check('K drops non-pak junk', !dests.some((d) => d.toLowerCase().endsWith('readme.txt')), dests.join());
+  }
+
+  // L. UEML mod (ships a "Mods" loader folder) -> Content/Paks/Mods preserved -
+  {
+    const files = ['Mods/MagniMap.pak'];
+    const t = await installers.testPakMod(files, CLIENT);
+    check('L UEML claimed by pak installer', t.supported === true);
+    const { instructions } = await installers.installPakMod(files, '/stage', CLIENT);
+    check('L preserves Mods/ folder', copies(instructions).includes('Mods/MagniMap.pak'), copies(instructions).join());
+    check('L modtype pak', modtype(instructions) === common.MODTYPE_PAK);
+  }
+
+  // M. UEML mod wrapped in a versioned folder + junk -------------------------
+  {
+    const files = ['MagniMap-v2/Mods/MagniMap.pak', 'MagniMap-v2/readme.txt'];
+    const { instructions } = await installers.installPakMod(files, '/stage', CLIENT);
+    const dests = copies(instructions);
+    check('M strips wrapper before Mods/', dests.includes('Mods/MagniMap.pak'), dests.join());
+    check('M drops junk', !dests.some((d) => d.toLowerCase().endsWith('readme.txt')));
+  }
+
+  // N. UE4SS pak loader folder is preserved ----------------------------------
+  {
+    const files = ['LogicMods/Foo.pak'];
+    const { instructions } = await installers.installPakMod(files, '/stage', CLIENT);
+    check('N preserves LogicMods/', copies(instructions).includes('LogicMods/Foo.pak'), copies(instructions).join());
   }
 
   console.log(`\n${passed} passed, ${failed} failed`);

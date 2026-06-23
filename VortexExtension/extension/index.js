@@ -43,7 +43,7 @@ async function maybeProvisionUE4SS(api, gameId) {
 //     still requires dwmapi.dll), so a mod-less game stays functionally vanilla.
 async function setup(api, discovery, variant) {
   if (!discovery || !discovery.path) return;
-  for (const dir of [common.ue4ssModsRoot(discovery.path), common.paksModsRoot(discovery.path)]) {
+  for (const dir of [common.ue4ssModsRoot(discovery.path), common.paksRoot(discovery.path)]) {
     try {
       await fs.ensureDirWritableAsync(dir);
     } catch (err) {
@@ -228,12 +228,14 @@ function main(context) {
     { name: 'UE4SS Mod', deploymentEssential: true, mergeMods: true },
   );
 
-  // PAK mod -> SCUM/Content/Paks/~mods (a different SCUM ecosystem; no UE4SS).
+  // PAK mod -> SCUM/Content/Paks (a different SCUM ecosystem; no UE4SS). The
+  // installer re-roots each pak under the right loader subfolder (~mods / Mods /
+  // LogicMods), so the deploy root is the Paks dir itself, not ~mods.
   context.registerModType(
     common.MODTYPE_PAK,
     8,
     isOurGame,
-    (game) => common.paksModsRoot(common.discoveryPath(context.api, game.id)),
+    (game) => common.paksRoot(common.discoveryPath(context.api, game.id)),
     (instructions) => hasModType(instructions, common.MODTYPE_PAK),
     { name: 'SCUM PAK Mod', deploymentEssential: true, mergeMods: true },
   );

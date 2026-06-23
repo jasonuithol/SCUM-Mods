@@ -237,20 +237,38 @@ async function installGenericLuaMod(files, destinationPath, gameId, progress, ch
 
 const isPakFile = (f) => common.PAK_EXTENSIONS.includes(path.extname(f).toLowerCase());
 
+// Recognised loader subfolders under Content/Paks. A pak shipped inside one of
+// these is deployed PRESERVING that folder, because the loader expects it there:
+//   ~mods     - engine loose-mod folder (MegaPAK style)
+//   Mods      - the "Unofficial Editor Mod Loader" framework folder (MagniMap …)
+//   LogicMods - the UE4SS pak loader's folder
+// A pak with NO recognised loader folder (bare, or in some arbitrary wrapper)
+// defaults into ~mods.
+const PAK_LOADER_FOLDERS = ['~mods', 'mods', 'logicmods'];
+
+// Destination (relative to Content/Paks) for one pak-family file: keep the path
+// from its loader folder down, else drop it into ~mods by basename.
+function pakDestination(file) {
+  const segs = norm(file).split('/');
+  const idx = segs.findIndex((s, i) => i < segs.length - 1 && PAK_LOADER_FOLDERS.includes(s.toLowerCase()));
+  if (idx !== -1) return segs.slice(idx).join('/');
+  return `${common.PAK_MODS_FOLDER}/${segs[segs.length - 1]}`;
+}
+
 async function testPakMod(files, gameId) {
   const supported = isOurGame(gameId) && files.some(isPakFile);
   return { supported, requiredFiles: [] };
 }
 
-// Flatten every pak-family file into ~mods/. The engine mounts loose paks from
-// Content/Paks/~mods; IoStore siblings (.utoc/.ucas) and a .sig must sit beside
-// their .pak, which flattening to one folder preserves. Non-pak files (readmes,
-// screenshots) are dropped — they have no place under ~mods.
+// Deploy pak-family files under Content/Paks, honouring whichever loader folder
+// the archive ships (Mods/ ~mods/ LogicMods/) or defaulting a bare pak to ~mods.
+// IoStore siblings (.utoc/.ucas) and a .sig stay beside their .pak since they
+// share its source folder. Non-pak files (readmes, screenshots) are dropped.
 async function installPakMod(files, destinationPath, gameId) {
   const instructions = files
     .filter(isFile)
     .filter(isPakFile)
-    .map((source) => ({ type: 'copy', source, destination: path.basename(source) }));
+    .map((source) => ({ type: 'copy', source, destination: path.join(...pakDestination(source).split('/')) }));
   instructions.push({ type: 'setmodtype', value: common.MODTYPE_PAK });
   log('info', 'installing SCUM PAK mod', { gameId, paks: instructions.length - 1 });
   return { instructions };
