@@ -60,6 +60,16 @@ async function setup(api, discovery, variant) {
 // however the game is started. Harmless when no PAK mods are present.
 const PAK_LOAD_FLAG = '-fileopenlog';
 
+// Default (play button) launch params. BattlEye OFF by default — this is a
+// modding tool, so modded play is the least-surprising default; the "with
+// BattlEye" tool (toolsFor) restores it. Server keeps -log (console + live
+// log); the client default stays clean (no console window).
+function playParams(variant) {
+  return variant.side === 'server'
+    ? ['-log', '-nobattleye', PAK_LOAD_FLAG]
+    : ['-nobattleye', PAK_LOAD_FLAG];
+}
+
 // Build the launcher tools shown on a variant's dashboard. Every tool needs
 // requiredFiles or Vortex throws "requiredFiles is not iterable" during tool
 // discovery and blocks game-mode activation.
@@ -74,15 +84,12 @@ function toolsFor(variant) {
     exclusive: true,
     defaultPrimary: false,
   });
-  if (variant.side === 'client') {
-    // Client: a BattlEye-off launcher (to join a modded / BE-off server).
-    // Launching SCUM.exe directly — as Vortex does, not via Steam — is what
-    // makes -nobattleye actually take effect.
-    return [tool('nobattleye', 'no BattlEye', ['-nobattleye', PAK_LOAD_FLAG])];
-  }
-  // Server: a -log console launcher with BattlEye off, for local mod testing.
-  // (The play button already launches the server with -log + BattlEye on.)
-  return [tool('log-nobattleye', '-log -nobattleye', ['-log', '-nobattleye', PAK_LOAD_FLAG])];
+  // The default play button now runs BattlEye OFF (modded play). This tool
+  // launches WITH BattlEye (i.e. without -nobattleye) for vanilla / official
+  // servers, keeping -log for a console + live log. NB Vortex launches
+  // SCUM.exe directly, so this just omits the suppress-flag rather than
+  // injecting BE — genuine BattlEye enforcement still means a Steam launch.
+  return [tool('battleye', 'with BattlEye', ['-log', PAK_LOAD_FLAG])];
 }
 
 function registerVariant(context, variant) {
@@ -94,15 +101,14 @@ function registerVariant(context, variant) {
     queryModPath: () => '.', // base deploy = game root; mod-types override per type
     logo: 'gameart.jpg',
     executable: () => variant.exe,
-    // -log opens the UE console window + writes the live log, for diagnosing
-    // a Vortex-launched run. -fileopenlog lets SCUM load unsigned mod paks from
-    // ~mods (see PAK_LOAD_FLAG). These are set here, not editable in Vortex's
-    // UI — which is why there's no field for them.
-    parameters: ['-log', PAK_LOAD_FLAG],
+    // Default launch params (see playParams): BattlEye OFF for modded play,
+    // -fileopenlog so SCUM loads unsigned ~mods/Mods paks, and -log on the
+    // server for its console + live log. Set here, not editable in Vortex's UI.
+    parameters: playParams(variant),
     requiredFiles: [variant.exe],
     setup: (discovery) => setup(context.api, discovery, variant),
-    // Clickable starter tiles: client -> a no-BattlEye launcher; server -> a
-    // -log -nobattleye launcher. See toolsFor().
+    // Clickable starter tile: a "with BattlEye" launcher (the play button runs
+    // BattlEye off by default). See toolsFor().
     supportedTools: toolsFor(variant),
     // NB: deliberately NO `environment: { SteamAPPId }`. Forcing the server's
     // app id (3792580) into the process env breaks client auth — the joining
