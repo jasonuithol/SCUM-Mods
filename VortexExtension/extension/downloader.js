@@ -103,14 +103,20 @@ function hasUE4SSMod(api, gameId) {
 }
 
 // Public: ensure UE4SS exists for this game; download+install if missing.
-async function ensureUE4SS(api, gameId, gamePath) {
+// opts.notifyIfPresent: surface an info toast when it's already installed (used
+// by the manual "Install/Update UE4SS" button so a click isn't a silent no-op).
+async function ensureUE4SS(api, gameId, gamePath, opts = {}) {
   if (!gamePath) return;
-  if (hasUE4SSMod(api, gameId)) {
-    log('info', 'UE4SS already installed as a Vortex mod; skipping auto-download', { gameId });
-    return;
-  }
-  if (await isInstalled(gamePath)) {
-    log('info', 'UE4SS already present on disk for SCUM; skipping auto-download', { gameId });
+  if (hasUE4SSMod(api, gameId) || await isInstalled(gamePath)) {
+    log('info', 'UE4SS already present for SCUM; skipping download', { gameId });
+    if (opts.notifyIfPresent) {
+      api.sendNotification({
+        id: 'scum-ue4ss-present',
+        type: 'info',
+        message: 'RE-UE4SS is already installed for SCUM.',
+        displayMS: 5000,
+      });
+    }
     return;
   }
   let asset;

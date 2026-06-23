@@ -10,7 +10,7 @@
  * Plain-JS extension: no build step. Vortex injects `vortex-api` at runtime.
  */
 const path = require('path');
-const { actions, fs, log, util } = require('vortex-api');
+const { actions, fs, log, selectors, util } = require('vortex-api');
 const common = require('./common');
 const installers = require('./installers');
 const modsFile = require('./modsFile');
@@ -20,15 +20,37 @@ const isOurGame = (gameId) => common.GAME_IDS.includes(gameId);
 const hasModType = (instructions, value) =>
   Promise.resolve(instructions.some((i) => i.type === 'setmodtype' && i.value === value));
 
-// Ensure the UE4SS Mods folder exists and provision UE4SS if missing.
+// Lazy provisioning: only fetch UE4SS for a game that actually has at least one
+// UE4SS Lua mod. A SCUM install with zero mods is left completely untouched
+// (no UE4SS injected), so deleting all mods keeps the game vanilla.
+async function maybeProvisionUE4SS(api, gameId) {
+  const gamePath = common.discoveryPath(api, gameId);
+  if (!gamePath) return;
+  const mods = api.getState().persistent.mods[gameId] || {};
+  const hasLuaMod = Object.values(mods).some((m) => m.type === common.MODTYPE_LUA);
+  if (!hasLuaMod) return; // nothing to inject for yet — stay hands-off
+  await ensureUE4SS(api, gameId, gamePath);
+}
+
+// Runs when a SCUM game is activated. Two jobs:
+//  1. Pre-create the deploy-target dirs for our non-base mod types. Vortex's
+//     deployment-method (hardlink) applicability check writes a probe into each
+//     mod-type's path; a MISSING dir makes it report "deployment method no
+//     longer applicable / can't write to output directory" (it doesn't create
+//     the dir itself). These are empty folders — they inject nothing.
+//  2. Provision UE4SS, but only if the game already has Lua mods (lazy). The
+//     empty ue4ss/Mods dir from step 1 does NOT count as installed (isInstalled
+//     still requires dwmapi.dll), so a mod-less game stays functionally vanilla.
 async function setup(api, discovery, variant) {
   if (!discovery || !discovery.path) return;
-  try {
-    await fs.ensureDirWritableAsync(common.ue4ssModsRoot(discovery.path));
-  } catch (err) {
-    log('warn', 'could not create UE4SS Mods folder', { error: err.message });
+  for (const dir of [common.ue4ssModsRoot(discovery.path), common.paksModsRoot(discovery.path)]) {
+    try {
+      await fs.ensureDirWritableAsync(dir);
+    } catch (err) {
+      log('warn', 'could not create deploy-target dir', { dir, error: err.message });
+    }
   }
-  await ensureUE4SS(api, variant.id, discovery.path);
+  await maybeProvisionUE4SS(api, variant.id);
 }
 
 // Build the launcher tools shown on a variant's dashboard. Every tool needs
@@ -112,14 +134,23 @@ function registerProvenance(context) {
     // (e.g. "Gothic Remake"), mislabelling its origin. Force-correct it so it
     // shows as a GitHub-sourced UE4SS for SCUM with no bogus update target.
     if (mod.type === common.MODTYPE_UE4SS) {
+      // Surface the REAL build: SCUM needs the experimental line, not stable
+      // 3.0.1. Vortex would otherwise display "3.0.1" (parsed from the file
+      // name) and hide the -971 build, so we stamp an explicit version. Prefer
+      // parsing the actual downloaded filename (auto-tracks a future re-pin),
+      // falling back to the pinned constants.
+      const fname = a.fileName || a.logicalFileName || a.customFileName || '';
+      const m = String(fname).match(/v?(\d+\.\d+\.\d+)-(\d+)/i);
+      const ver = m ? `${m[1]}-${m[2]}` : `${common.UE4SS_TARGET_SEMVER}-${common.UE4SS_TARGET_BUILD}`;
       set('source', 'other');
       set('downloadGame', gameId);
       set('modName', 'RE-UE4SS');
-      set('customFileName', 'RE-UE4SS (auto-provisioned)');
+      set('version', ver);                                              // e.g. 3.0.1-971
+      set('customFileName', `RE-UE4SS ${ver} (experimental, auto-provisioned)`);
       set('homepage', 'https://github.com/UE4SS-RE/RE-UE4SS');
       set('modId', undefined);   // drop the misattributed Nexus mod id
       set('fileId', undefined);
-      log('info', 'corrected UE4SS mod attribution', { gameId, modId });
+      log('info', 'corrected UE4SS mod attribution', { gameId, modId, version: ver });
       return;
     }
 
@@ -140,6 +171,24 @@ function registerProvenance(context) {
       set('source', 'other');
     }
     log('info', 'applied SCUM mod provenance', { modId, source: a.scumNexusFileId ? 'nexus' : (a.homepage ? 'website' : 'other') });
+  });
+}
+
+// Lazy UE4SS provisioning: the first time a UE4SS Lua mod is installed for a
+// SCUM game, fetch UE4SS if it isn't already present. Combined with setup()
+// (which only provisions when Lua mods already exist), this means a mod-less
+// SCUM install is never touched.
+function registerLazyUE4SS(context) {
+  const api = context.api;
+  api.events.on('did-install-mod', async (gameId, archiveId, modId) => {
+    if (!isOurGame(gameId)) return;
+    const mod = (api.getState().persistent.mods[gameId] || {})[modId];
+    if (!mod || mod.type !== common.MODTYPE_LUA) return; // only our Lua mods trigger it
+    try {
+      await maybeProvisionUE4SS(api, gameId);
+    } catch (err) {
+      log('warn', 'lazy UE4SS provision failed', { error: err.message });
+    }
   });
 }
 
@@ -171,25 +220,63 @@ function main(context) {
     { name: 'UE4SS Mod', deploymentEssential: true, mergeMods: true },
   );
 
+  // PAK mod -> SCUM/Content/Paks/~mods (a different SCUM ecosystem; no UE4SS).
+  context.registerModType(
+    common.MODTYPE_PAK,
+    8,
+    isOurGame,
+    (game) => common.paksModsRoot(common.discoveryPath(context.api, game.id)),
+    (instructions) => hasModType(instructions, common.MODTYPE_PAK),
+    { name: 'SCUM PAK Mod', deploymentEssential: true, mergeMods: true },
+  );
+
   // --- installers (lower priority number runs first) -----------------------
+  // 20: our manifest mods (strict). 25: the UE4SS injector. 30: third-party
+  // UE4SS mods with no manifest, recognised structurally and re-rooted under
+  // ue4ss/Mods/ so existing Nexus mods "just work". Anything past 30 falls
+  // through to Vortex's stock installer.
   context.registerInstaller('scum-ue4ss-lua', 20, installers.testLuaMod, installers.installLuaMod);
   context.registerInstaller('scum-ue4ss-injector', 25, installers.testUE4SSInjector, installers.installUE4SSInjector);
+  context.registerInstaller('scum-ue4ss-lua-generic', 30, installers.testGenericLuaMod, installers.installGenericLuaMod);
+  // 35: cooked content paks -> Content/Paks/~mods. Runs last; a pak-only archive
+  // matches nothing above (no manifest, not lua-shaped, not the injector).
+  context.registerInstaller('scum-pak', 35, installers.testPakMod, installers.installPakMod);
 
   // --- "Open Mods folder" convenience action -------------------------------
-  context.registerAction('mods-action-icons', 300, 'open-ext', {}, 'Open UE4SS Mods Folder', (instanceIds) => {
-    const state = context.api.getState();
-    const gameId = util.getSafe(state, ['settings', 'profiles', 'activeProfileId'], undefined)
-      ? util.activeGameId(state)
-      : undefined;
+  // NB: the active game id is on `selectors`, NOT `util` (util.activeGameId is
+  // undefined → a condition using it THROWS → Vortex renders the action as a
+  // disabled/greyed button instead of hiding it). Same applies below.
+  context.registerAction('mods-action-icons', 300, 'open-ext', {}, 'Open UE4SS Mods Folder', () => {
+    const gameId = selectors.activeGameId(context.api.getState());
     if (!isOurGame(gameId)) return;
     const gamePath = common.discoveryPath(context.api, gameId);
     if (gamePath) util.opn(common.ue4ssModsRoot(gamePath)).catch(() => null);
-  }, () => isOurGame(util.activeGameId(context.api.getState())));
+  }, () => isOurGame(selectors.activeGameId(context.api.getState())));
+
+  // --- manual UE4SS install/update -----------------------------------------
+  // An escape hatch from lazy provisioning: install UE4SS even with zero Lua
+  // mods (e.g. to set up / test a server before adding any mods). Idempotent —
+  // if UE4SS is already present it just says so. Toolbar button above the mod
+  // list; the condition returns true only for a managed SCUM game (false hides
+  // it on other games' mod pages).
+  context.registerAction('mod-icons', 210, 'download', {}, 'Install/Update UE4SS', () => {
+    const api = context.api;
+    const gameId = selectors.activeGameId(api.getState());
+    if (!isOurGame(gameId)) return;
+    const gamePath = common.discoveryPath(api, gameId);
+    if (!gamePath) {
+      api.sendNotification({ id: 'scum-ue4ss-nogame', type: 'warning', message: 'SCUM is not discovered yet.', displayMS: 5000 });
+      return;
+    }
+    ensureUE4SS(api, gameId, gamePath, { notifyIfPresent: true })
+      .catch((err) => log('warn', 'manual UE4SS install failed', { error: err.message }));
+  }, () => isOurGame(selectors.activeGameId(context.api.getState())));
 
   // --- live mods.txt sync --------------------------------------------------
   context.once(() => {
     modsFile.register(context);
     registerProvenance(context);
+    registerLazyUE4SS(context);
   });
 
   return true;
