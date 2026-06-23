@@ -52,7 +52,7 @@ Two separate, complete walk-throughs follow — use **one**.
 ## Install — Vortex (easiest)
 
 If you use the [Vortex](https://www.nexusmods.com/vortex) mod manager with the
-**SCUM (UE4SS)** game extension, this is by far the simplest path — Vortex sets up
+[**SCUM (UE4SS)** game extension](https://www.nexusmods.com/site/mods/2018), this is by far the simplest path — Vortex sets up
 UE4SS and enables the mod for you, so you can skip the manual UE4SS download, the
 settings file, and the mod-list editing described below.
 

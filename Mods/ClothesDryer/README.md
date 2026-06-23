@@ -35,7 +35,7 @@ none). Three ways to install follow — **Vortex** (easiest), or one of the two 
 ## Install — Vortex (easiest)
 
 If you use the [Vortex](https://www.nexusmods.com/vortex) mod manager with the
-**SCUM (UE4SS)** game extension, this is by far the simplest path — Vortex sets up
+[**SCUM (UE4SS)** game extension](https://www.nexusmods.com/site/mods/2018), this is by far the simplest path — Vortex sets up
 UE4SS and enables the mod for you, so you can skip the manual UE4SS download, the
 settings file, and the mod-list editing described below.
 
@@ -46,9 +46,10 @@ settings file, and the mod-list editing described below.
    or drag the mod's `.zip` onto Vortex's **Mods** tab.
 3. **Enable** the mod and click **Deploy**. Vortex installs it to
    `…\ue4ss\Mods\ClothesDryer\` and adds it to the UE4SS mod list for you.
-4. **Launch** — for a server, the normal Vortex play button; for single-player, the
-   extension's **"SCUM (no BattlEye)"** launcher tool. In game, type **`dryer`** in
-   normal chat to confirm it loaded.
+4. **Launch** — click Vortex's **Play** button; it runs with BattlEye **off** by
+   default (modded play), for both the dedicated server and single-player. A
+   **"with BattlEye"** launcher tool is available if you ever need it. In game,
+   type **`dryer`** in normal chat to confirm it loaded.
 
 Everything below is only needed for a **manual** install (without Vortex).
 
