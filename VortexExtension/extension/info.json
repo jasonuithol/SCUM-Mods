@@ -1,6 +1,6 @@
 {
   "name": "Game: SCUM (UE4SS)",
   "author": "modunderscore",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Vortex support for SCUM (client + dedicated server), with UE4SS auto-provisioning and manifest-driven UE4SS Lua mod installation."
 }

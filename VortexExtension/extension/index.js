@@ -53,6 +53,13 @@ async function setup(api, discovery, variant) {
   await maybeProvisionUE4SS(api, variant.id);
 }
 
+// SCUM enforces pak signatures (every base pak ships a .sig), which blocks
+// loose unsigned mod paks in Content/Paks/~mods. Launching with -fileopenlog
+// makes SCUM load them. We add it to EVERY launch path we control (the play
+// button + each launcher tool) for both client and server, so a PAK mod works
+// however the game is started. Harmless when no PAK mods are present.
+const PAK_LOAD_FLAG = '-fileopenlog';
+
 // Build the launcher tools shown on a variant's dashboard. Every tool needs
 // requiredFiles or Vortex throws "requiredFiles is not iterable" during tool
 // discovery and blocks game-mode activation.
@@ -71,11 +78,11 @@ function toolsFor(variant) {
     // Client: a BattlEye-off launcher (to join a modded / BE-off server).
     // Launching SCUM.exe directly — as Vortex does, not via Steam — is what
     // makes -nobattleye actually take effect.
-    return [tool('nobattleye', 'no BattlEye', ['-nobattleye'])];
+    return [tool('nobattleye', 'no BattlEye', ['-nobattleye', PAK_LOAD_FLAG])];
   }
   // Server: a -log console launcher with BattlEye off, for local mod testing.
   // (The play button already launches the server with -log + BattlEye on.)
-  return [tool('log-nobattleye', '-log -nobattleye', ['-log', '-nobattleye'])];
+  return [tool('log-nobattleye', '-log -nobattleye', ['-log', '-nobattleye', PAK_LOAD_FLAG])];
 }
 
 function registerVariant(context, variant) {
@@ -88,9 +95,10 @@ function registerVariant(context, variant) {
     logo: 'gameart.jpg',
     executable: () => variant.exe,
     // -log opens the UE console window + writes the live log, for diagnosing
-    // a Vortex-launched run. The game's own starter params are set here, not
-    // editable in Vortex's UI — which is why there's no field for them.
-    parameters: ['-log'],
+    // a Vortex-launched run. -fileopenlog lets SCUM load unsigned mod paks from
+    // ~mods (see PAK_LOAD_FLAG). These are set here, not editable in Vortex's
+    // UI — which is why there's no field for them.
+    parameters: ['-log', PAK_LOAD_FLAG],
     requiredFiles: [variant.exe],
     setup: (discovery) => setup(context.api, discovery, variant),
     // Clickable starter tiles: client -> a no-BattlEye launcher; server -> a
